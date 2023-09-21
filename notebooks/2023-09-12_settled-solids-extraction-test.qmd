@@ -1,0 +1,61 @@
+---
+title: "Extraction experiment 2: high-level results & interpretation"
+author: "Will Bradshaw"
+date: 2023-09-12
+format:
+  html:
+    code-fold: true
+    code-tools: true
+    code-link: true
+    df-print: paged
+editor: visual
+---
+
+```{r}
+#| label: load-packages
+#| include: false
+library(tidyverse)
+library(ggrepel)
+source("../scripts/aux_plot-theme.R")
+```
+
+**See also:**
+
+- [Experiment writeup](https://docs.google.com/document/d/1Po6eE3LHc9svHC4yfnDak-B-sKa7o1Pc1noFMoSbFSE/edit#heading=h.ukkrtnihc50j)
+- [Templates and results spreadsheet](https://docs.google.com/spreadsheets/d/1f_KSgM2mPdv01Z6QtuDFeQjFP1Ix7YfHqmn-qtAcSoc/edit#gid=1454827698)
+
+# 1. Total RNA quantification
+
+Nanodrop and RNA Qubit assays were performed on replicates A and B of each kit, after [DNA digestion with DNase](https://docs.google.com/document/d/144ApL4fRZxjZSvVXLzc1VOiHNW39iJxFKjCYGHZ3Ei0/edit#heading=h.iw6f49how6k5).Fragment Analyzer was run on replicate A of each kit.
+
+```{r}
+#| label: load-data
+inpath <- "../data/2023-09-11_extraction-expt-2.tsv"
+data <- read_tsv(inpath, show_col_types = FALSE)
+data
+```
+
+Raw total concentration readings for each of the instruments are shown below:
+
+```{r}
+#| label: plot-concentrations
+#| fig-height: 6
+#| fig-cap: "Raw total RNA concentration readings for Qubit, Nanodrop and Fragment Analyzer."
+data_processed <- data %>% select(sample,kit,replicate,elution_volume,contains("ngul")) %>%
+  gather(instrument, concentration, -sample, -kit, -replicate, -elution_volume) %>%
+  mutate(instrument = str_to_title(gsub("_.*", "", instrument)),
+         instrument = gsub("Fa", "Fragment Analyzer", instrument),
+         concentration_adj = concentration/elution_volume * 100)
+g_conc <- ggplot(data_processed, aes(x=kit, y=concentration, color=instrument)) +
+  geom_point(shape = 16, na.rm = TRUE) +
+  scale_y_continuous(limits = c(0,40), breaks = seq(0,40,10), 
+                     name = "Concentration (ng/ul)", expand = c(0,0)) +
+  scale_x_discrete(name = "Extraction Kit") +
+  scale_color_brewer(palette = "Dark2", name = "Instrument") +
+  theme_base + 
+  theme(axis.text.x = element_text(hjust = 1, vjust = 1, angle = 45),
+        axis.title.x = element_blank(),
+        legend.position = "bottom")
+g_conc
+```
+

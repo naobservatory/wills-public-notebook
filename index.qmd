@@ -1,0 +1,7 @@
+---
+title: "Dan's NAO Notebook"
+listing:
+  contents: notebooks
+  type: default
+  sort: "date desc"
+---

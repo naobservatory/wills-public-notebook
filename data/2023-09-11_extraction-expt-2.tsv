@@ -1,0 +1,15 @@
+sample	kit	replicate	qubit_rna_ngul	nanodrop_rna_ngul	qubit_nanodrop_ratio	nanodrop_rna_260_280	nanodrop_rna_260_230	fa_rna_ngul	elution_volume
+1	Zymo quick-RNA	A	15.8	21	0.7523809524	1.76	3.91	22.9846	30
+1	Zymo quick-RNA	B	15.3	20.5	0.7463414634	1.69	2.04		30
+2	Zymo quick-DNA/RNA	A	13.7	23.9	0.5732217573	1.69	1.9	24.7115	100
+2	Zymo quick-DNA/RNA	B	13.1	21.9	0.598173516	1.68	1.37		100
+3	Invitrogen PureLink RNA	A	12.6	14.8	0.8513513514	1.69	1.81	14.3232	100
+3	Invitrogen PureLink RNA	B	11.5	14.4	0.7986111111	1.64	1.16		100
+4	NucleoSpin Virus	A	14.6	24.5	0.5959183673	1.75	3.75	19.0442	60
+4	NucleoSpin Virus	B	11.8	21	0.5619047619	1.64	2.53		60
+5	QIAamp MinElute Virus	A	17.1	25.2	0.6785714286	1.74	1.9	20.7415	100
+5	QIAamp MinElute Virus	B	16.6	23.9	0.6945606695	1.69	2.01		100
+6	QIAamp Viral RNA mini kit	A	16.7	29.4	0.5680272109	1.72	0.73	21.1794	80
+6	QIAamp Viral RNA mini kit	B	16.9	32.1	0.5264797508	1.75	1.09		80
+7	Qiagen AllPrep PowerViral DNA/RNA	A	3.78	10	0.378	0.9	0.18	1.8471	100
+7	Qiagen AllPrep PowerViral DNA/RNA	B	4.92	10.6	0.4641509434	1.36	0.4		100
