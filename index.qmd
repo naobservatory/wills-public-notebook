@@ -3,5 +3,6 @@ title: "Will's Public NAO Notebook"
 listing:
   contents: notebooks
   type: default
+  fields: [image, date, title, subtitle] # Potentially add categories later
   sort: "date desc"
 ---
