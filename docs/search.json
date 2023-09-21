@@ -1,0 +1,16 @@
+[
+  {
+    "objectID": "notebooks/2023-09-12_settled-solids-extraction-test.html",
+    "href": "notebooks/2023-09-12_settled-solids-extraction-test.html",
+    "title": "Extraction experiment 2: high-level results & interpretation",
+    "section": "",
+    "text": "See also:\n\nExperiment writeup\nTemplates and results spreadsheet\n\n1. Total RNA quantification\nNanodrop and RNA Qubit assays were performed on replicates A and B of each kit, after DNA digestion with DNase.Fragment Analyzer was run on replicate A of each kit.\n\nCodeinpath &lt;- \"../data/2023-09-11_extraction-expt-2.tsv\"\ndata &lt;- read_tsv(inpath, show_col_types = FALSE)\ndata\n\n\n\n  \n\n\n\nRaw total concentration readings for each of the instruments are shown below:\n\nCodedata_processed &lt;- data %&gt;% select(sample,kit,replicate,elution_volume,contains(\"ngul\")) %&gt;%\n  gather(instrument, concentration, -sample, -kit, -replicate, -elution_volume) %&gt;%\n  mutate(instrument = str_to_title(gsub(\"_.*\", \"\", instrument)),\n         instrument = gsub(\"Fa\", \"Fragment Analyzer\", instrument),\n         concentration_adj = concentration/elution_volume * 100)\ng_conc &lt;- ggplot(data_processed, aes(x=kit, y=concentration, color=instrument)) +\n  geom_point(shape = 16, na.rm = TRUE) +\n  scale_y_continuous(limits = c(0,40), breaks = seq(0,40,10), \n                     name = \"Concentration (ng/ul)\", expand = c(0,0)) +\n  scale_x_discrete(name = \"Extraction Kit\") +\n  scale_color_brewer(palette = \"Dark2\", name = \"Instrument\") +\n  theme_base + \n  theme(axis.text.x = element_text(hjust = 1, vjust = 1, angle = 45),\n        axis.title.x = element_blank(),\n        legend.position = \"bottom\")\ng_conc\n\n\n\nRaw total RNA concentration readings for Qubit, Nanodrop and Fragment Analyzer."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Dan’s NAO Notebook",
+    "section": "",
+    "text": "Extraction experiment 2: high-level results & interpretation\n\n\n\n\n\n\n\n\n\n\n\n\nSep 12, 2023\n\n\nWill Bradshaw\n\n\n\n\n\n\nNo matching items"
+  }
+]
