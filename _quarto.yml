@@ -1,3 +1,9 @@
 project:
   type: website
   output-dir: docs
+website:
+  title: "Will's Public NAO Notebook"
+  navbar:
+    background: black
+    foreground: white
+    search: true
