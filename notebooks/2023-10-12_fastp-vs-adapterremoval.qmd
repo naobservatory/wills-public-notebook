@@ -258,3 +258,5 @@ Taken together, I think these data make a decent case for using FASTP, rather th
 -   For those samples with high adapter content, FASTP appeared more effective than AdapterRemoval at removing adapters, at least for those adapter sequences that could be detected by FASTQC.
 
 -   FASTP provides substantially more functionality than AdapterRemoval, making it easier for us to add additional preprocessing steps like read filtering and (some) deduplication down the line.
+
+However, one important caveat is that it's unclear how well either tool will perform on Element sequencing data -- or how well FASTQC will be able to detect Element adapters that remain after preprocessing.
