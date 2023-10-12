@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/notebooks/2023-10-12_fastp-vs-adapterremoval.html",
       "/notebooks/2023-09-12_settled-solids-extraction-test.html"
     ]
   }

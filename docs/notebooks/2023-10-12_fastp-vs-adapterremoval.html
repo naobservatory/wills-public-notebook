@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Will Bradshaw">
+<meta name="dcterms.date" content="2023-10-21">
+<title>Will’s Public NAO Notebook - Comparing FASTP and AdapterRemoval for MGS pre-processing</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><style>
+
+      .quarto-title-block .quarto-title-banner {
+        background: black;
+      }
+</style>
+<link href="../site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="../site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+</head>
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg navbar-dark "><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Will’s Public NAO Notebook</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools ms-auto">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav></header><!-- content --><header id="title-block-header" class="quarto-title-block default page-columns page-full"><div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">Comparing FASTP and AdapterRemoval for MGS pre-processing</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+            <p class="subtitle lead">Two tools – how do they perform?</p>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Will Bradshaw </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">October 21, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content"><p><strong>See also:</strong></p>
+<ul>
+<li>[…]</li>
+</ul>
+<p>The first major step in our current MGS pipeline uses AdapterRemoval to automatically identify and remove sequencing adapters, as well as trimming low-quality bases and collapsing overlapping read pairs (it can also discard low-quality reads entirely, but our current pipeline doesn’t use this). An alternative tool, that can do all of this as well as read deduplication, is fastp. I asked the pipeline’s current primary maintainer if there was a good reason we were using one tool instead of the other, and he said that there wasn’t. So I decided to do a shallow investigation of their relative behavior on some example MGS datasets to see how they compare.</p>
+<section id="the-data" class="level1"><h1>The data</h1>
+<p>To carry out this test, I selected three pairs of raw Illumina FASTQC files, corresponding to one sample each from two different published studies as well as one dataset provided to us by Marc Johnson:</p>
+<table class="table">
+<thead><tr class="header">
+<th>Study</th>
+<th>Bioproject</th>
+<th>Sample</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Rothman et al.&nbsp;(2021)</td>
+<td><a href="https://www.ebi.ac.uk/ena/browser/view/PRJNA729801">PRJNA729801</a></td>
+<td>SRR19607374</td>
+</tr>
+<tr class="even">
+<td>Crits-Cristoph et al.&nbsp;(2021)</td>
+<td><a href="https://www.ebi.ac.uk/ena/browser/view/PRJNA661613">PRJNA661613</a></td>
+<td>SRR23998357</td>
+</tr>
+<tr class="odd">
+<td>Johnson (2023)</td>
+<td>N/A</td>
+<td>COMO4</td>
+</tr>
+</tbody>
+</table>
+<p>For each sample, I generated FASTQC report files for the raw data, then ran FASTP and AdapterRemoval independently on the FASTQ files and tabulated the results</p>
+</section><section id="the-commands" class="level1"><h1>The commands</h1>
+<p>For processing with FASTP, I ran the following command:</p>
+<pre><code>fastp -i &lt;raw-reads-1&gt; -I &lt;raw-reads-2&gt; -o &lt;output-path-1&gt; -O &lt;output-path-2&gt; --failed_out &lt;output-path-failed-reads&gt; --cut_tail --correction</code></pre>
+<p>(I didn’t run deduplication for this test, as AdapterRemoval doesn’t have that functionality.)</p>
+<p>For processing with AdapterRemoval, I first ran the following command to identify adapters:</p>
+<pre><code>AdapterRemoval --file1 &lt;raw-reads-1&gt; --file2 &lt;raw-reads-2&gt; --identify-adapters --threads 4 &gt; adapter_report.txt</code></pre>
+<p>I then ran the following command to actually carry out pre-processing, using the adapter sequences identified in the previous step (NB the <code>minlength</code>: and <code>maxns</code> values are chosen to match the FASTP defaults):</p>
+<pre><code>AdapterRemoval --file1 &lt;raw-reads-1&gt; --file2 &lt;raw-reads-2&gt; --basename &lt;output-prefix&gt; --adapter1 &lt;adapter1&gt; --adapter2 &lt;adapter2&gt; --gzip --trimns --trimqualities --minlength 15 --maxns 5</code></pre>
+</section><section id="rothman-et-al.-srr19607374" class="level1"><h1>1. Rothman et al.&nbsp;(SRR19607374)</h1>
+<p>This sample from Rothman et al.&nbsp;contains <strong>11.58M</strong> read pairs in the raw FASTQ files.</p>
+<p><strong>FASTP:</strong></p>
+<ul>
+<li><p>Running FASTP took a total of <strong>39 seconds</strong>.</p></li>
+<li><p>FASTP detected and trimmed adapters on <strong>3.88M reads</strong> (note: <em>not</em> read pairs).</p></li>
+<li><p>A total of 133 Mb of sequence was trimmed due to adapter trimming, and 55 Mb due to other trimming processes, for a total of <strong>188 Mb of trimmed sequence</strong>.</p></li>
+<li><p>A total of <strong>367,938 read pairs</strong> were discarded due to failing various filters, leaving <strong>11.21M read pairs</strong> remaining.</p></li>
+</ul>
+<p><strong>AdapterRemoval:</strong></p>
+<ul>
+<li><p>Running AdapterRemoval took a total of <strong>323.9 seconds</strong> (a bit under 5.5 minutes).</p></li>
+<li><p>AdapterRemoval detected and trimmed adapters on <strong>3.96M reads</strong> (note: again, not read pairs).</p></li>
+<li><p>A total of <strong>135 Mb</strong> of sequence was trimmed across all reads; the information isn’t provided to distinguish trimmed adapter sequences vs other trimming.</p></li>
+<li><p>Only 2,347 read pairs were discarded due to failing various filters, leaving the final read number almost unchanged.</p></li>
+</ul>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate read allocations for Rothman</span></span>
+<span><span class="va">status</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"raw"</span>, <span class="st">"fastp"</span>, <span class="st">"AdapterRemoval"</span><span class="op">)</span></span>
+<span><span class="va">bp_passed</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1748896043</span><span class="op">+</span><span class="fl">1748896043</span>,<span class="fl">1627794563</span><span class="op">+</span><span class="fl">1627794563</span>,<span class="fl">1681118328</span><span class="op">+</span><span class="fl">1681115431</span><span class="op">)</span></span>
+<span><span class="va">bp_discarded</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">54014538</span>,<span class="fl">276107</span><span class="op">+</span><span class="fl">271850</span><span class="op">)</span></span>
+<span><span class="va">bp_trimmed</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="va">bp_passed</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">-</span><span class="va">bp_passed</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">-</span><span class="va">bp_discarded</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,<span class="va">bp_passed</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">-</span><span class="va">bp_passed</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">-</span><span class="va">bp_discarded</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co"># Tabulate</span></span>
+<span><span class="va">tab_rothman</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>status <span class="op">=</span> <span class="va">status</span>, bp_passed <span class="op">=</span> <span class="va">bp_passed</span>, bp_discarded <span class="op">=</span> <span class="va">bp_discarded</span>, bp_trimmed <span class="op">=</span> <span class="va">bp_trimmed</span><span class="op">)</span></span>
+<span><span class="va">tab_rothman</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["status"],"name":[1],"type":["chr"],"align":["left"]},{"label":["bp_passed"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["bp_discarded"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["bp_trimmed"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"raw","2":"3497792086","3":"0","4":"0"},{"1":"fastp","2":"3255589126","3":"54014538","4":"188188422"},{"1":"AdapterRemoval","2":"3362233759","3":"547957","4":"135010370"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+<details><summary>Code</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize</span></span>
+<span><span class="va">tab_rothman_gathered</span> <span class="op">&lt;-</span> <span class="fu">gather</span><span class="op">(</span><span class="va">tab_rothman</span>, key <span class="op">=</span> <span class="va">sequence_group</span>, value <span class="op">=</span> <span class="va">bp</span>, <span class="op">-</span><span class="va">status</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>sequence_group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">sub</a></span><span class="op">(</span><span class="st">"bp_"</span>, <span class="st">""</span>, <span class="va">sequence_group</span><span class="op">)</span>,</span>
+<span>         sequence_group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">sequence_group</span>, </span>
+<span>                                 levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"passed"</span>, <span class="st">"trimmed"</span>, <span class="st">"discarded"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>         status <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">status</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"raw"</span>, <span class="st">"fastp"</span>, <span class="st">"AdapterRemoval"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">g_rothman</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">tab_rothman_gathered</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">status</span>, y<span class="op">=</span><span class="va">bp</span>, fill <span class="op">=</span> <span class="va">sequence_group</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span>position <span class="op">=</span> <span class="st">"stack"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_fill_brewer</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dark2"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="va">theme_base</span> <span class="op">+</span> <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">g_rothman</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2023-10-12_fastp-vs-adapterremoval_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p><strong>FASTQC results:</strong></p>
+<ul>
+<li><p>Prior to adapter removal with either tool, the sequencing reads appear good quality, with a consistent average quality score of 30 across all bases in the forward read and ~29 in the reverse read. FASTP successfully raises the average quality score in the reverse read to 30 through trimming and read filtering, while AdapterRemoval leaves it unchanged.</p></li>
+<li><p>FASTQC judges the data to have iffy sequence composition (%A/C/G/T); neither tool affects this much.</p></li>
+<li><p>All reads in the raw data are 151bp long; unsurprisingly, trimming by both tools results in a left tail in the sequencing length distribution that was absent in the raw data.</p></li>
+<li><p>As previously observed, the raw data has very high duplicate levels, with only ~26% of sequences estimated by FASTQC to remain after deduplication. Increasing the comparison window to 100bp (from a default of 50bp) increases this to ~35%. Neither tool has much effect on this number – unsurprisingly, since neither carried out deduplication.</p></li>
+<li><p>Finally, adapter removal. Unsurprisingly, the raw data shows substantial adapter content. AdapterRemoval does a good job of removing adapters, resulting in a “pass” grade from FASTQC. Surprisingly, despite trimming adapters from fewer reads, fastp does even better (according to FASTQC) at removing adapters.</p></li>
+<li>
+<p>The images below show raw, fastp, and AR adapter content:</p>
+<ul>
+<li><p><img src="../img/2023-10-12_rothman-fastqc-adapters-raw.png" class="img-fluid"></p></li>
+<li><p><img src="../img/2023-10-12_rothman-fastqc-adapters-fastp.png" class="img-fluid"></p></li>
+<li><p><img src="../img/2023-10-12_rothman-fastqc-adapters-ar.png" class="img-fluid"></p></li>
+</ul>
+</li>
+</ul></section><section id="crits-christoph-et-al.-srr23998357" class="level1"><h1>2. Crits-Christoph et al.&nbsp;(SRR23998357)</h1>
+<p>This sample from Rothman et al.&nbsp;contains <strong>48.46M</strong> read pairs in the raw FASTQ files.</p>
+<p><strong>FASTP:</strong></p>
+<ul>
+<li><p>Running FASTP took a total of <strong>99 seconds</strong>.</p></li>
+<li><p>FASTP detected and trimmed adapters on <strong>13.41M reads</strong> (note: <em>not</em> read pairs).</p></li>
+<li><p>A total of 270 Mb of sequence was trimmed due to adapter trimming, and 43 Mb due to other trimming processes, for a total of <strong>313 Mb of trimmed sequence</strong>.</p></li>
+<li><p>A total of <strong>1.99M read pairs</strong> were discarded due to failing various filters, leaving <strong>47.47M read pairs</strong> remaining.</p></li>
+</ul>
+<p><strong>AdapterRemoval:</strong></p>
+<ul>
+<li><p>Running AdapterRemoval took a total of <strong>1041.3 seconds</strong> (a bit over 17 minutes).</p></li>
+<li><p>AdapterRemoval detected and trimmed adapters on <strong>8.22M reads</strong> (note: again, not read pairs).</p></li>
+<li><p>A total of <strong>93.7 Mb</strong> of sequence was trimmed across all reads; the information isn’t provided to distinguish trimmed adapter sequences vs other trimming.</p></li>
+<li><p>Only <strong>32,381</strong> read pairs were discarded due to failing various filters, leaving the final read number (again) almost unchanged.</p></li>
+</ul>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate read allocations for CritsCristoph</span></span>
+<span><span class="va">status</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"raw"</span>, <span class="st">"fastp"</span>, <span class="st">"AdapterRemoval"</span><span class="op">)</span></span>
+<span><span class="va">bp_passed_cc</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">3683175308</span><span class="op">+</span><span class="fl">3683175308</span>,<span class="fl">3465517525</span><span class="op">+</span><span class="fl">3467624847</span>,<span class="fl">3634186441</span><span class="op">+</span><span class="fl">3634143668</span><span class="op">)</span></span>
+<span><span class="va">bp_discarded_cc</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">120701257</span>,<span class="fl">2057612</span><span class="op">+</span><span class="fl">2224529</span><span class="op">)</span></span>
+<span><span class="va">bp_trimmed_cc</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="va">bp_passed_cc</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">-</span><span class="va">bp_passed_cc</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">-</span><span class="va">bp_discarded_cc</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,<span class="va">bp_passed_cc</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">-</span><span class="va">bp_passed_cc</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">-</span><span class="va">bp_discarded_cc</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co"># Tabulate</span></span>
+<span><span class="va">tab_cc</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>status <span class="op">=</span> <span class="va">status</span>, bp_passed <span class="op">=</span> <span class="va">bp_passed_cc</span>, bp_discarded <span class="op">=</span> <span class="va">bp_discarded_cc</span>, bp_trimmed <span class="op">=</span> <span class="va">bp_trimmed_cc</span><span class="op">)</span></span>
+<span><span class="va">tab_cc</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["status"],"name":[1],"type":["chr"],"align":["left"]},{"label":["bp_passed"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["bp_discarded"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["bp_trimmed"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"raw","2":"7366350616","3":"0","4":"0"},{"1":"fastp","2":"6933142372","3":"120701257","4":"312506987"},{"1":"AdapterRemoval","2":"7268330109","3":"4282141","4":"93738366"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+<details><summary>Code</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize</span></span>
+<span><span class="va">tab_cc_gathered</span> <span class="op">&lt;-</span> <span class="fu">gather</span><span class="op">(</span><span class="va">tab_cc</span>, key <span class="op">=</span> <span class="va">sequence_group</span>, value <span class="op">=</span> <span class="va">bp</span>, <span class="op">-</span><span class="va">status</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>sequence_group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">sub</a></span><span class="op">(</span><span class="st">"bp_"</span>, <span class="st">""</span>, <span class="va">sequence_group</span><span class="op">)</span>,</span>
+<span>         sequence_group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">sequence_group</span>, </span>
+<span>                                 levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"passed"</span>, <span class="st">"trimmed"</span>, <span class="st">"discarded"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>         status <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">status</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"raw"</span>, <span class="st">"fastp"</span>, <span class="st">"AdapterRemoval"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">g_cc</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">tab_cc_gathered</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">status</span>, y<span class="op">=</span><span class="va">bp</span>, fill <span class="op">=</span> <span class="va">sequence_group</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span>position <span class="op">=</span> <span class="st">"stack"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_fill_brewer</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dark2"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="va">theme_base</span> <span class="op">+</span> <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">g_cc</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2023-10-12_fastp-vs-adapterremoval_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p><strong>FASTQC results:</strong></p>
+<ul>
+<li><p>As with Rothman, the raw data shows good sequence quality (though with some tailing off at later read positions), poor sequence composition, uniform read length (76bp in this case) and high numbers of duplicates. They also, unsurprisingly, have high adaptor content.</p></li>
+<li><p>As with Rothman, fastp successfully improves read quality scores, while AdapterRemoval has little effect. Also as with Rothman, neither tool (as configured) has much effect on sequence composition or duplicates.</p></li>
+<li>
+<p>In this case, fastp is highly effective at removing adapter sequences, while AdapterRemoval is only weakly effective. I wonder if I misconfigured AR somehow, because I’m surprised at how many adapter sequences remain in this case. The images below show raw, fastp, and AR adapter content:</p>
+<ul>
+<li><p><img src="../img/2023-10-12_cc-fastqc-adapters-raw.png" class="img-fluid"></p></li>
+<li><p><img src="../img/2023-10-12_cc-fastqc-adapters-fastp.png" class="img-fluid"></p></li>
+<li><p><img src="../img/2023-10-12_cc-fastqc-adapters-ar.png" class="img-fluid"></p></li>
+</ul>
+</li>
+</ul></section><section id="johnson-como4" class="level1"><h1>3. Johnson (COMO4)</h1>
+<p>This sample from Johnson contains <strong>15.58M</strong> read pairs in the raw FASTQ files.</p>
+<p><strong>FASTP:</strong></p>
+<ul>
+<li><p>Running FASTP took a total of <strong>33 seconds</strong>.</p></li>
+<li><p>FASTP detected and trimmed adapters on <strong>158,114 reads</strong> (note: <em>not</em> read pairs).</p></li>
+<li><p>A total of 1.3 Mb of sequence was trimmed due to adapter trimming, and 14.6 Mb due to other trimming processes, for a total of <strong>15.9 Mb of trimmed sequence</strong>.</p></li>
+<li><p>A total of <strong>0.33M read pairs</strong> were discarded due to failing various filters, leaving <strong>15.25M read pairs</strong> remaining.</p></li>
+</ul>
+<p><strong>AdapterRemoval:</strong></p>
+<ul>
+<li><p>Running AdapterRemoval took a total of <strong>311.4 seconds</strong> (a bit over 5 minutes).</p></li>
+<li><p>AdapterRemoval detected and trimmed adapters on <strong>155,360 reads</strong> (note: again, not read pairs).</p></li>
+<li><p>A total of <strong>93.7 Mb</strong> of sequence was trimmed across all reads; the information isn’t provided to distinguish trimmed adapter sequences vs other trimming.</p></li>
+<li><p>Only <strong>5,512</strong> read pairs were discarded due to failing various filters, leaving the final read number (again) almost unchanged.</p></li>
+</ul>
+<p><strong>FASTQC results:</strong></p>
+<ul>
+<li><p>As with previous samples, the raw data shows good sequence quality (though with some tailing off at later read positions), poor sequence composition, uniform read length (76bp again) and high numbers of duplicates.</p></li>
+<li><p>Unlike previous samples, the raw data for this sample shows very low adapter content – plausibly they underwent adapter trimming before they were sent to us?</p></li>
+<li><p>Neither tool achieves much visible improvement on adapter content – unsurprisingly, given the very low levels in the raw data.</p></li>
+</ul>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate read allocations for Johnson</span></span>
+<span><span class="va">status</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"raw"</span>, <span class="st">"fastp"</span>, <span class="st">"AdapterRemoval"</span><span class="op">)</span></span>
+<span><span class="va">bp_passed_como</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1183987584</span><span class="op">+</span><span class="fl">1183987584</span>,<span class="fl">1157539804</span><span class="op">+</span><span class="fl">1157540364</span>,<span class="fl">1182999562</span><span class="op">+</span><span class="fl">1182970312</span><span class="op">)</span></span>
+<span><span class="va">bp_discarded_como</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">36950446</span>,<span class="fl">418230</span><span class="op">+</span><span class="fl">257734</span><span class="op">)</span></span>
+<span><span class="va">bp_trimmed_como</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="va">bp_passed_como</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">-</span><span class="va">bp_passed_como</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">-</span><span class="va">bp_discarded_como</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,<span class="va">bp_passed_como</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">-</span><span class="va">bp_passed_como</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">-</span><span class="va">bp_discarded_como</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co"># Tabulate</span></span>
+<span><span class="va">tab_como</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>status <span class="op">=</span> <span class="va">status</span>, bp_passed <span class="op">=</span> <span class="va">bp_passed_como</span>, bp_discarded <span class="op">=</span> <span class="va">bp_discarded_como</span>, bp_trimmed <span class="op">=</span> <span class="va">bp_trimmed_como</span><span class="op">)</span></span>
+<span><span class="va">tab_como</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["status"],"name":[1],"type":["chr"],"align":["left"]},{"label":["bp_passed"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["bp_discarded"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["bp_trimmed"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"raw","2":"2367975168","3":"0","4":"0"},{"1":"fastp","2":"2315080168","3":"36950446","4":"15944554"},{"1":"AdapterRemoval","2":"2365969874","3":"675964","4":"1329330"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+<details><summary>Code</summary><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize</span></span>
+<span><span class="va">tab_como_gathered</span> <span class="op">&lt;-</span> <span class="fu">gather</span><span class="op">(</span><span class="va">tab_como</span>, key <span class="op">=</span> <span class="va">sequence_group</span>, value <span class="op">=</span> <span class="va">bp</span>, <span class="op">-</span><span class="va">status</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>sequence_group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">sub</a></span><span class="op">(</span><span class="st">"bp_"</span>, <span class="st">""</span>, <span class="va">sequence_group</span><span class="op">)</span>,</span>
+<span>         sequence_group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">sequence_group</span>, </span>
+<span>                                 levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"passed"</span>, <span class="st">"trimmed"</span>, <span class="st">"discarded"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>         status <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">status</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"raw"</span>, <span class="st">"fastp"</span>, <span class="st">"AdapterRemoval"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">g_cc</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">tab_como_gathered</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">status</span>, y<span class="op">=</span><span class="va">bp</span>, fill <span class="op">=</span> <span class="va">sequence_group</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span>position <span class="op">=</span> <span class="st">"stack"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_fill_brewer</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dark2"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="va">theme_base</span> <span class="op">+</span> <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">g_cc</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2023-10-12_fastp-vs-adapterremoval_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section><section id="deduplication-with-fastp" class="level1"><h1>Deduplication with fastp</h1>
+<p>Given that all three of these samples contain high levels of sequence duplicates, I was curious to see to what degree fastp was able to improve on this metric. To test this, I reran fastp on all three samples, with the <code>--dedup</code> option enabled. I observed the following:</p>
+<ul>
+<li><p>Runtimes were consistently very slightly longer than without deduplication.</p></li>
+<li><p>The number of successful output reads declined from 11.21M to 9.29M for the Rothman sample, from 47.47M to 31.47M, and from 15.25M to 11.03M for the Johnson sample.</p></li>
+<li><p>Relative to the raw data, and using the default FASTQC settings, the predicted fraction of reads surviving deduplication rose from 26% to 29% for the Rothman sample, from 45% to 64% for the Crits-Cristoph sample, and from 26% to 32% for the Johnson sample, following fastp deduplication. That is to say, by this metric, deduplication was mildly but not very effective.</p></li>
+<li><p>This relative lack of efficacy may simply be because FASTP identifies duplicates as read pairs that are entirely identical in sequence, while FASTQC only looks at the first 50 base pairs of each read in isolation.</p></li>
+<li><p>I think I need to learn more about read duplicates and deduplication before I have strong takeaways here.</p></li>
+</ul></section><section id="conclusions" class="level1"><h1>Conclusions</h1>
+<p>Taken together, I think these data make a decent case for using FASTP, rather than AdapterRemoval, for pre-processing and adapter trimming.</p>
+<ul>
+<li><p>FASTP is much faster than AdapterRemoval.</p></li>
+<li><p>For those samples with high adapter content, FASTP appeared more effective than AdapterRemoval at removing adapters, at least for those adapter sequences that could be detected by FASTQC.</p></li>
+<li><p>FASTP provides substantially more functionality than AdapterRemoval, making it easier for us to add additional preprocessing steps like read filtering and (some) deduplication down the line.</p></li>
+</ul>
+
+
+<!-- -->
+
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb10" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Comparing FASTP and AdapterRemoval for MGS pre-processing"</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Two tools -- how do they perform?"</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Will Bradshaw"</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> 2023-10-21</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co">    code-link: true</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co">    df-print: paged</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span><span class="co"> visual</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="an">title-block-banner:</span><span class="co"> black</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: load-packages</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggrepel)</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"../scripts/aux_plot-theme.R"</span>)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>**See also:**</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="sc">\[</span>...<span class="sc">\]</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>The first major step in our current MGS pipeline uses AdapterRemoval to automatically identify and remove sequencing adapters, as well as trimming low-quality bases and collapsing overlapping read pairs (it can also discard low-quality reads entirely, but our current pipeline doesn't use this). An alternative tool, that can do all of this as well as read deduplication, is fastp. I asked the pipeline's current primary maintainer if there was a good reason we were using one tool instead of the other, and he said that there wasn't. So I decided to do a shallow investigation of their relative behavior on some example MGS datasets to see how they compare.</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="fu"># The data</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>To carry out this test, I selected three pairs of raw Illumina FASTQC files, corresponding to one sample each from two different published studies as well as one dataset provided to us by Marc Johnson:</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>| Study                        | Bioproject                                                        | Sample      |</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>|------------------------------|-------------------------------------------------------------------|-------------|</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>| Rothman et al. (2021)        | <span class="co">[</span><span class="ot">PRJNA729801</span><span class="co">](https://www.ebi.ac.uk/ena/browser/view/PRJNA729801)</span> | SRR19607374 |</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>| Crits-Cristoph et al. (2021) | <span class="co">[</span><span class="ot">PRJNA661613</span><span class="co">](https://www.ebi.ac.uk/ena/browser/view/PRJNA661613)</span> | SRR23998357 |</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>| Johnson (2023)               | N/A                                                               | COMO4       |</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>For each sample, I generated FASTQC report files for the raw data, then ran FASTP and AdapterRemoval independently on the FASTQ files and tabulated the results</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a><span class="fu"># The commands</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>For processing with FASTP, I ran the following command:</span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a><span class="in">```         </span></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a><span class="in">fastp -i &lt;raw-reads-1&gt; -I &lt;raw-reads-2&gt; -o &lt;output-path-1&gt; -O &lt;output-path-2&gt; --failed_out &lt;output-path-failed-reads&gt; --cut_tail --correction</span></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>(I didn't run deduplication for this test, as AdapterRemoval doesn't have that functionality.)</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>For processing with AdapterRemoval, I first ran the following command to identify adapters:</span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a><span class="in">```         </span></span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a><span class="in">AdapterRemoval --file1 &lt;raw-reads-1&gt; --file2 &lt;raw-reads-2&gt; --identify-adapters --threads 4 &gt; adapter_report.txt</span></span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>I then ran the following command to actually carry out pre-processing, using the adapter sequences identified in the previous step (NB the <span class="in">`minlength`</span>: and <span class="in">`maxns`</span> values are chosen to match the FASTP defaults):</span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a><span class="in">```         </span></span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a><span class="in">AdapterRemoval --file1 &lt;raw-reads-1&gt; --file2 &lt;raw-reads-2&gt; --basename &lt;output-prefix&gt; --adapter1 &lt;adapter1&gt; --adapter2 &lt;adapter2&gt; --gzip --trimns --trimqualities --minlength 15 --maxns 5</span></span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a><span class="fu"># 1. Rothman et al. (SRR19607374)</span></span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>This sample from Rothman et al. contains **11.58M** read pairs in the raw FASTQ files.</span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>**FASTP:**</span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Running FASTP took a total of **39 seconds**.</span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>FASTP detected and trimmed adapters on **3.88M reads** (note: *not* read pairs).</span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>A total of 133 Mb of sequence was trimmed due to adapter trimming, and 55 Mb due to other trimming processes, for a total of **188 Mb of trimmed sequence**.</span>
+<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>A total of **367,938 read pairs** were discarded due to failing various filters, leaving **11.21M read pairs** remaining.</span>
+<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-81"><a href="#cb10-81" aria-hidden="true" tabindex="-1"></a>**AdapterRemoval:**</span>
+<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Running AdapterRemoval took a total of **323.9 seconds** (a bit under 5.5 minutes).</span>
+<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-85"><a href="#cb10-85" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>AdapterRemoval detected and trimmed adapters on **3.96M reads** (note: again, not read pairs).</span>
+<span id="cb10-86"><a href="#cb10-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-87"><a href="#cb10-87" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>A total of **135 Mb** of sequence was trimmed across all reads; the information isn't provided to distinguish trimmed adapter sequences vs other trimming.</span>
+<span id="cb10-88"><a href="#cb10-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-89"><a href="#cb10-89" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Only 2,347 read pairs were discarded due to failing various filters, leaving the final read number almost unchanged.</span>
+<span id="cb10-90"><a href="#cb10-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-93"><a href="#cb10-93" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb10-94"><a href="#cb10-94" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate read allocations for Rothman</span></span>
+<span id="cb10-95"><a href="#cb10-95" aria-hidden="true" tabindex="-1"></a>status <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"raw"</span>, <span class="st">"fastp"</span>, <span class="st">"AdapterRemoval"</span>)</span>
+<span id="cb10-96"><a href="#cb10-96" aria-hidden="true" tabindex="-1"></a>bp_passed <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1748896043</span><span class="sc">+</span><span class="dv">1748896043</span>,<span class="dv">1627794563</span><span class="sc">+</span><span class="dv">1627794563</span>,<span class="dv">1681118328</span><span class="sc">+</span><span class="dv">1681115431</span>)</span>
+<span id="cb10-97"><a href="#cb10-97" aria-hidden="true" tabindex="-1"></a>bp_discarded <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">54014538</span>,<span class="dv">276107</span><span class="sc">+</span><span class="dv">271850</span>)</span>
+<span id="cb10-98"><a href="#cb10-98" aria-hidden="true" tabindex="-1"></a>bp_trimmed <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>,bp_passed[<span class="dv">1</span>]<span class="sc">-</span>bp_passed[<span class="dv">2</span>]<span class="sc">-</span>bp_discarded[<span class="dv">2</span>],bp_passed[<span class="dv">1</span>]<span class="sc">-</span>bp_passed[<span class="dv">3</span>]<span class="sc">-</span>bp_discarded[<span class="dv">3</span>])</span>
+<span id="cb10-99"><a href="#cb10-99" aria-hidden="true" tabindex="-1"></a><span class="co"># Tabulate</span></span>
+<span id="cb10-100"><a href="#cb10-100" aria-hidden="true" tabindex="-1"></a>tab_rothman <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">status =</span> status, <span class="at">bp_passed =</span> bp_passed, <span class="at">bp_discarded =</span> bp_discarded, <span class="at">bp_trimmed =</span> bp_trimmed)</span>
+<span id="cb10-101"><a href="#cb10-101" aria-hidden="true" tabindex="-1"></a>tab_rothman</span>
+<span id="cb10-102"><a href="#cb10-102" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize</span></span>
+<span id="cb10-103"><a href="#cb10-103" aria-hidden="true" tabindex="-1"></a>tab_rothman_gathered <span class="ot">&lt;-</span> <span class="fu">gather</span>(tab_rothman, <span class="at">key =</span> sequence_group, <span class="at">value =</span> bp, <span class="sc">-</span>status) <span class="sc">|&gt;</span></span>
+<span id="cb10-104"><a href="#cb10-104" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sequence_group =</span> <span class="fu">sub</span>(<span class="st">"bp_"</span>, <span class="st">""</span>, sequence_group),</span>
+<span id="cb10-105"><a href="#cb10-105" aria-hidden="true" tabindex="-1"></a>         <span class="at">sequence_group =</span> <span class="fu">factor</span>(sequence_group, </span>
+<span id="cb10-106"><a href="#cb10-106" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"passed"</span>, <span class="st">"trimmed"</span>, <span class="st">"discarded"</span>)),</span>
+<span id="cb10-107"><a href="#cb10-107" aria-hidden="true" tabindex="-1"></a>         <span class="at">status =</span> <span class="fu">factor</span>(status, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"raw"</span>, <span class="st">"fastp"</span>, <span class="st">"AdapterRemoval"</span>)))</span>
+<span id="cb10-108"><a href="#cb10-108" aria-hidden="true" tabindex="-1"></a>g_rothman <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(tab_rothman_gathered, <span class="fu">aes</span>(<span class="at">x=</span>status, <span class="at">y=</span>bp, <span class="at">fill =</span> sequence_group)) <span class="sc">+</span></span>
+<span id="cb10-109"><a href="#cb10-109" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"stack"</span>) <span class="sc">+</span> <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>) <span class="sc">+</span> </span>
+<span id="cb10-110"><a href="#cb10-110" aria-hidden="true" tabindex="-1"></a>  theme_base <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb10-111"><a href="#cb10-111" aria-hidden="true" tabindex="-1"></a>g_rothman</span>
+<span id="cb10-112"><a href="#cb10-112" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-113"><a href="#cb10-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-114"><a href="#cb10-114" aria-hidden="true" tabindex="-1"></a>**FASTQC results:**</span>
+<span id="cb10-115"><a href="#cb10-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-116"><a href="#cb10-116" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Prior to adapter removal with either tool, the sequencing reads appear good quality, with a consistent average quality score of 30 across all bases in the forward read and \~29 in the reverse read. FASTP successfully raises the average quality score in the reverse read to 30 through trimming and read filtering, while AdapterRemoval leaves it unchanged.</span>
+<span id="cb10-117"><a href="#cb10-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-118"><a href="#cb10-118" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>FASTQC judges the data to have iffy sequence composition (%A/C/G/T); neither tool affects this much.</span>
+<span id="cb10-119"><a href="#cb10-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-120"><a href="#cb10-120" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>All reads in the raw data are 151bp long; unsurprisingly, trimming by both tools results in a left tail in the sequencing length distribution that was absent in the raw data.</span>
+<span id="cb10-121"><a href="#cb10-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-122"><a href="#cb10-122" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>As previously observed, the raw data has very high duplicate levels, with only \~26% of sequences estimated by FASTQC to remain after deduplication. Increasing the comparison window to 100bp (from a default of 50bp) increases this to \~35%. Neither tool has much effect on this number -- unsurprisingly, since neither carried out deduplication.</span>
+<span id="cb10-123"><a href="#cb10-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-124"><a href="#cb10-124" aria-hidden="true" tabindex="-1"></a><span class="ss">-    </span>Finally, adapter removal. Unsurprisingly, the raw data shows substantial adapter content. AdapterRemoval does a good job of removing adapters, resulting in a "pass" grade from FASTQC. Surprisingly, despite trimming adapters from fewer reads, fastp does even better (according to FASTQC) at removing adapters.</span>
+<span id="cb10-125"><a href="#cb10-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-126"><a href="#cb10-126" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The images below show raw, fastp, and AR adapter content:</span>
+<span id="cb10-127"><a href="#cb10-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-128"><a href="#cb10-128" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span><span class="al">![](/img/2023-10-12_rothman-fastqc-adapters-raw.png)</span></span>
+<span id="cb10-129"><a href="#cb10-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-130"><a href="#cb10-130" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span><span class="al">![](/img/2023-10-12_rothman-fastqc-adapters-fastp.png)</span></span>
+<span id="cb10-131"><a href="#cb10-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-132"><a href="#cb10-132" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span><span class="al">![](/img/2023-10-12_rothman-fastqc-adapters-ar.png)</span></span>
+<span id="cb10-133"><a href="#cb10-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-134"><a href="#cb10-134" aria-hidden="true" tabindex="-1"></a><span class="fu"># 2. Crits-Christoph et al. (SRR23998357)</span></span>
+<span id="cb10-135"><a href="#cb10-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-136"><a href="#cb10-136" aria-hidden="true" tabindex="-1"></a>This sample from Rothman et al. contains **48.46M** read pairs in the raw FASTQ files.</span>
+<span id="cb10-137"><a href="#cb10-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-138"><a href="#cb10-138" aria-hidden="true" tabindex="-1"></a>**FASTP:**</span>
+<span id="cb10-139"><a href="#cb10-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-140"><a href="#cb10-140" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Running FASTP took a total of **99 seconds**.</span>
+<span id="cb10-141"><a href="#cb10-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-142"><a href="#cb10-142" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>FASTP detected and trimmed adapters on **13.41M reads** (note: *not* read pairs).</span>
+<span id="cb10-143"><a href="#cb10-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-144"><a href="#cb10-144" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>A total of 270 Mb of sequence was trimmed due to adapter trimming, and 43 Mb due to other trimming processes, for a total of **313 Mb of trimmed sequence**.</span>
+<span id="cb10-145"><a href="#cb10-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-146"><a href="#cb10-146" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>A total of **1.99M read pairs** were discarded due to failing various filters, leaving **47.47M read pairs** remaining.</span>
+<span id="cb10-147"><a href="#cb10-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-148"><a href="#cb10-148" aria-hidden="true" tabindex="-1"></a>**AdapterRemoval:**</span>
+<span id="cb10-149"><a href="#cb10-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-150"><a href="#cb10-150" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Running AdapterRemoval took a total of **1041.3 seconds** (a bit over 17 minutes).</span>
+<span id="cb10-151"><a href="#cb10-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-152"><a href="#cb10-152" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>AdapterRemoval detected and trimmed adapters on **8.22M reads** (note: again, not read pairs).</span>
+<span id="cb10-153"><a href="#cb10-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-154"><a href="#cb10-154" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>A total of **93.7 Mb** of sequence was trimmed across all reads; the information isn't provided to distinguish trimmed adapter sequences vs other trimming.</span>
+<span id="cb10-155"><a href="#cb10-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-156"><a href="#cb10-156" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Only **32,381** read pairs were discarded due to failing various filters, leaving the final read number (again) almost unchanged.</span>
+<span id="cb10-157"><a href="#cb10-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-160"><a href="#cb10-160" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb10-161"><a href="#cb10-161" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate read allocations for CritsCristoph</span></span>
+<span id="cb10-162"><a href="#cb10-162" aria-hidden="true" tabindex="-1"></a>status <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"raw"</span>, <span class="st">"fastp"</span>, <span class="st">"AdapterRemoval"</span>)</span>
+<span id="cb10-163"><a href="#cb10-163" aria-hidden="true" tabindex="-1"></a>bp_passed_cc <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">3683175308</span><span class="sc">+</span><span class="dv">3683175308</span>,<span class="dv">3465517525</span><span class="sc">+</span><span class="dv">3467624847</span>,<span class="dv">3634186441</span><span class="sc">+</span><span class="dv">3634143668</span>)</span>
+<span id="cb10-164"><a href="#cb10-164" aria-hidden="true" tabindex="-1"></a>bp_discarded_cc <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">120701257</span>,<span class="dv">2057612</span><span class="sc">+</span><span class="dv">2224529</span>)</span>
+<span id="cb10-165"><a href="#cb10-165" aria-hidden="true" tabindex="-1"></a>bp_trimmed_cc <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>,bp_passed_cc[<span class="dv">1</span>]<span class="sc">-</span>bp_passed_cc[<span class="dv">2</span>]<span class="sc">-</span>bp_discarded_cc[<span class="dv">2</span>],bp_passed_cc[<span class="dv">1</span>]<span class="sc">-</span>bp_passed_cc[<span class="dv">3</span>]<span class="sc">-</span>bp_discarded_cc[<span class="dv">3</span>])</span>
+<span id="cb10-166"><a href="#cb10-166" aria-hidden="true" tabindex="-1"></a><span class="co"># Tabulate</span></span>
+<span id="cb10-167"><a href="#cb10-167" aria-hidden="true" tabindex="-1"></a>tab_cc <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">status =</span> status, <span class="at">bp_passed =</span> bp_passed_cc, <span class="at">bp_discarded =</span> bp_discarded_cc, <span class="at">bp_trimmed =</span> bp_trimmed_cc)</span>
+<span id="cb10-168"><a href="#cb10-168" aria-hidden="true" tabindex="-1"></a>tab_cc</span>
+<span id="cb10-169"><a href="#cb10-169" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize</span></span>
+<span id="cb10-170"><a href="#cb10-170" aria-hidden="true" tabindex="-1"></a>tab_cc_gathered <span class="ot">&lt;-</span> <span class="fu">gather</span>(tab_cc, <span class="at">key =</span> sequence_group, <span class="at">value =</span> bp, <span class="sc">-</span>status) <span class="sc">|&gt;</span></span>
+<span id="cb10-171"><a href="#cb10-171" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sequence_group =</span> <span class="fu">sub</span>(<span class="st">"bp_"</span>, <span class="st">""</span>, sequence_group),</span>
+<span id="cb10-172"><a href="#cb10-172" aria-hidden="true" tabindex="-1"></a>         <span class="at">sequence_group =</span> <span class="fu">factor</span>(sequence_group, </span>
+<span id="cb10-173"><a href="#cb10-173" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"passed"</span>, <span class="st">"trimmed"</span>, <span class="st">"discarded"</span>)),</span>
+<span id="cb10-174"><a href="#cb10-174" aria-hidden="true" tabindex="-1"></a>         <span class="at">status =</span> <span class="fu">factor</span>(status, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"raw"</span>, <span class="st">"fastp"</span>, <span class="st">"AdapterRemoval"</span>)))</span>
+<span id="cb10-175"><a href="#cb10-175" aria-hidden="true" tabindex="-1"></a>g_cc <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(tab_cc_gathered, <span class="fu">aes</span>(<span class="at">x=</span>status, <span class="at">y=</span>bp, <span class="at">fill =</span> sequence_group)) <span class="sc">+</span></span>
+<span id="cb10-176"><a href="#cb10-176" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"stack"</span>) <span class="sc">+</span> <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>) <span class="sc">+</span> </span>
+<span id="cb10-177"><a href="#cb10-177" aria-hidden="true" tabindex="-1"></a>  theme_base <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb10-178"><a href="#cb10-178" aria-hidden="true" tabindex="-1"></a>g_cc</span>
+<span id="cb10-179"><a href="#cb10-179" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-180"><a href="#cb10-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-181"><a href="#cb10-181" aria-hidden="true" tabindex="-1"></a>**FASTQC results:**</span>
+<span id="cb10-182"><a href="#cb10-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-183"><a href="#cb10-183" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>As with Rothman, the raw data shows good sequence quality (though with some tailing off at later read positions), poor sequence composition, uniform read length (76bp in this case) and high numbers of duplicates. They also, unsurprisingly, have high adaptor content.</span>
+<span id="cb10-184"><a href="#cb10-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-185"><a href="#cb10-185" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>As with Rothman, fastp successfully improves read quality scores, while AdapterRemoval has little effect. Also as with Rothman, neither tool (as configured) has much effect on sequence composition or duplicates.</span>
+<span id="cb10-186"><a href="#cb10-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-187"><a href="#cb10-187" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>In this case, fastp is highly effective at removing adapter sequences, while AdapterRemoval is only weakly effective. I wonder if I misconfigured AR somehow, because I'm surprised at how many adapter sequences remain in this case. The images below show raw, fastp, and AR adapter content:</span>
+<span id="cb10-188"><a href="#cb10-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-189"><a href="#cb10-189" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span><span class="al">![](/img/2023-10-12_cc-fastqc-adapters-raw.png)</span></span>
+<span id="cb10-190"><a href="#cb10-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-191"><a href="#cb10-191" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span><span class="al">![](/img/2023-10-12_cc-fastqc-adapters-fastp.png)</span></span>
+<span id="cb10-192"><a href="#cb10-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-193"><a href="#cb10-193" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span><span class="al">![](/img/2023-10-12_cc-fastqc-adapters-ar.png)</span></span>
+<span id="cb10-194"><a href="#cb10-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-195"><a href="#cb10-195" aria-hidden="true" tabindex="-1"></a><span class="fu"># 3. Johnson (COMO4)</span></span>
+<span id="cb10-196"><a href="#cb10-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-197"><a href="#cb10-197" aria-hidden="true" tabindex="-1"></a>This sample from Johnson contains **15.58M** read pairs in the raw FASTQ files.</span>
+<span id="cb10-198"><a href="#cb10-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-199"><a href="#cb10-199" aria-hidden="true" tabindex="-1"></a>**FASTP:**</span>
+<span id="cb10-200"><a href="#cb10-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-201"><a href="#cb10-201" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Running FASTP took a total of **33 seconds**.</span>
+<span id="cb10-202"><a href="#cb10-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-203"><a href="#cb10-203" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>FASTP detected and trimmed adapters on **158,114 reads** (note: *not* read pairs).</span>
+<span id="cb10-204"><a href="#cb10-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-205"><a href="#cb10-205" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>A total of 1.3 Mb of sequence was trimmed due to adapter trimming, and 14.6 Mb due to other trimming processes, for a total of **15.9 Mb of trimmed sequence**.</span>
+<span id="cb10-206"><a href="#cb10-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-207"><a href="#cb10-207" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>A total of **0.33M read pairs** were discarded due to failing various filters, leaving **15.25M read pairs** remaining.</span>
+<span id="cb10-208"><a href="#cb10-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-209"><a href="#cb10-209" aria-hidden="true" tabindex="-1"></a>**AdapterRemoval:**</span>
+<span id="cb10-210"><a href="#cb10-210" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-211"><a href="#cb10-211" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Running AdapterRemoval took a total of **311.4 seconds** (a bit over 5 minutes).</span>
+<span id="cb10-212"><a href="#cb10-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-213"><a href="#cb10-213" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>AdapterRemoval detected and trimmed adapters on **155,360 reads** (note: again, not read pairs).</span>
+<span id="cb10-214"><a href="#cb10-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-215"><a href="#cb10-215" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>A total of **93.7 Mb** of sequence was trimmed across all reads; the information isn't provided to distinguish trimmed adapter sequences vs other trimming.</span>
+<span id="cb10-216"><a href="#cb10-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-217"><a href="#cb10-217" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Only **5,512** read pairs were discarded due to failing various filters, leaving the final read number (again) almost unchanged.</span>
+<span id="cb10-218"><a href="#cb10-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-219"><a href="#cb10-219" aria-hidden="true" tabindex="-1"></a>**FASTQC results:**</span>
+<span id="cb10-220"><a href="#cb10-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-221"><a href="#cb10-221" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>As with previous samples, the raw data shows good sequence quality (though with some tailing off at later read positions), poor sequence composition, uniform read length (76bp again) and high numbers of duplicates.</span>
+<span id="cb10-222"><a href="#cb10-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-223"><a href="#cb10-223" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Unlike previous samples, the raw data for this sample shows very low adapter content -- plausibly they underwent adapter trimming before they were sent to us?</span>
+<span id="cb10-224"><a href="#cb10-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-225"><a href="#cb10-225" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Neither tool achieves much visible improvement on adapter content -- unsurprisingly, given the very low levels in the raw data.</span>
+<span id="cb10-226"><a href="#cb10-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-229"><a href="#cb10-229" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb10-230"><a href="#cb10-230" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate read allocations for Johnson</span></span>
+<span id="cb10-231"><a href="#cb10-231" aria-hidden="true" tabindex="-1"></a>status <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"raw"</span>, <span class="st">"fastp"</span>, <span class="st">"AdapterRemoval"</span>)</span>
+<span id="cb10-232"><a href="#cb10-232" aria-hidden="true" tabindex="-1"></a>bp_passed_como <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1183987584</span><span class="sc">+</span><span class="dv">1183987584</span>,<span class="dv">1157539804</span><span class="sc">+</span><span class="dv">1157540364</span>,<span class="dv">1182999562</span><span class="sc">+</span><span class="dv">1182970312</span>)</span>
+<span id="cb10-233"><a href="#cb10-233" aria-hidden="true" tabindex="-1"></a>bp_discarded_como <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">36950446</span>,<span class="dv">418230</span><span class="sc">+</span><span class="dv">257734</span>)</span>
+<span id="cb10-234"><a href="#cb10-234" aria-hidden="true" tabindex="-1"></a>bp_trimmed_como <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>,bp_passed_como[<span class="dv">1</span>]<span class="sc">-</span>bp_passed_como[<span class="dv">2</span>]<span class="sc">-</span>bp_discarded_como[<span class="dv">2</span>],bp_passed_como[<span class="dv">1</span>]<span class="sc">-</span>bp_passed_como[<span class="dv">3</span>]<span class="sc">-</span>bp_discarded_como[<span class="dv">3</span>])</span>
+<span id="cb10-235"><a href="#cb10-235" aria-hidden="true" tabindex="-1"></a><span class="co"># Tabulate</span></span>
+<span id="cb10-236"><a href="#cb10-236" aria-hidden="true" tabindex="-1"></a>tab_como <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">status =</span> status, <span class="at">bp_passed =</span> bp_passed_como, <span class="at">bp_discarded =</span> bp_discarded_como, <span class="at">bp_trimmed =</span> bp_trimmed_como)</span>
+<span id="cb10-237"><a href="#cb10-237" aria-hidden="true" tabindex="-1"></a>tab_como</span>
+<span id="cb10-238"><a href="#cb10-238" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize</span></span>
+<span id="cb10-239"><a href="#cb10-239" aria-hidden="true" tabindex="-1"></a>tab_como_gathered <span class="ot">&lt;-</span> <span class="fu">gather</span>(tab_como, <span class="at">key =</span> sequence_group, <span class="at">value =</span> bp, <span class="sc">-</span>status) <span class="sc">|&gt;</span></span>
+<span id="cb10-240"><a href="#cb10-240" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sequence_group =</span> <span class="fu">sub</span>(<span class="st">"bp_"</span>, <span class="st">""</span>, sequence_group),</span>
+<span id="cb10-241"><a href="#cb10-241" aria-hidden="true" tabindex="-1"></a>         <span class="at">sequence_group =</span> <span class="fu">factor</span>(sequence_group, </span>
+<span id="cb10-242"><a href="#cb10-242" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"passed"</span>, <span class="st">"trimmed"</span>, <span class="st">"discarded"</span>)),</span>
+<span id="cb10-243"><a href="#cb10-243" aria-hidden="true" tabindex="-1"></a>         <span class="at">status =</span> <span class="fu">factor</span>(status, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"raw"</span>, <span class="st">"fastp"</span>, <span class="st">"AdapterRemoval"</span>)))</span>
+<span id="cb10-244"><a href="#cb10-244" aria-hidden="true" tabindex="-1"></a>g_cc <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(tab_como_gathered, <span class="fu">aes</span>(<span class="at">x=</span>status, <span class="at">y=</span>bp, <span class="at">fill =</span> sequence_group)) <span class="sc">+</span></span>
+<span id="cb10-245"><a href="#cb10-245" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"stack"</span>) <span class="sc">+</span> <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>) <span class="sc">+</span> </span>
+<span id="cb10-246"><a href="#cb10-246" aria-hidden="true" tabindex="-1"></a>  theme_base <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb10-247"><a href="#cb10-247" aria-hidden="true" tabindex="-1"></a>g_cc</span>
+<span id="cb10-248"><a href="#cb10-248" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-249"><a href="#cb10-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-250"><a href="#cb10-250" aria-hidden="true" tabindex="-1"></a><span class="fu"># Deduplication with fastp</span></span>
+<span id="cb10-251"><a href="#cb10-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-252"><a href="#cb10-252" aria-hidden="true" tabindex="-1"></a>Given that all three of these samples contain high levels of sequence duplicates, I was curious to see to what degree fastp was able to improve on this metric. To test this, I reran fastp on all three samples, with the <span class="in">`--dedup`</span> option enabled. I observed the following:</span>
+<span id="cb10-253"><a href="#cb10-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-254"><a href="#cb10-254" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Runtimes were consistently very slightly longer than without deduplication.</span>
+<span id="cb10-255"><a href="#cb10-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-256"><a href="#cb10-256" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The number of successful output reads declined from 11.21M to 9.29M for the Rothman sample, from 47.47M to 31.47M, and from 15.25M to 11.03M for the Johnson sample.</span>
+<span id="cb10-257"><a href="#cb10-257" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-258"><a href="#cb10-258" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Relative to the raw data, and using the default FASTQC settings, the predicted fraction of reads surviving deduplication rose from 26% to 29% for the Rothman sample, from 45% to 64% for the Crits-Cristoph sample, and from 26% to 32% for the Johnson sample, following fastp deduplication. That is to say, by this metric, deduplication was mildly but not very effective.</span>
+<span id="cb10-259"><a href="#cb10-259" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-260"><a href="#cb10-260" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>This relative lack of efficacy may simply be because FASTP identifies duplicates as read pairs that are entirely identical in sequence, while FASTQC only looks at the first 50 base pairs of each read in isolation.</span>
+<span id="cb10-261"><a href="#cb10-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-262"><a href="#cb10-262" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>I think I need to learn more about read duplicates and deduplication before I have strong takeaways here.</span>
+<span id="cb10-263"><a href="#cb10-263" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-264"><a href="#cb10-264" aria-hidden="true" tabindex="-1"></a><span class="fu"># Conclusions</span></span>
+<span id="cb10-265"><a href="#cb10-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-266"><a href="#cb10-266" aria-hidden="true" tabindex="-1"></a>Taken together, I think these data make a decent case for using FASTP, rather than AdapterRemoval, for pre-processing and adapter trimming.</span>
+<span id="cb10-267"><a href="#cb10-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-268"><a href="#cb10-268" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>FASTP is much faster than AdapterRemoval.</span>
+<span id="cb10-269"><a href="#cb10-269" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-270"><a href="#cb10-270" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>For those samples with high adapter content, FASTP appeared more effective than AdapterRemoval at removing adapters, at least for those adapter sequences that could be detected by FASTQC.</span>
+<span id="cb10-271"><a href="#cb10-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-272"><a href="#cb10-272" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>FASTP provides substantially more functionality than AdapterRemoval, making it easier for us to add additional preprocessing steps like read filtering and (some) deduplication down the line.</span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+</body></html>
