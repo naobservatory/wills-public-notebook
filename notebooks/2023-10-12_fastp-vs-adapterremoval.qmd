@@ -22,10 +22,6 @@ library(ggrepel)
 source("../scripts/aux_plot-theme.R")
 ```
 
-**See also:**
-
--   \[...\]
-
 The first major step in our current MGS pipeline uses AdapterRemoval to automatically identify and remove sequencing adapters, as well as trimming low-quality bases and collapsing overlapping read pairs (it can also discard low-quality reads entirely, but our current pipeline doesn't use this). An alternative tool, that can do all of this as well as read deduplication, is fastp. I asked the pipeline's current primary maintainer if there was a good reason we were using one tool instead of the other, and he said that there wasn't. So I decided to do a shallow investigation of their relative behavior on some example MGS datasets to see how they compare.
 
 # The data
@@ -56,7 +52,7 @@ For processing with AdapterRemoval, I first ran the following command to identif
 AdapterRemoval --file1 <raw-reads-1> --file2 <raw-reads-2> --identify-adapters --threads 4 > adapter_report.txt
 ```
 
-I then ran the following command to actually carry out pre-processing, using the adapter sequences identified in the previous step (NB the `minlength`: and `maxns` values are chosen to match the FASTP defaults):
+I then ran the following command to actually carry out pre-processing, using the adapter sequences identified in the previous step (NB the `minlength` and `maxns` values are chosen to match the FASTP defaults):
 
 ```         
 AdapterRemoval --file1 <raw-reads-1> --file2 <raw-reads-2> --basename <output-prefix> --adapter1 <adapter1> --adapter2 <adapter2> --gzip --trimns --trimqualities --minlength 15 --maxns 5
