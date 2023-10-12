@@ -367,6 +367,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li><p>FASTP is much faster than AdapterRemoval.</p></li>
 <li><p>For those samples with high adapter content, FASTP appeared more effective than AdapterRemoval at removing adapters, at least for those adapter sequences that could be detected by FASTQC.</p></li>
+<li><p>FASTP appears to be more aggressive at quality trimming reads than AdapterRemoval, resulting in better read quality distributions in FASTQC.</p></li>
 <li><p>FASTP provides substantially more functionality than AdapterRemoval, making it easier for us to add additional preprocessing steps like read filtering and (some) deduplication down the line.</p></li>
 </ul>
 <p>However, one important caveat is that it’s unclear how well either tool will perform on Element sequencing data – or how well FASTQC will be able to detect Element adapters that remain after preprocessing.</p>
@@ -917,9 +918,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb10-265"><a href="#cb10-265" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-266"><a href="#cb10-266" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>For those samples with high adapter content, FASTP appeared more effective than AdapterRemoval at removing adapters, at least for those adapter sequences that could be detected by FASTQC.</span>
 <span id="cb10-267"><a href="#cb10-267" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-268"><a href="#cb10-268" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>FASTP provides substantially more functionality than AdapterRemoval, making it easier for us to add additional preprocessing steps like read filtering and (some) deduplication down the line.</span>
+<span id="cb10-268"><a href="#cb10-268" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>FASTP appears to be more aggressive at quality trimming reads than AdapterRemoval, resulting in better read quality distributions in FASTQC.</span>
 <span id="cb10-269"><a href="#cb10-269" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-270"><a href="#cb10-270" aria-hidden="true" tabindex="-1"></a>However, one important caveat is that it's unclear how well either tool will perform on Element sequencing data -- or how well FASTQC will be able to detect Element adapters that remain after preprocessing.</span>
+<span id="cb10-270"><a href="#cb10-270" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>FASTP provides substantially more functionality than AdapterRemoval, making it easier for us to add additional preprocessing steps like read filtering and (some) deduplication down the line.</span>
+<span id="cb10-271"><a href="#cb10-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-272"><a href="#cb10-272" aria-hidden="true" tabindex="-1"></a>However, one important caveat is that it's unclear how well either tool will perform on Element sequencing data -- or how well FASTQC will be able to detect Element adapters that remain after preprocessing.</span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
