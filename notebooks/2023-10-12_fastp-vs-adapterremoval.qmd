@@ -2,7 +2,7 @@
 title: "Comparing FASTP and AdapterRemoval for MGS pre-processing"
 subtitle: "Two tools -- how do they perform?"
 author: "Will Bradshaw"
-date: 2023-10-21
+date: 2023-10-12
 format:
   html:
     code-fold: true
@@ -29,7 +29,7 @@ The first major step in our current MGS pipeline uses AdapterRemoval to automati
 To carry out this test, I selected three pairs of raw Illumina FASTQC files, corresponding to one sample each from two different published studies as well as one dataset provided to us by Marc Johnson:
 
 | Study                        | Bioproject                                                        | Sample      |
-|------------------------------|-------------------------------------------------------------------|-------------|
+|-----------------|----------------------------------------|---------------|
 | Rothman et al. (2021)        | [PRJNA729801](https://www.ebi.ac.uk/ena/browser/view/PRJNA729801) | SRR19607374 |
 | Crits-Cristoph et al. (2021) | [PRJNA661613](https://www.ebi.ac.uk/ena/browser/view/PRJNA661613) | SRR23998357 |
 | Johnson (2023)               | N/A                                                               | COMO4       |
@@ -113,7 +113,7 @@ g_rothman
 
 -   As previously observed, the raw data has very high duplicate levels, with only \~26% of sequences estimated by FASTQC to remain after deduplication. Increasing the comparison window to 100bp (from a default of 50bp) increases this to \~35%. Neither tool has much effect on this number -- unsurprisingly, since neither carried out deduplication.
 
--    Finally, adapter removal. Unsurprisingly, the raw data shows substantial adapter content. AdapterRemoval does a good job of removing adapters, resulting in a "pass" grade from FASTQC. Surprisingly, despite trimming adapters from fewer reads, fastp does even better (according to FASTQC) at removing adapters.
+-   Finally, adapter removal. Unsurprisingly, the raw data shows substantial adapter content. AdapterRemoval does a good job of removing adapters, resulting in a "pass" grade from FASTQC. Surprisingly, despite trimming adapters from fewer reads, fastp does even better (according to FASTQC) at removing adapters.
 
 -   The images below show raw, fastp, and AR adapter content:
 

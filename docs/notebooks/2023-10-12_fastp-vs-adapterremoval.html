@@ -5,7 +5,7 @@
 <meta name="generator" content="quarto-1.3.450">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="author" content="Will Bradshaw">
-<meta name="dcterms.date" content="2023-10-21">
+<meta name="dcterms.date" content="2023-10-12">
 <title>Will’s Public NAO Notebook - Comparing FASTP and AdapterRemoval for MGS pre-processing</title>
 <style>
 code{white-space: pre-wrap;}
@@ -131,7 +131,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">October 21, 2023</p>
+        <p class="date">October 12, 2023</p>
       </div>
     </div>
     
@@ -663,7 +663,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Comparing FASTP and AdapterRemoval for MGS pre-processing"</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Two tools -- how do they perform?"</span></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Will Bradshaw"</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> 2023-10-21</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> 2023-10-12</span></span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
@@ -690,7 +690,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>To carry out this test, I selected three pairs of raw Illumina FASTQC files, corresponding to one sample each from two different published studies as well as one dataset provided to us by Marc Johnson:</span>
 <span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>| Study                        | Bioproject                                                        | Sample      |</span>
-<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>|------------------------------|-------------------------------------------------------------------|-------------|</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>|-----------------|----------------------------------------|---------------|</span>
 <span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>| Rothman et al. (2021)        | <span class="co">[</span><span class="ot">PRJNA729801</span><span class="co">](https://www.ebi.ac.uk/ena/browser/view/PRJNA729801)</span> | SRR19607374 |</span>
 <span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>| Crits-Cristoph et al. (2021) | <span class="co">[</span><span class="ot">PRJNA661613</span><span class="co">](https://www.ebi.ac.uk/ena/browser/view/PRJNA661613)</span> | SRR23998357 |</span>
 <span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>| Johnson (2023)               | N/A                                                               | COMO4       |</span>
@@ -774,7 +774,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb10-117"><a href="#cb10-117" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-118"><a href="#cb10-118" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>As previously observed, the raw data has very high duplicate levels, with only \~26% of sequences estimated by FASTQC to remain after deduplication. Increasing the comparison window to 100bp (from a default of 50bp) increases this to \~35%. Neither tool has much effect on this number -- unsurprisingly, since neither carried out deduplication.</span>
 <span id="cb10-119"><a href="#cb10-119" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-120"><a href="#cb10-120" aria-hidden="true" tabindex="-1"></a><span class="ss">-    </span>Finally, adapter removal. Unsurprisingly, the raw data shows substantial adapter content. AdapterRemoval does a good job of removing adapters, resulting in a "pass" grade from FASTQC. Surprisingly, despite trimming adapters from fewer reads, fastp does even better (according to FASTQC) at removing adapters.</span>
+<span id="cb10-120"><a href="#cb10-120" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Finally, adapter removal. Unsurprisingly, the raw data shows substantial adapter content. AdapterRemoval does a good job of removing adapters, resulting in a "pass" grade from FASTQC. Surprisingly, despite trimming adapters from fewer reads, fastp does even better (according to FASTQC) at removing adapters.</span>
 <span id="cb10-121"><a href="#cb10-121" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-122"><a href="#cb10-122" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The images below show raw, fastp, and AR adapter content:</span>
 <span id="cb10-123"><a href="#cb10-123" aria-hidden="true" tabindex="-1"></a></span>
