@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Will Bradshaw">
+<meta name="dcterms.date" content="2023-10-16">
+<title>Will’s Public NAO Notebook - Comparing Ribodetector and bbduk for rRNA detection</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><style>
+
+      .quarto-title-block .quarto-title-banner {
+        background: black;
+      }
+</style>
+<link href="../site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="../site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+</head>
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg navbar-dark "><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Will’s Public NAO Notebook</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools ms-auto">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav></header><!-- content --><header id="title-block-header" class="quarto-title-block default page-columns page-full"><div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">Comparing Ribodetector and bbduk for rRNA detection</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+            <p class="subtitle lead">In search of quick rRNA filtering.</p>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Will Bradshaw </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">October 16, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content"><p><strong>See also:</strong></p>
+<ul>
+<li><a href="https://data.securebio.org/wills-public-notebook/notebooks/2023-10-12_fastp-vs-adapterremoval.html">Comparing FASTP and AdapterRemoval for MGS pre-processing</a></li>
+</ul>
+<p>A useful step in processing wastewater MGS data is the removal of (primarily bacterial) ribosomal RNA sequences. These often make up a substantial fraction of all reads in the dataset, and their removal can both speed up downstream processing and potentially improve certain downstream metrics (e.g.&nbsp;library complexity). Our current pipeline counts and lists rRNA reads using <a href="https://doi.org/10.1093/nar/gkac112">Ribodetector</a>, a deep-learning-based tool that is sensitive and specific, but slow. This slowness makes it annoying to work Ribodetector into our broader pipeline – for example, the time taken to classify reads with Ribodetector is much more than the time saved on downstream steps by excluding rRNA reads from our pipeline.</p>
+<p>I wanted to see if there were alternative rRNA detection methods that gave good-enough results while being fast enough to include in the preprocessing phase of the pipeline. To that end, I investigated <a href="https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbduk-guide/">bbduk</a>, a k-mer based contamination-detection approach suggested in <a href="https://www.biostars.org/p/184791/#254402">this biostars thread</a><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>To compare these tools, I applied bbduk and Ribodetector to three samples from pre-existing wastewater metagenomics datasets. Two of these, from Johnson and Crits-Christoph, were the same as in my <a href="https://data.securebio.org/wills-public-notebook/notebooks/2023-10-12_fastp-vs-adapterremoval.html">last methods comparison post</a>. I initially also used the same sample from the third dataset, Rothman et al.&nbsp;(2021), but switched to a different sample when I realised the first had undergone panel enrichment for respiratory viruses and so wasn’t truly untargeted.</p>
+<table class="table">
+<thead><tr class="header">
+<th>Study</th>
+<th>Bioproject</th>
+<th>Sample</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Rothman et al.&nbsp;(2021)</td>
+<td><a href="https://www.ebi.ac.uk/ena/browser/view/PRJNA729801">PRJNA729801</a></td>
+<td>SRR14530880</td>
+</tr>
+<tr class="even">
+<td>Crits-Cristoph et al.&nbsp;(2021)</td>
+<td><a href="https://www.ebi.ac.uk/ena/browser/view/PRJNA661613">PRJNA661613</a></td>
+<td>SRR23998357</td>
+</tr>
+<tr class="odd">
+<td>Johnson (2023)</td>
+<td>N/A</td>
+<td>COMO4</td>
+</tr>
+</tbody>
+</table>
+<p>For each sample, I ran rRNA removal on the FASTQ files that had been preprocessed with FASTP (without deduplication. For SortMeRNA and bbduk, I used reference files (<a href="https://www.arb-silva.de/fileadmin/silva_databases/release_138.1/Exports/SILVA_138.1_LSURef_NR99_tax_silva.fasta.gz">1</a>,<a href="https://www.arb-silva.de/fileadmin/silva_databases/release_138.1/Exports/SILVA_138.1_SSURef_NR99_tax_silva.fasta.gz">2</a>) downloaded from the <a href="https://www.arb-silva.de/">SILVA database</a>.</p>
+<p>The commands I ran were as follows:</p>
+<ul>
+<li>
+<p>Ribodetector (high MCC mode, X=75 for Johnson &amp; Crits-Cristoph &amp; 100 for Rothman):</p>
+<pre><code>ribodetector_cpu --len X --ensure rrna --threads 28 --chunk_size 512 --input &lt;fastp-file-1&gt; &lt;fastp-file-2&gt; --o &lt;non-rrna-file-1&gt; &lt;non-rrna-file-2&gt; --rrna &lt;rrna-file-1&gt; &lt;rrna-file-2&gt; COMO4_ribodetector_failed_1.fastq.gz COMO4_ribodetector_failed_2.fastq.gz</code></pre>
+</li>
+<li>
+<p>Ribodetector (high recall mode, X as above):</p>
+<pre><code>ribodetector_cpu --len X --ensure norrna --threads 28 --chunk_size 512 --input &lt;fastp-file-1&gt; &lt;fastp-file-2&gt; --o &lt;non-rrna-file-1&gt; &lt;non-rrna-file-2&gt; --rrna &lt;rrna-file-1&gt; &lt;rrna-file-2&gt; COMO4_ribodetector_failed_1.fastq.gz COMO4_ribodetector_failed_2.fastq.gz</code></pre>
+</li>
+<li>
+<p>bbduk (Y = 27 or 43):</p>
+<pre><code>bbduk.sh in=&lt;fastp-file-1&gt; in2=&lt;fastp-file-2&gt; ref=../ribokmers_lsu.fasta.gz,../ribokmers_ssu.fasta.gz out=&lt;non-rrna-file-1&gt; out2=&lt;non-rrna-file-2&gt; outm=&lt;rrna-file-1&gt; outm2=&lt;rrna-file-2&gt; stats=&lt;stats-file&gt; threads=28 k=Y</code></pre>
+</li>
+</ul>
+<section id="johnson-como4" class="level1"><h1>1. Johnson (COMO4)</h1>
+<p>I started with the sample from Johnson, which we already know has a high fraction of rRNA reads (46.2% on our <a href="https://data.securebio.org/mgs-counts/">sequencing dashboard</a>).</p>
+<section id="high-level-output" class="level2"><h2 class="anchored" data-anchor-id="high-level-output">High-level output</h2>
+<p>Running Ribodetector in high-MCC mode set took <strong>1266 seconds</strong> (just over 21 minutes). The tool identified 6.87M out of 15.25M read pairs as ribosomal: 45.0%. Re-running in high-recall mode took a similar amount of time (1264 seconds) and identified 7.76M reads as ribosomal: 50.9%.</p>
+<p>Running bbduk took a total of 36 seconds. The tool identified 7.57M out of 15.25M read pairs as ribosomal: 49.63%, a little under the result for Ribodetector’ high-recall mode.</p>
+<p>The default bbduk command given above uses the default k-mer size of 27. Increasing <em>k</em> will increase the precision and decrease the recall of the bbduk algorithm, potentially moving the results closer to the high-MCC version of Ribodetector. After some experimentation, I found that a k-mer length of 43 returned a ribosomal fraction of 45.39%, only slightly above high-MCC ribodetector.</p>
+</section><section id="overlap-between-tools" class="level2"><h2 class="anchored" data-anchor-id="overlap-between-tools">Overlap between tools</h2>
+<p>To compare the output of Ribodetector (high-MCC and high-recall) and bbduk (low and high <em>k</em>) in more detail, I extracted and downloaded the read IDs from their respective rRNA files and compared the overlap between the lists of IDs:</p>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">data_dir</span> <span class="op">&lt;-</span> <span class="st">"../data/2023-10-16_ribodetection/"</span></span>
+<span><span class="va">johnson_bbduk_reads_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"COMO4_bbduk_failed_ids.txt"</span><span class="op">)</span></span>
+<span><span class="va">johnson_bbduk_highk_reads_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"COMO4_bbduk_highk_failed_ids.txt"</span><span class="op">)</span></span>
+<span><span class="va">johnson_rd_precision_reads_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"COMO4_ribodetector_failed_ids_1.txt"</span><span class="op">)</span></span>
+<span><span class="va">johnson_rd_recall_reads_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"COMO4_ribodetector_recall_failed_ids_1.txt"</span><span class="op">)</span></span>
+<span><span class="va">johnson_bbduk_reads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html">readLines</a></span><span class="op">(</span><span class="va">johnson_bbduk_reads_path</span><span class="op">)</span></span>
+<span><span class="va">johnson_bbduk_highk_reads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html">readLines</a></span><span class="op">(</span><span class="va">johnson_bbduk_highk_reads_path</span><span class="op">)</span></span>
+<span><span class="va">johnson_rd_precision_reads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html">readLines</a></span><span class="op">(</span><span class="va">johnson_rd_precision_reads_path</span><span class="op">)</span></span>
+<span><span class="va">johnson_rd_recall_reads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html">readLines</a></span><span class="op">(</span><span class="va">johnson_rd_recall_reads_path</span><span class="op">)</span></span>
+<span><span class="va">johnson_read_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>bbduk <span class="op">=</span> <span class="va">johnson_bbduk_reads</span>,</span>
+<span>                 bbduk_highk <span class="op">=</span> <span class="va">johnson_bbduk_highk_reads</span>,</span>
+<span>                 rd_precision <span class="op">=</span> <span class="va">johnson_rd_precision_reads</span>,</span>
+<span>                 rd_recall <span class="op">=</span> <span class="va">johnson_rd_recall_reads</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">g_venn_johnson</span> <span class="op">&lt;-</span> <span class="fu">ggVennDiagram</span><span class="op">(</span><span class="va">johnson_read_ids</span>, label_alpha<span class="op">=</span><span class="fl">0</span>, edge_size <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_fill_gradient</span><span class="op">(</span>low <span class="op">=</span> <span class="st">"#FFFFFF"</span>, high <span class="op">=</span> <span class="st">"#4981BF"</span><span class="op">)</span></span>
+<span><span class="va">g_venn_johnson</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2023-10-13_rrna-removal_files/figure-html/rrna-overlap-venn-johnson-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Some observations:</p>
+<ul>
+<li><p>As expected, the rRNA reads returned by bbduk with a high k-value are a strict subset of those returned with a low k-value, and those returned by Ribodetector in high-precision mode are a strict subset of those returned in high-recall mode.</p></li>
+<li>
+<p>Across all read IDs identified as ribosomal under any of the four conditions, 82% (6.42M read pairs) were identified as such by all four conditions. Of those that remain:</p>
+<ul>
+<li><p>5% are identified by all conditions except high-k bbduk;</p></li>
+<li><p>6% are identified by all conditions except high-precision Ribodetector;</p></li>
+<li><p>2% are identified by both high-recall conditions, but neither high-precision condition;</p></li>
+<li><p>3% are identified by high-recall Ribodetector only;</p></li>
+<li><p>1% are identified by low-k bbduk only;</p></li>
+<li><p>1% by some other combination of conditions</p></li>
+</ul>
+</li>
+<li><p>Overall, it seems that, while the two high-recall methods exhibit quite good agreement (sharing &gt;95% of identified sequences), the two high-precision methods agree less well (with &gt;10% of all identified sequences identified by one but not the other).</p></li>
+</ul></section></section><section id="rothman-et-al.-srr14530880" class="level1"><h1>2. Rothman et al.&nbsp;(SRR14530880)</h1>
+<p>I next repeated the analysis on a non-panel-enriched sample from Rothman et al.&nbsp;(2023). In this case, I didn’t have a clear advance idea of how much rRNA was present in the sample, though I didn’t have much reason to expect it to be much lower than Johnson.</p>
+<p>In this case, I ran both bbduk and Ribodetector with 16 threads, so I could run two processes in parallel on my EC2 instance. Running bbduk with default settings (k=27) identified 7.41M out of 13.61M reads as ribosomal (54.43%). Running bbduk with k=43 identified 5.14M reads as ribosomal (37.78%). Both iterations ran in under 40 seconds.</p>
+<p>Running Ribodetector in high-MCC mode identified 6.75M reads (49.63%) as ribosomal. Running it in high-recall mode identified 7.27M reads (53.39%) as ribosomal. Both iterations took roughly 43 minutes.</p>
+<p>The overlap in reads identified by different tools in this case looked as follows:</p>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">rothman_bbduk_reads_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"SRR14530880_bbduk_failed_ids.txt"</span><span class="op">)</span></span>
+<span><span class="va">rothman_bbduk_highk_reads_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"SRR14530880_bbduk_highk_failed_ids.txt"</span><span class="op">)</span></span>
+<span><span class="va">rothman_rd_precision_reads_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"SRR14530880_ribodetector_failed_ids.txt"</span><span class="op">)</span></span>
+<span><span class="va">rothman_rd_recall_reads_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"SRR14530880_ribodetector_recall_failed_ids.txt"</span><span class="op">)</span></span>
+<span><span class="va">rothman_bbduk_reads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html">readLines</a></span><span class="op">(</span><span class="va">rothman_bbduk_reads_path</span><span class="op">)</span></span>
+<span><span class="va">rothman_bbduk_highk_reads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html">readLines</a></span><span class="op">(</span><span class="va">rothman_bbduk_highk_reads_path</span><span class="op">)</span></span>
+<span><span class="va">rothman_rd_precision_reads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html">readLines</a></span><span class="op">(</span><span class="va">rothman_rd_precision_reads_path</span><span class="op">)</span></span>
+<span><span class="va">rothman_rd_recall_reads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html">readLines</a></span><span class="op">(</span><span class="va">rothman_rd_recall_reads_path</span><span class="op">)</span></span>
+<span><span class="va">rothman_read_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>bbduk <span class="op">=</span> <span class="va">rothman_bbduk_reads</span>,</span>
+<span>                 bbduk_highk <span class="op">=</span> <span class="va">rothman_bbduk_highk_reads</span>,</span>
+<span>                 rd_precision <span class="op">=</span> <span class="va">rothman_rd_precision_reads</span>,</span>
+<span>                 rd_recall <span class="op">=</span> <span class="va">rothman_rd_recall_reads</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">g_venn_rothman</span> <span class="op">&lt;-</span> <span class="fu">ggVennDiagram</span><span class="op">(</span><span class="va">rothman_read_ids</span>, label_alpha<span class="op">=</span><span class="fl">0</span>, edge_size <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_fill_gradient</span><span class="op">(</span>low <span class="op">=</span> <span class="st">"#FFFFFF"</span>, high <span class="op">=</span> <span class="st">"#4981BF"</span><span class="op">)</span></span>
+<span><span class="va">g_venn_rothman</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2023-10-13_rrna-removal_files/figure-html/rrna-overlap-venn-rothman-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>As before, the rRNA reads returned by bbduk with a high k-value are a strict subset of those returned with a low k-value, and those returned by Ribodetector in high-precision mode are a strict subset of those returned in high-recall mode. This time, only 64% of putative rRNA reads were agreed on by all four conditions; most of the rest were only identified by all methods except high-k bbduk. The agreement between the high-recall methods remains good, but less good than for Johnson, with 6% of putative rRNA reads identified only by low-k bbduk and 2% only by high-recall Ribodetector.</p>
+</section><section id="crits-christoph-et-al.-srr23998357" class="level1"><h1>3. Crits-Christoph et al.&nbsp;(SRR23998357)</h1>
+<p>Finally, we have the sample from Crits-Christoph et al.&nbsp;(2021). This was by far the biggest sample of the three, with a total of 47.47M read pairs. It is also the only sample that, to my knowledge, explicitly included ribodepletion in its methods.</p>
+<p>In this case, I ran both bbduk and Ribodetector with 16 threads, so I could run two processes in parallel on my EC2 instance. Under these conditions, running bbduk with k=27 identified 5.02M read pairs (10.57%) as ribosomal; running it with k=43 identified 3.90M (8.21%). These runs took 90 and 79 seconds, respectively.</p>
+<p>Running Ribodetector in high-MCC mode identified 3.90M (8.21%) as ribosomal; running it in high-recall mode identified 4.95M (10.42%). Both runs took well over an hour.</p>
+<p>The overlap in reads identified by different tools in this case looked as follows:</p>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cc_bbduk_reads_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"SRR23998357_bbduk_failed_ids.txt"</span><span class="op">)</span></span>
+<span><span class="va">cc_bbduk_highk_reads_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"SRR23998357_bbduk_highk_failed_ids.txt"</span><span class="op">)</span></span>
+<span><span class="va">cc_rd_precision_reads_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"SRR23998357_ribodetector_failed_ids.txt"</span><span class="op">)</span></span>
+<span><span class="va">cc_rd_recall_reads_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"/SRR23998357_ribodetector_recall_failed_ids.txt"</span><span class="op">)</span></span>
+<span><span class="va">cc_bbduk_reads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html">readLines</a></span><span class="op">(</span><span class="va">cc_bbduk_reads_path</span><span class="op">)</span></span>
+<span><span class="va">cc_bbduk_highk_reads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html">readLines</a></span><span class="op">(</span><span class="va">cc_bbduk_highk_reads_path</span><span class="op">)</span></span>
+<span><span class="va">cc_rd_precision_reads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html">readLines</a></span><span class="op">(</span><span class="va">cc_rd_precision_reads_path</span><span class="op">)</span></span>
+<span><span class="va">cc_rd_recall_reads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html">readLines</a></span><span class="op">(</span><span class="va">cc_rd_recall_reads_path</span><span class="op">)</span></span>
+<span><span class="va">cc_read_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>bbduk <span class="op">=</span> <span class="va">cc_bbduk_reads</span>,</span>
+<span>                 bbduk_highk <span class="op">=</span> <span class="va">cc_bbduk_highk_reads</span>,</span>
+<span>                 rd_precision <span class="op">=</span> <span class="va">cc_rd_precision_reads</span>,</span>
+<span>                 rd_recall <span class="op">=</span> <span class="va">cc_rd_recall_reads</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">g_venn_cc</span> <span class="op">&lt;-</span> <span class="fu">ggVennDiagram</span><span class="op">(</span><span class="va">cc_read_ids</span>, label_alpha<span class="op">=</span><span class="fl">0</span>, edge_size <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_fill_gradient</span><span class="op">(</span>low <span class="op">=</span> <span class="st">"#FFFFFF"</span>, high <span class="op">=</span> <span class="st">"#4981BF"</span><span class="op">)</span></span>
+<span><span class="va">g_venn_cc</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2023-10-13_rrna-removal_files/figure-html/rrna-overlap-venn-cc-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>To my surprise, while the total number of reads identified as ribosomal by the two high-recall methods showed good agreement, the specific reads identified showed much more divergence than in the other two samples – in total, over 20% of reads identified as ribosomal by at least one method showed disagreement between the two high-recall methods. This made validating the results before using any one method a higher priority for me.</p>
+</section><section id="validation" class="level1"><h1>4. Validation</h1>
+<p>In the absence of an external gold-standard ribodetection algorithm, it’s difficult to directly validate their performance at ribodetection. We can, however, validate their performance <em>relative to the needs of our pipelines</em> by running their outputs through Kraken and seeing which taxa they map to. In particular, I wanted to ensure that as few “ribosomal” reads as possible were mapping to viruses.</p>
+<p>To do this, I first restricted each dataset to “controversial” reads: those that showed some disagreement between methods. I assumed that reads that all four methods classified as ribosomal were in fact ribosomal, and ditto for those all four methods classified as non-ribosomal. This left 1.42M reads for the Johnson sample, 2.76M reads for the Rothman sample and 2.21M reads for the Crits-Christoph sample: 6.39M reads total. I downsampled each read file to these reads using <code>seqtk subseq</code>, concatenated the reads from all three files together, and ran the concatenated files through kraken2, using the same 16GB version of the Standard database used in our current MGS pipeline. I repeated this for reads identified as ribosomal by each method in turn, and used kraken2’s <code>--report</code>function to get a high-level sense of the taxonomic breakdowns for each method. The results were as follows:</p>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ribo_taxa_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"/ribodetection-domains.csv"</span><span class="op">)</span></span>
+<span><span class="va">ribo_taxa</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span><span class="va">ribo_taxa_path</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">ribo_taxa_gathered</span> <span class="op">&lt;-</span> <span class="va">ribo_taxa</span> <span class="op">%&gt;%</span> <span class="fu">gather</span><span class="op">(</span><span class="va">classification</span>, <span class="va">read_percentage</span>, <span class="op">-</span><span class="va">dataset</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>classification <span class="op">=</span> <span class="fu">fct_inorder</span><span class="op">(</span><span class="va">classification</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">g_ribo_taxa</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">ribo_taxa_gathered</span>, </span>
+<span>                      <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">dataset</span>, y<span class="op">=</span><span class="va">read_percentage</span>, fill <span class="op">=</span> <span class="va">classification</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span>position <span class="op">=</span> <span class="st">"stack"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span><span class="st">"% of controversial ribosomal reads"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">theme_base</span> <span class="op">+</span> <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">g_ribo_taxa</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2023-10-13_rrna-removal_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+<details><summary>Code</summary><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">g_ribo_viruses</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">ribo_taxa_gathered</span>, <span class="va">classification</span> <span class="op">==</span> <span class="st">"Viruses"</span><span class="op">)</span>, </span>
+<span>                         <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">dataset</span>, y<span class="op">=</span><span class="va">read_percentage</span>, fill <span class="op">=</span> <span class="va">classification</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span>position <span class="op">=</span> <span class="st">"stack"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span><span class="st">"% of controversial ribosomal reads"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">theme_base</span> <span class="op">+</span> <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">g_ribo_viruses</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2023-10-13_rrna-removal_files/figure-html/unnamed-chunk-9-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Unsurprisingly, in all cases, the vast majority of reads were either unclassified or mapped to bacteria. In all cases, a very small but nonzero fraction of reads mapped to viruses – this fraction was by far the highest for high-recall Ribodetector (0.66%), and lowest for high-MCC ribodetector (0.02%); both bbduk methods were intermediate (0.05%).</p>
+<p>Given that we know we have at least some viral reads getting misassigned as viral<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, how good/bad is this? What fraction of all viral reads are being identified as viral by each method? Digging into the individual datasets, kraken2 assigns the following total numbers of viral reads to each sample:</p>
+<ul>
+<li><p>1,000,084 reads to the Johnson sample (3.28% of all reads)</p></li>
+<li><p>5,667,635 reads to the Rothman sample (20.82% of all reads)</p></li>
+<li><p>246,193 to the Crits-Christoph sample (0.26% of all reads)</p></li>
+</ul>
+<p>In total (including “uncontroversial” assignments) the total number of viral reads classified as ribosomal by each method for each sample are as follows:</p>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">viral_mis_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"ribodetection-viruses.csv"</span><span class="op">)</span></span>
+<span><span class="va">viral_mis</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span><span class="va">viral_mis_path</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">viral_mis_gathered</span> <span class="op">&lt;-</span> <span class="fu">gather</span><span class="op">(</span><span class="va">viral_mis</span>, <span class="va">method</span>, <span class="va">n_viral_reads</span>, <span class="op">-</span><span class="va">sample</span>, <span class="op">-</span><span class="va">raw</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>viral_reads_percentage <span class="op">=</span> <span class="va">n_viral_reads</span> <span class="op">/</span> <span class="va">raw</span> <span class="op">*</span> <span class="fl">100</span>,</span>
+<span>         sample <span class="op">=</span> <span class="fu">fct_inorder</span><span class="op">(</span><span class="va">sample</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">g_viral_mis</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">viral_mis_gathered</span>, </span>
+<span>                      <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">sample</span>, y<span class="op">=</span><span class="va">viral_reads_percentage</span>, fill <span class="op">=</span> <span class="va">method</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span>position <span class="op">=</span> <span class="st">"dodge"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">2</span>,<span class="fl">0.2</span><span class="op">)</span>, </span>
+<span>                     name <span class="op">=</span> <span class="st">"% of viral reads identified as ribosomal"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_x_discrete</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Source dataset"</span>,</span>
+<span>                   labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Johnson"</span>, <span class="st">"Rothman"</span>, <span class="st">"Crits-Christoph"</span>, <span class="st">"[geometric mean]"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">theme_base</span></span>
+<span><span class="va">g_viral_mis</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2023-10-13_rrna-removal_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>High-MCC Ribodetector performs the best on average, returning the lowest number of viral reads for two out of three samples. Running bbduk with k=43 achieves the best result on one out of three samples, and average results only marginally worse than that of high-MCC Ribodetector. bbduk with k=27 does somewhat worse, but still consistently returns less than one third of one percent of all viral reads. High-recall Ribodetector consistently performs much worse than the other methods, frequently returning over 1% of viral reads as ribosomal.</p>
+<p>In general, then, the levels of viral misclassification by bbduk are low, but not as low as high-MCC-mode Ribodetector. On the other hand, bbduk consistently runs 1-2 orders of magnitude more quickly than Ribodetector, a difference that compounds when attempting to run ribodetection on multiple samples. This difference in speed would make a big difference to the practicality of comprehensive integration of ribodetection into our current pipeline. Whether this is worth a small increase in viral misclassification, however, is ultimately a decision for the team.</p>
+
+
+<!-- -->
+
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>I also began investigating <a href="https://doi.org/10.1093/bioinformatics/bts611">SortMeRNA</a>, a published tool based on heuristic alignment, which generally appeared to perform second-best on the quality metrics from the Ribodetector paper. However, I quickly dropped SortMeRNA, as it was substantially slower than Ribodetector.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>At least as far as Kraken2 is concerned. I don’t entirely trust Kraken2’s assignments, but am going with them for now. I might come back and dig more into this aspect of things later if it seems useful.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb13" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Comparing Ribodetector and bbduk for rRNA detection"</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "In search of quick rRNA filtering."</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Will Bradshaw"</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> 2023-10-16</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co">    code-link: true</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co">    df-print: paged</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span><span class="co"> visual</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="an">title-block-banner:</span><span class="co"> black</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: load-packages</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggrepel)</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggVennDiagram)</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plyr)</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"../scripts/aux_plot-theme.R"</span>)</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>**See also:**</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="co">[</span><span class="ot">Comparing FASTP and AdapterRemoval for MGS pre-processing</span><span class="co">](https://data.securebio.org/wills-public-notebook/notebooks/2023-10-12_fastp-vs-adapterremoval.html)</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>A useful step in processing wastewater MGS data is the removal of (primarily bacterial) ribosomal RNA sequences. These often make up a substantial fraction of all reads in the dataset, and their removal can both speed up downstream processing and potentially improve certain downstream metrics (e.g. library complexity). Our current pipeline counts and lists rRNA reads using <span class="co">[</span><span class="ot">Ribodetector</span><span class="co">](https://doi.org/10.1093/nar/gkac112)</span>, a deep-learning-based tool that is sensitive and specific, but slow. This slowness makes it annoying to work Ribodetector into our broader pipeline -- for example, the time taken to classify reads with Ribodetector is much more than the time saved on downstream steps by excluding rRNA reads from our pipeline.</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>I wanted to see if there were alternative rRNA detection methods that gave good-enough results while being fast enough to include in the preprocessing phase of the pipeline. To that end, I investigated <span class="co">[</span><span class="ot">bbduk</span><span class="co">](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbduk-guide/)</span>, a k-mer based contamination-detection approach suggested in <span class="co">[</span><span class="ot">this biostars thread</span><span class="co">](https://www.biostars.org/p/184791/#254402)</span><span class="ot">[^1]</span>.</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a><span class="ot">[^1]: </span>I also began investigating <span class="co">[</span><span class="ot">SortMeRNA</span><span class="co">](https://doi.org/10.1093/bioinformatics/bts611)</span>, a published tool based on heuristic alignment, which generally appeared to perform second-best on the quality metrics from the Ribodetector paper. However, I quickly dropped SortMeRNA, as it was substantially slower than Ribodetector.</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>To compare these tools, I applied bbduk and Ribodetector to three samples from pre-existing wastewater metagenomics datasets. Two of these, from Johnson and Crits-Christoph, were the same as in my <span class="co">[</span><span class="ot">last methods comparison post</span><span class="co">](https://data.securebio.org/wills-public-notebook/notebooks/2023-10-12_fastp-vs-adapterremoval.html)</span>. I initially also used the same sample from the third dataset, Rothman et al. (2021), but switched to a different sample when I realised the first had undergone panel enrichment for respiratory viruses and so wasn't truly untargeted.</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>| Study                        | Bioproject                                                        | Sample      |</span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>|-------------------|-----------------------------------|-------------------|</span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>| Rothman et al. (2021)        | <span class="co">[</span><span class="ot">PRJNA729801</span><span class="co">](https://www.ebi.ac.uk/ena/browser/view/PRJNA729801)</span> | SRR14530880 |</span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>| Crits-Cristoph et al. (2021) | <span class="co">[</span><span class="ot">PRJNA661613</span><span class="co">](https://www.ebi.ac.uk/ena/browser/view/PRJNA661613)</span> | SRR23998357 |</span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>| Johnson (2023)               | N/A                                                               | COMO4       |</span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>For each sample, I ran rRNA removal on the FASTQ files that had been preprocessed with FASTP (without deduplication. For SortMeRNA and bbduk, I used reference files (<span class="co">[</span><span class="ot">1</span><span class="co">](https://www.arb-silva.de/fileadmin/silva_databases/release_138.1/Exports/SILVA_138.1_LSURef_NR99_tax_silva.fasta.gz)</span>,<span class="co">[</span><span class="ot">2</span><span class="co">](https://www.arb-silva.de/fileadmin/silva_databases/release_138.1/Exports/SILVA_138.1_SSURef_NR99_tax_silva.fasta.gz)</span>) downloaded from the <span class="co">[</span><span class="ot">SILVA database</span><span class="co">](https://www.arb-silva.de/)</span>.</span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>The commands I ran were as follows:</span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Ribodetector (high MCC mode, X=75 for Johnson &amp; Crits-Cristoph &amp; 100 for Rothman):</span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>    <span class="in">```         </span></span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a><span class="in">    ribodetector_cpu --len X --ensure rrna --threads 28 --chunk_size 512 --input &lt;fastp-file-1&gt; &lt;fastp-file-2&gt; --o &lt;non-rrna-file-1&gt; &lt;non-rrna-file-2&gt; --rrna &lt;rrna-file-1&gt; &lt;rrna-file-2&gt; COMO4_ribodetector_failed_1.fastq.gz COMO4_ribodetector_failed_2.fastq.gz</span></span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a><span class="in">    ```</span></span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Ribodetector (high recall mode, X as above):</span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>    <span class="in">```         </span></span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a><span class="in">    ribodetector_cpu --len X --ensure norrna --threads 28 --chunk_size 512 --input &lt;fastp-file-1&gt; &lt;fastp-file-2&gt; --o &lt;non-rrna-file-1&gt; &lt;non-rrna-file-2&gt; --rrna &lt;rrna-file-1&gt; &lt;rrna-file-2&gt; COMO4_ribodetector_failed_1.fastq.gz COMO4_ribodetector_failed_2.fastq.gz</span></span>
+<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a><span class="in">    ```</span></span>
+<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>bbduk (Y = 27 or 43):</span>
+<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a>    <span class="in">```         </span></span>
+<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a><span class="in">    bbduk.sh in=&lt;fastp-file-1&gt; in2=&lt;fastp-file-2&gt; ref=../ribokmers_lsu.fasta.gz,../ribokmers_ssu.fasta.gz out=&lt;non-rrna-file-1&gt; out2=&lt;non-rrna-file-2&gt; outm=&lt;rrna-file-1&gt; outm2=&lt;rrna-file-2&gt; stats=&lt;stats-file&gt; threads=28 k=Y</span></span>
+<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a><span class="in">    ```</span></span>
+<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a><span class="fu"># 1. Johnson (COMO4)</span></span>
+<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a>I started with the sample from Johnson, which we already know has a high fraction of rRNA reads (46.2% on our <span class="co">[</span><span class="ot">sequencing dashboard</span><span class="co">](https://data.securebio.org/mgs-counts/)</span>).</span>
+<span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a><span class="fu">## High-level output</span></span>
+<span id="cb13-74"><a href="#cb13-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-75"><a href="#cb13-75" aria-hidden="true" tabindex="-1"></a>Running Ribodetector in high-MCC mode set took **1266 seconds** (just over 21 minutes). The tool identified 6.87M out of 15.25M read pairs as ribosomal: 45.0%. Re-running in high-recall mode took a similar amount of time (1264 seconds) and identified 7.76M reads as ribosomal: 50.9%.</span>
+<span id="cb13-76"><a href="#cb13-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-77"><a href="#cb13-77" aria-hidden="true" tabindex="-1"></a>Running bbduk took a total of 36 seconds. The tool identified 7.57M out of 15.25M read pairs as ribosomal: 49.63%, a little under the result for Ribodetector' high-recall mode.</span>
+<span id="cb13-78"><a href="#cb13-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-79"><a href="#cb13-79" aria-hidden="true" tabindex="-1"></a>The default bbduk command given above uses the default k-mer size of 27. Increasing *k* will increase the precision and decrease the recall of the bbduk algorithm, potentially moving the results closer to the high-MCC version of Ribodetector. After some experimentation, I found that a k-mer length of 43 returned a ribosomal fraction of 45.39%, only slightly above high-MCC ribodetector.</span>
+<span id="cb13-80"><a href="#cb13-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-81"><a href="#cb13-81" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overlap between tools</span></span>
+<span id="cb13-82"><a href="#cb13-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-83"><a href="#cb13-83" aria-hidden="true" tabindex="-1"></a>To compare the output of Ribodetector (high-MCC and high-recall) and bbduk (low and high *k*) in more detail, I extracted and downloaded the read IDs from their respective rRNA files and compared the overlap between the lists of IDs:</span>
+<span id="cb13-84"><a href="#cb13-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-87"><a href="#cb13-87" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-88"><a href="#cb13-88" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: rrna-reads-johnson</span></span>
+<span id="cb13-89"><a href="#cb13-89" aria-hidden="true" tabindex="-1"></a>data_dir <span class="ot">&lt;-</span> <span class="st">"../data/2023-10-16_ribodetection/"</span></span>
+<span id="cb13-90"><a href="#cb13-90" aria-hidden="true" tabindex="-1"></a>johnson_bbduk_reads_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"COMO4_bbduk_failed_ids.txt"</span>)</span>
+<span id="cb13-91"><a href="#cb13-91" aria-hidden="true" tabindex="-1"></a>johnson_bbduk_highk_reads_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"COMO4_bbduk_highk_failed_ids.txt"</span>)</span>
+<span id="cb13-92"><a href="#cb13-92" aria-hidden="true" tabindex="-1"></a>johnson_rd_precision_reads_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"COMO4_ribodetector_failed_ids_1.txt"</span>)</span>
+<span id="cb13-93"><a href="#cb13-93" aria-hidden="true" tabindex="-1"></a>johnson_rd_recall_reads_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"COMO4_ribodetector_recall_failed_ids_1.txt"</span>)</span>
+<span id="cb13-94"><a href="#cb13-94" aria-hidden="true" tabindex="-1"></a>johnson_bbduk_reads <span class="ot">&lt;-</span> <span class="fu">readLines</span>(johnson_bbduk_reads_path)</span>
+<span id="cb13-95"><a href="#cb13-95" aria-hidden="true" tabindex="-1"></a>johnson_bbduk_highk_reads <span class="ot">&lt;-</span> <span class="fu">readLines</span>(johnson_bbduk_highk_reads_path)</span>
+<span id="cb13-96"><a href="#cb13-96" aria-hidden="true" tabindex="-1"></a>johnson_rd_precision_reads <span class="ot">&lt;-</span> <span class="fu">readLines</span>(johnson_rd_precision_reads_path)</span>
+<span id="cb13-97"><a href="#cb13-97" aria-hidden="true" tabindex="-1"></a>johnson_rd_recall_reads <span class="ot">&lt;-</span> <span class="fu">readLines</span>(johnson_rd_recall_reads_path)</span>
+<span id="cb13-98"><a href="#cb13-98" aria-hidden="true" tabindex="-1"></a>johnson_read_ids <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">bbduk =</span> johnson_bbduk_reads,</span>
+<span id="cb13-99"><a href="#cb13-99" aria-hidden="true" tabindex="-1"></a>                 <span class="at">bbduk_highk =</span> johnson_bbduk_highk_reads,</span>
+<span id="cb13-100"><a href="#cb13-100" aria-hidden="true" tabindex="-1"></a>                 <span class="at">rd_precision =</span> johnson_rd_precision_reads,</span>
+<span id="cb13-101"><a href="#cb13-101" aria-hidden="true" tabindex="-1"></a>                 <span class="at">rd_recall =</span> johnson_rd_recall_reads)</span>
+<span id="cb13-102"><a href="#cb13-102" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-103"><a href="#cb13-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-106"><a href="#cb13-106" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-107"><a href="#cb13-107" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: rrna-overlap-venn-johnson</span></span>
+<span id="cb13-108"><a href="#cb13-108" aria-hidden="true" tabindex="-1"></a>g_venn_johnson <span class="ot">&lt;-</span> <span class="fu">ggVennDiagram</span>(johnson_read_ids, <span class="at">label_alpha=</span><span class="dv">0</span>, <span class="at">edge_size =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb13-109"><a href="#cb13-109" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"#FFFFFF"</span>, <span class="at">high =</span> <span class="st">"#4981BF"</span>)</span>
+<span id="cb13-110"><a href="#cb13-110" aria-hidden="true" tabindex="-1"></a>g_venn_johnson</span>
+<span id="cb13-111"><a href="#cb13-111" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-112"><a href="#cb13-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-113"><a href="#cb13-113" aria-hidden="true" tabindex="-1"></a>Some observations:</span>
+<span id="cb13-114"><a href="#cb13-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-115"><a href="#cb13-115" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>As expected, the rRNA reads returned by bbduk with a high k-value are a strict subset of those returned with a low k-value, and those returned by Ribodetector in high-precision mode are a strict subset of those returned in high-recall mode.</span>
+<span id="cb13-116"><a href="#cb13-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-117"><a href="#cb13-117" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Across all read IDs identified as ribosomal under any of the four conditions, 82% (6.42M read pairs) were identified as such by all four conditions. Of those that remain:</span>
+<span id="cb13-118"><a href="#cb13-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-119"><a href="#cb13-119" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>5% are identified by all conditions except high-k bbduk;</span>
+<span id="cb13-120"><a href="#cb13-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-121"><a href="#cb13-121" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>6% are identified by all conditions except high-precision Ribodetector;</span>
+<span id="cb13-122"><a href="#cb13-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-123"><a href="#cb13-123" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>2% are identified by both high-recall conditions, but neither high-precision condition;</span>
+<span id="cb13-124"><a href="#cb13-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-125"><a href="#cb13-125" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>3% are identified by high-recall Ribodetector only;</span>
+<span id="cb13-126"><a href="#cb13-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-127"><a href="#cb13-127" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>1% are identified by low-k bbduk only;</span>
+<span id="cb13-128"><a href="#cb13-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-129"><a href="#cb13-129" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>1% by some other combination of conditions</span>
+<span id="cb13-130"><a href="#cb13-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-131"><a href="#cb13-131" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Overall, it seems that, while the two high-recall methods exhibit quite good agreement (sharing <span class="sc">\&gt;</span>95% of identified sequences), the two high-precision methods agree less well (with <span class="sc">\&gt;</span>10% of all identified sequences identified by one but not the other).</span>
+<span id="cb13-132"><a href="#cb13-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-133"><a href="#cb13-133" aria-hidden="true" tabindex="-1"></a><span class="fu"># 2. Rothman et al. (SRR14530880)</span></span>
+<span id="cb13-134"><a href="#cb13-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-135"><a href="#cb13-135" aria-hidden="true" tabindex="-1"></a>I next repeated the analysis on a non-panel-enriched sample from Rothman et al. (2023). In this case, I didn't have a clear advance idea of how much rRNA was present in the sample, though I didn't have much reason to expect it to be much lower than Johnson.</span>
+<span id="cb13-136"><a href="#cb13-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-137"><a href="#cb13-137" aria-hidden="true" tabindex="-1"></a>In this case, I ran both bbduk and Ribodetector with 16 threads, so I could run two processes in parallel on my EC2 instance. Running bbduk with default settings (k=27) identified 7.41M out of 13.61M reads as ribosomal (54.43%). Running bbduk with k=43 identified 5.14M reads as ribosomal (37.78%). Both iterations ran in under 40 seconds.</span>
+<span id="cb13-138"><a href="#cb13-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-139"><a href="#cb13-139" aria-hidden="true" tabindex="-1"></a>Running Ribodetector in high-MCC mode identified 6.75M reads (49.63%) as ribosomal. Running it in high-recall mode identified 7.27M reads (53.39%) as ribosomal. Both iterations took roughly 43 minutes.</span>
+<span id="cb13-140"><a href="#cb13-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-141"><a href="#cb13-141" aria-hidden="true" tabindex="-1"></a>The overlap in reads identified by different tools in this case looked as follows:</span>
+<span id="cb13-142"><a href="#cb13-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-145"><a href="#cb13-145" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-146"><a href="#cb13-146" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: rrna-reads-rothman</span></span>
+<span id="cb13-147"><a href="#cb13-147" aria-hidden="true" tabindex="-1"></a>rothman_bbduk_reads_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"SRR14530880_bbduk_failed_ids.txt"</span>)</span>
+<span id="cb13-148"><a href="#cb13-148" aria-hidden="true" tabindex="-1"></a>rothman_bbduk_highk_reads_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"SRR14530880_bbduk_highk_failed_ids.txt"</span>)</span>
+<span id="cb13-149"><a href="#cb13-149" aria-hidden="true" tabindex="-1"></a>rothman_rd_precision_reads_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"SRR14530880_ribodetector_failed_ids.txt"</span>)</span>
+<span id="cb13-150"><a href="#cb13-150" aria-hidden="true" tabindex="-1"></a>rothman_rd_recall_reads_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"SRR14530880_ribodetector_recall_failed_ids.txt"</span>)</span>
+<span id="cb13-151"><a href="#cb13-151" aria-hidden="true" tabindex="-1"></a>rothman_bbduk_reads <span class="ot">&lt;-</span> <span class="fu">readLines</span>(rothman_bbduk_reads_path)</span>
+<span id="cb13-152"><a href="#cb13-152" aria-hidden="true" tabindex="-1"></a>rothman_bbduk_highk_reads <span class="ot">&lt;-</span> <span class="fu">readLines</span>(rothman_bbduk_highk_reads_path)</span>
+<span id="cb13-153"><a href="#cb13-153" aria-hidden="true" tabindex="-1"></a>rothman_rd_precision_reads <span class="ot">&lt;-</span> <span class="fu">readLines</span>(rothman_rd_precision_reads_path)</span>
+<span id="cb13-154"><a href="#cb13-154" aria-hidden="true" tabindex="-1"></a>rothman_rd_recall_reads <span class="ot">&lt;-</span> <span class="fu">readLines</span>(rothman_rd_recall_reads_path)</span>
+<span id="cb13-155"><a href="#cb13-155" aria-hidden="true" tabindex="-1"></a>rothman_read_ids <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">bbduk =</span> rothman_bbduk_reads,</span>
+<span id="cb13-156"><a href="#cb13-156" aria-hidden="true" tabindex="-1"></a>                 <span class="at">bbduk_highk =</span> rothman_bbduk_highk_reads,</span>
+<span id="cb13-157"><a href="#cb13-157" aria-hidden="true" tabindex="-1"></a>                 <span class="at">rd_precision =</span> rothman_rd_precision_reads,</span>
+<span id="cb13-158"><a href="#cb13-158" aria-hidden="true" tabindex="-1"></a>                 <span class="at">rd_recall =</span> rothman_rd_recall_reads)</span>
+<span id="cb13-159"><a href="#cb13-159" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-160"><a href="#cb13-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-163"><a href="#cb13-163" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-164"><a href="#cb13-164" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: rrna-overlap-venn-rothman</span></span>
+<span id="cb13-165"><a href="#cb13-165" aria-hidden="true" tabindex="-1"></a>g_venn_rothman <span class="ot">&lt;-</span> <span class="fu">ggVennDiagram</span>(rothman_read_ids, <span class="at">label_alpha=</span><span class="dv">0</span>, <span class="at">edge_size =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb13-166"><a href="#cb13-166" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"#FFFFFF"</span>, <span class="at">high =</span> <span class="st">"#4981BF"</span>)</span>
+<span id="cb13-167"><a href="#cb13-167" aria-hidden="true" tabindex="-1"></a>g_venn_rothman</span>
+<span id="cb13-168"><a href="#cb13-168" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-169"><a href="#cb13-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-170"><a href="#cb13-170" aria-hidden="true" tabindex="-1"></a>As before, the rRNA reads returned by bbduk with a high k-value are a strict subset of those returned with a low k-value, and those returned by Ribodetector in high-precision mode are a strict subset of those returned in high-recall mode. This time, only 64% of putative rRNA reads were agreed on by all four conditions; most of the rest were only identified by all methods except high-k bbduk. The agreement between the high-recall methods remains good, but less good than for Johnson, with 6% of putative rRNA reads identified only by low-k bbduk and 2% only by high-recall Ribodetector.</span>
+<span id="cb13-171"><a href="#cb13-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-172"><a href="#cb13-172" aria-hidden="true" tabindex="-1"></a><span class="fu"># 3. Crits-Christoph et al. (SRR23998357)</span></span>
+<span id="cb13-173"><a href="#cb13-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-174"><a href="#cb13-174" aria-hidden="true" tabindex="-1"></a>Finally, we have the sample from Crits-Christoph et al. (2021). This was by far the biggest sample of the three, with a total of 47.47M read pairs. It is also the only sample that, to my knowledge, explicitly included ribodepletion in its methods.</span>
+<span id="cb13-175"><a href="#cb13-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-176"><a href="#cb13-176" aria-hidden="true" tabindex="-1"></a>In this case, I ran both bbduk and Ribodetector with 16 threads, so I could run two processes in parallel on my EC2 instance. Under these conditions, running bbduk with k=27 identified 5.02M read pairs (10.57%) as ribosomal; running it with k=43 identified 3.90M (8.21%). These runs took 90 and 79 seconds, respectively.</span>
+<span id="cb13-177"><a href="#cb13-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-178"><a href="#cb13-178" aria-hidden="true" tabindex="-1"></a>Running Ribodetector in high-MCC mode identified 3.90M (8.21%) as ribosomal; running it in high-recall mode identified 4.95M (10.42%). Both runs took well over an hour.</span>
+<span id="cb13-179"><a href="#cb13-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-180"><a href="#cb13-180" aria-hidden="true" tabindex="-1"></a>The overlap in reads identified by different tools in this case looked as follows:</span>
+<span id="cb13-181"><a href="#cb13-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-184"><a href="#cb13-184" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-185"><a href="#cb13-185" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: rrna-reads-cc</span></span>
+<span id="cb13-186"><a href="#cb13-186" aria-hidden="true" tabindex="-1"></a>cc_bbduk_reads_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"SRR23998357_bbduk_failed_ids.txt"</span>)</span>
+<span id="cb13-187"><a href="#cb13-187" aria-hidden="true" tabindex="-1"></a>cc_bbduk_highk_reads_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"SRR23998357_bbduk_highk_failed_ids.txt"</span>)</span>
+<span id="cb13-188"><a href="#cb13-188" aria-hidden="true" tabindex="-1"></a>cc_rd_precision_reads_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"SRR23998357_ribodetector_failed_ids.txt"</span>)</span>
+<span id="cb13-189"><a href="#cb13-189" aria-hidden="true" tabindex="-1"></a>cc_rd_recall_reads_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"/SRR23998357_ribodetector_recall_failed_ids.txt"</span>)</span>
+<span id="cb13-190"><a href="#cb13-190" aria-hidden="true" tabindex="-1"></a>cc_bbduk_reads <span class="ot">&lt;-</span> <span class="fu">readLines</span>(cc_bbduk_reads_path)</span>
+<span id="cb13-191"><a href="#cb13-191" aria-hidden="true" tabindex="-1"></a>cc_bbduk_highk_reads <span class="ot">&lt;-</span> <span class="fu">readLines</span>(cc_bbduk_highk_reads_path)</span>
+<span id="cb13-192"><a href="#cb13-192" aria-hidden="true" tabindex="-1"></a>cc_rd_precision_reads <span class="ot">&lt;-</span> <span class="fu">readLines</span>(cc_rd_precision_reads_path)</span>
+<span id="cb13-193"><a href="#cb13-193" aria-hidden="true" tabindex="-1"></a>cc_rd_recall_reads <span class="ot">&lt;-</span> <span class="fu">readLines</span>(cc_rd_recall_reads_path)</span>
+<span id="cb13-194"><a href="#cb13-194" aria-hidden="true" tabindex="-1"></a>cc_read_ids <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">bbduk =</span> cc_bbduk_reads,</span>
+<span id="cb13-195"><a href="#cb13-195" aria-hidden="true" tabindex="-1"></a>                 <span class="at">bbduk_highk =</span> cc_bbduk_highk_reads,</span>
+<span id="cb13-196"><a href="#cb13-196" aria-hidden="true" tabindex="-1"></a>                 <span class="at">rd_precision =</span> cc_rd_precision_reads,</span>
+<span id="cb13-197"><a href="#cb13-197" aria-hidden="true" tabindex="-1"></a>                 <span class="at">rd_recall =</span> cc_rd_recall_reads)</span>
+<span id="cb13-198"><a href="#cb13-198" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-199"><a href="#cb13-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-202"><a href="#cb13-202" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-203"><a href="#cb13-203" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: rrna-overlap-venn-cc</span></span>
+<span id="cb13-204"><a href="#cb13-204" aria-hidden="true" tabindex="-1"></a>g_venn_cc <span class="ot">&lt;-</span> <span class="fu">ggVennDiagram</span>(cc_read_ids, <span class="at">label_alpha=</span><span class="dv">0</span>, <span class="at">edge_size =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb13-205"><a href="#cb13-205" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"#FFFFFF"</span>, <span class="at">high =</span> <span class="st">"#4981BF"</span>)</span>
+<span id="cb13-206"><a href="#cb13-206" aria-hidden="true" tabindex="-1"></a>g_venn_cc</span>
+<span id="cb13-207"><a href="#cb13-207" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-208"><a href="#cb13-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-209"><a href="#cb13-209" aria-hidden="true" tabindex="-1"></a>To my surprise, while the total number of reads identified as ribosomal by the two high-recall methods showed good agreement, the specific reads identified showed much more divergence than in the other two samples -- in total, over 20% of reads identified as ribosomal by at least one method showed disagreement between the two high-recall methods. This made validating the results before using any one method a higher priority for me.</span>
+<span id="cb13-210"><a href="#cb13-210" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-211"><a href="#cb13-211" aria-hidden="true" tabindex="-1"></a><span class="fu"># 4. Validation</span></span>
+<span id="cb13-212"><a href="#cb13-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-213"><a href="#cb13-213" aria-hidden="true" tabindex="-1"></a>In the absence of an external gold-standard ribodetection algorithm, it's difficult to directly validate their performance at ribodetection. We can, however, validate their performance *relative to the needs of our pipelines* by running their outputs through Kraken and seeing which taxa they map to. In particular, I wanted to ensure that as few "ribosomal" reads as possible were mapping to viruses.</span>
+<span id="cb13-214"><a href="#cb13-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-217"><a href="#cb13-217" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-218"><a href="#cb13-218" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: validation</span></span>
+<span id="cb13-219"><a href="#cb13-219" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb13-220"><a href="#cb13-220" aria-hidden="true" tabindex="-1"></a><span class="co"># methods &lt;- names(rothman_read_ids)</span></span>
+<span id="cb13-221"><a href="#cb13-221" aria-hidden="true" tabindex="-1"></a><span class="co"># johnson_read_tabs &lt;- list()</span></span>
+<span id="cb13-222"><a href="#cb13-222" aria-hidden="true" tabindex="-1"></a><span class="co"># rothman_read_tabs &lt;- list()</span></span>
+<span id="cb13-223"><a href="#cb13-223" aria-hidden="true" tabindex="-1"></a><span class="co"># cc_read_tabs &lt;- list()</span></span>
+<span id="cb13-224"><a href="#cb13-224" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb13-225"><a href="#cb13-225" aria-hidden="true" tabindex="-1"></a><span class="co"># for (m in methods){</span></span>
+<span id="cb13-226"><a href="#cb13-226" aria-hidden="true" tabindex="-1"></a><span class="co">#   # Convert from vectors to tibbles</span></span>
+<span id="cb13-227"><a href="#cb13-227" aria-hidden="true" tabindex="-1"></a><span class="co">#   johnson_read_tabs[[m]] &lt;- tibble(ID = johnson_read_ids[[m]])</span></span>
+<span id="cb13-228"><a href="#cb13-228" aria-hidden="true" tabindex="-1"></a><span class="co">#   rothman_read_tabs[[m]] &lt;- tibble(ID = rothman_read_ids[[m]])</span></span>
+<span id="cb13-229"><a href="#cb13-229" aria-hidden="true" tabindex="-1"></a><span class="co">#   cc_read_tabs[[m]] &lt;- tibble(ID = cc_read_ids[[m]])</span></span>
+<span id="cb13-230"><a href="#cb13-230" aria-hidden="true" tabindex="-1"></a><span class="co">#   # Add dataset information</span></span>
+<span id="cb13-231"><a href="#cb13-231" aria-hidden="true" tabindex="-1"></a><span class="co">#   johnson_read_tabs[[m]][["dataset"]] &lt;- "Johnson"</span></span>
+<span id="cb13-232"><a href="#cb13-232" aria-hidden="true" tabindex="-1"></a><span class="co">#   rothman_read_tabs[[m]][["dataset"]] &lt;- "Rothman"</span></span>
+<span id="cb13-233"><a href="#cb13-233" aria-hidden="true" tabindex="-1"></a><span class="co">#   cc_read_tabs[[m]][["dataset"]] &lt;- "Crits-Christoph"</span></span>
+<span id="cb13-234"><a href="#cb13-234" aria-hidden="true" tabindex="-1"></a><span class="co">#   # Add method information</span></span>
+<span id="cb13-235"><a href="#cb13-235" aria-hidden="true" tabindex="-1"></a><span class="co">#   johnson_read_tabs[[m]][[m]] &lt;- TRUE</span></span>
+<span id="cb13-236"><a href="#cb13-236" aria-hidden="true" tabindex="-1"></a><span class="co">#   rothman_read_tabs[[m]][[m]] &lt;- TRUE</span></span>
+<span id="cb13-237"><a href="#cb13-237" aria-hidden="true" tabindex="-1"></a><span class="co">#   cc_read_tabs[[m]][[m]] &lt;- TRUE</span></span>
+<span id="cb13-238"><a href="#cb13-238" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span>
+<span id="cb13-239"><a href="#cb13-239" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb13-240"><a href="#cb13-240" aria-hidden="true" tabindex="-1"></a><span class="co"># # Join datasets</span></span>
+<span id="cb13-241"><a href="#cb13-241" aria-hidden="true" tabindex="-1"></a><span class="co"># anyrm &lt;- purrr::partial(any, na.rm = TRUE)</span></span>
+<span id="cb13-242"><a href="#cb13-242" aria-hidden="true" tabindex="-1"></a><span class="co"># aggregate_tabs &lt;- function(tab_list){</span></span>
+<span id="cb13-243"><a href="#cb13-243" aria-hidden="true" tabindex="-1"></a><span class="co">#   bind_rows(tab_list)  |&gt; group_by(ID, dataset) |&gt;</span></span>
+<span id="cb13-244"><a href="#cb13-244" aria-hidden="true" tabindex="-1"></a><span class="co">#     dplyr::summarize(bbduk = anyrm(bbduk), bbduk_highk = anyrm(bbduk_highk),</span></span>
+<span id="cb13-245"><a href="#cb13-245" aria-hidden="true" tabindex="-1"></a><span class="co">#             rd_precision = anyrm(rd_precision), rd_recall = anyrm(rd_recall),</span></span>
+<span id="cb13-246"><a href="#cb13-246" aria-hidden="true" tabindex="-1"></a><span class="co">#             .groups = "drop_last") |&gt;</span></span>
+<span id="cb13-247"><a href="#cb13-247" aria-hidden="true" tabindex="-1"></a><span class="co">#     mutate(any_method = bbduk | bbduk_highk | rd_precision | rd_recall,</span></span>
+<span id="cb13-248"><a href="#cb13-248" aria-hidden="true" tabindex="-1"></a><span class="co">#            all_methods = bbduk &amp; bbduk_highk &amp; rd_precision &amp; rd_recall,</span></span>
+<span id="cb13-249"><a href="#cb13-249" aria-hidden="true" tabindex="-1"></a><span class="co">#            controversial = any_method &amp; !all_methods) %&gt;% ungroup</span></span>
+<span id="cb13-250"><a href="#cb13-250" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span>
+<span id="cb13-251"><a href="#cb13-251" aria-hidden="true" tabindex="-1"></a><span class="co"># johnson_read_tab &lt;- aggregate_tabs(johnson_read_tabs)</span></span>
+<span id="cb13-252"><a href="#cb13-252" aria-hidden="true" tabindex="-1"></a><span class="co"># rothman_read_tab &lt;- aggregate_tabs(rothman_read_tabs)</span></span>
+<span id="cb13-253"><a href="#cb13-253" aria-hidden="true" tabindex="-1"></a><span class="co"># cc_read_tab &lt;- aggregate_tabs(cc_read_tabs)</span></span>
+<span id="cb13-254"><a href="#cb13-254" aria-hidden="true" tabindex="-1"></a><span class="co"># read_tab &lt;- bind_rows(johnson_read_tab, rothman_read_tab, cc_read_tab) %&gt;% ungroup</span></span>
+<span id="cb13-255"><a href="#cb13-255" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-256"><a href="#cb13-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-257"><a href="#cb13-257" aria-hidden="true" tabindex="-1"></a>To do this, I first restricted each dataset to "controversial" reads: those that showed some disagreement between methods. I assumed that reads that all four methods classified as ribosomal were in fact ribosomal, and ditto for those all four methods classified as non-ribosomal. This left 1.42M reads for the Johnson sample, 2.76M reads for the Rothman sample and 2.21M reads for the Crits-Christoph sample: 6.39M reads total. I downsampled each read file to these reads using <span class="in">`seqtk subseq`</span>, concatenated the reads from all three files together, and ran the concatenated files through kraken2, using the same 16GB version of the Standard database used in our current MGS pipeline. I repeated this for reads identified as ribosomal by each method in turn, and used kraken2's <span class="in">`--report`</span>function to get a high-level sense of the taxonomic breakdowns for each method. The results were as follows:</span>
+<span id="cb13-258"><a href="#cb13-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-261"><a href="#cb13-261" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-262"><a href="#cb13-262" aria-hidden="true" tabindex="-1"></a>ribo_taxa_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"/ribodetection-domains.csv"</span>)</span>
+<span id="cb13-263"><a href="#cb13-263" aria-hidden="true" tabindex="-1"></a>ribo_taxa <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(ribo_taxa_path, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb13-264"><a href="#cb13-264" aria-hidden="true" tabindex="-1"></a>ribo_taxa_gathered <span class="ot">&lt;-</span> ribo_taxa <span class="sc">%&gt;%</span> <span class="fu">gather</span>(classification, read_percentage, <span class="sc">-</span>dataset) <span class="sc">%&gt;%</span></span>
+<span id="cb13-265"><a href="#cb13-265" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">classification =</span> <span class="fu">fct_inorder</span>(classification))</span>
+<span id="cb13-266"><a href="#cb13-266" aria-hidden="true" tabindex="-1"></a>g_ribo_taxa <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(ribo_taxa_gathered, </span>
+<span id="cb13-267"><a href="#cb13-267" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">aes</span>(<span class="at">x=</span>dataset, <span class="at">y=</span>read_percentage, <span class="at">fill =</span> classification)) <span class="sc">+</span> </span>
+<span id="cb13-268"><a href="#cb13-268" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"stack"</span>) <span class="sc">+</span> </span>
+<span id="cb13-269"><a href="#cb13-269" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">"% of controversial ribosomal reads"</span>) <span class="sc">+</span></span>
+<span id="cb13-270"><a href="#cb13-270" aria-hidden="true" tabindex="-1"></a>  theme_base <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb13-271"><a href="#cb13-271" aria-hidden="true" tabindex="-1"></a>g_ribo_taxa</span>
+<span id="cb13-272"><a href="#cb13-272" aria-hidden="true" tabindex="-1"></a>g_ribo_viruses <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="fu">filter</span>(ribo_taxa_gathered, classification <span class="sc">==</span> <span class="st">"Viruses"</span>), </span>
+<span id="cb13-273"><a href="#cb13-273" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">aes</span>(<span class="at">x=</span>dataset, <span class="at">y=</span>read_percentage, <span class="at">fill =</span> classification)) <span class="sc">+</span> </span>
+<span id="cb13-274"><a href="#cb13-274" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"stack"</span>) <span class="sc">+</span> </span>
+<span id="cb13-275"><a href="#cb13-275" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">"% of controversial ribosomal reads"</span>) <span class="sc">+</span></span>
+<span id="cb13-276"><a href="#cb13-276" aria-hidden="true" tabindex="-1"></a>  theme_base <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb13-277"><a href="#cb13-277" aria-hidden="true" tabindex="-1"></a>g_ribo_viruses</span>
+<span id="cb13-278"><a href="#cb13-278" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-279"><a href="#cb13-279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-280"><a href="#cb13-280" aria-hidden="true" tabindex="-1"></a>Unsurprisingly, in all cases, the vast majority of reads were either unclassified or mapped to bacteria. In all cases, a very small but nonzero fraction of reads mapped to viruses -- this fraction was by far the highest for high-recall Ribodetector (0.66%), and lowest for high-MCC ribodetector (0.02%); both bbduk methods were intermediate (0.05%).</span>
+<span id="cb13-281"><a href="#cb13-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-282"><a href="#cb13-282" aria-hidden="true" tabindex="-1"></a>Given that we know we have at least some viral reads getting misassigned as viral<span class="ot">[^2]</span>, how good/bad is this? What fraction of all viral reads are being identified as viral by each method? Digging into the individual datasets, kraken2 assigns the following total numbers of viral reads to each sample:</span>
+<span id="cb13-283"><a href="#cb13-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-284"><a href="#cb13-284" aria-hidden="true" tabindex="-1"></a><span class="ot">[^2]: </span>At least as far as Kraken2 is concerned. I don't entirely trust Kraken2's assignments, but am going with them for now. I might come back and dig more into this aspect of things later if it seems useful.</span>
+<span id="cb13-285"><a href="#cb13-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-286"><a href="#cb13-286" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>1,000,084 reads to the Johnson sample (3.28% of all reads)</span>
+<span id="cb13-287"><a href="#cb13-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-288"><a href="#cb13-288" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>5,667,635 reads to the Rothman sample (20.82% of all reads)</span>
+<span id="cb13-289"><a href="#cb13-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-290"><a href="#cb13-290" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>246,193 to the Crits-Christoph sample (0.26% of all reads)</span>
+<span id="cb13-291"><a href="#cb13-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-292"><a href="#cb13-292" aria-hidden="true" tabindex="-1"></a>In total (including "uncontroversial" assignments) the total number of viral reads classified as ribosomal by each method for each sample are as follows:</span>
+<span id="cb13-293"><a href="#cb13-293" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-296"><a href="#cb13-296" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-297"><a href="#cb13-297" aria-hidden="true" tabindex="-1"></a>viral_mis_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"ribodetection-viruses.csv"</span>)</span>
+<span id="cb13-298"><a href="#cb13-298" aria-hidden="true" tabindex="-1"></a>viral_mis <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(viral_mis_path, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb13-299"><a href="#cb13-299" aria-hidden="true" tabindex="-1"></a>viral_mis_gathered <span class="ot">&lt;-</span> <span class="fu">gather</span>(viral_mis, method, n_viral_reads, <span class="sc">-</span>sample, <span class="sc">-</span>raw) <span class="sc">%&gt;%</span></span>
+<span id="cb13-300"><a href="#cb13-300" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">viral_reads_percentage =</span> n_viral_reads <span class="sc">/</span> raw <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb13-301"><a href="#cb13-301" aria-hidden="true" tabindex="-1"></a>         <span class="at">sample =</span> <span class="fu">fct_inorder</span>(sample))</span>
+<span id="cb13-302"><a href="#cb13-302" aria-hidden="true" tabindex="-1"></a>g_viral_mis <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(viral_mis_gathered, </span>
+<span id="cb13-303"><a href="#cb13-303" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">aes</span>(<span class="at">x=</span>sample, <span class="at">y=</span>viral_reads_percentage, <span class="at">fill =</span> method)) <span class="sc">+</span> </span>
+<span id="cb13-304"><a href="#cb13-304" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span> </span>
+<span id="cb13-305"><a href="#cb13-305" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">2</span>,<span class="fl">0.2</span>), </span>
+<span id="cb13-306"><a href="#cb13-306" aria-hidden="true" tabindex="-1"></a>                     <span class="at">name =</span> <span class="st">"% of viral reads identified as ribosomal"</span>) <span class="sc">+</span></span>
+<span id="cb13-307"><a href="#cb13-307" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_discrete</span>(<span class="at">name =</span> <span class="st">"Source dataset"</span>,</span>
+<span id="cb13-308"><a href="#cb13-308" aria-hidden="true" tabindex="-1"></a>                   <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Johnson"</span>, <span class="st">"Rothman"</span>, <span class="st">"Crits-Christoph"</span>, <span class="st">"[geometric mean]"</span>)) <span class="sc">+</span></span>
+<span id="cb13-309"><a href="#cb13-309" aria-hidden="true" tabindex="-1"></a>  theme_base</span>
+<span id="cb13-310"><a href="#cb13-310" aria-hidden="true" tabindex="-1"></a>g_viral_mis</span>
+<span id="cb13-311"><a href="#cb13-311" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-312"><a href="#cb13-312" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-313"><a href="#cb13-313" aria-hidden="true" tabindex="-1"></a>High-MCC Ribodetector performs the best on average, returning the lowest number of viral reads for two out of three samples. Running bbduk with k=43 achieves the best result on one out of three samples, and average results only marginally worse than that of high-MCC Ribodetector. bbduk with k=27 does somewhat worse, but still consistently returns less than one third of one percent of all viral reads. High-recall Ribodetector consistently performs much worse than the other methods, frequently returning over 1% of viral reads as ribosomal.</span>
+<span id="cb13-314"><a href="#cb13-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-315"><a href="#cb13-315" aria-hidden="true" tabindex="-1"></a>In general, then, the levels of viral misclassification by bbduk are low, but not as low as high-MCC-mode Ribodetector. On the other hand, bbduk consistently runs 1-2 orders of magnitude more quickly than Ribodetector, a difference that compounds when attempting to run ribodetection on multiple samples. This difference in speed would make a big difference to the practicality of comprehensive integration of ribodetection into our current pipeline. Whether this is worth a small increase in viral misclassification, however, is ultimately a decision for the team.</span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+</body></html>

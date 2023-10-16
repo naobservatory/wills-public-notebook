@@ -29,7 +29,7 @@ The first major step in our current MGS pipeline uses AdapterRemoval to automati
 To carry out this test, I selected three pairs of raw Illumina FASTQC files, corresponding to one sample each from two different published studies as well as one dataset provided to us by Marc Johnson:
 
 | Study                        | Bioproject                                                        | Sample      |
-|-----------------|----------------------------------------|---------------|
+|------------------------------|-------------------------------------------------------------------|-------------|
 | Rothman et al. (2021)        | [PRJNA729801](https://www.ebi.ac.uk/ena/browser/view/PRJNA729801) | SRR19607374 |
 | Crits-Cristoph et al. (2021) | [PRJNA661613](https://www.ebi.ac.uk/ena/browser/view/PRJNA661613) | SRR23998357 |
 | Johnson (2023)               | N/A                                                               | COMO4       |

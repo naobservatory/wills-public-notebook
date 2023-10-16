@@ -1,0 +1,6 @@
+﻿dataset,Unclassified,Bacteria,Eukaryota,Archaea,Viruses,Other
+any_method,76.55,20.49,0.41,0.29,0.56,1.7
+bbduk,74.86,22.43,0.21,0.35,0.05,2.1
+bbduk_highk,46.75,47.16,0.37,1.48,0.05,4.19
+rd_precision,88.23,11.36,0.04,0.02,0.02,0.33
+rd_recall,79.57,18.4,0.36,0.29,0.66,0.72

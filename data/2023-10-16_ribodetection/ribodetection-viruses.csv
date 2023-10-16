@@ -1,0 +1,5 @@
+﻿sample,raw,bbduk,bbduk_highk,rd_precision,rd_recall
+johnson,1000084,1020,868,87,15139
+rothman,5667635,3403,398,1269,50294
+cc,246193,802,187,59,2874
+average,1117476,1407,401,187,12983
