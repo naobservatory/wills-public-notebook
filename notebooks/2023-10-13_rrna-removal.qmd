@@ -83,10 +83,10 @@ To compare the output of Ribodetector (high-MCC and high-recall) and bbduk (low 
 ```{r}
 #| label: rrna-reads-johnson
 data_dir <- "../data/2023-10-16_ribodetection/"
-johnson_bbduk_reads_path <- file.path(data_dir, "COMO4_bbduk_failed_ids.txt")
-johnson_bbduk_highk_reads_path <- file.path(data_dir, "COMO4_bbduk_highk_failed_ids.txt")
-johnson_rd_precision_reads_path <- file.path(data_dir, "COMO4_ribodetector_failed_ids_1.txt")
-johnson_rd_recall_reads_path <- file.path(data_dir, "COMO4_ribodetector_recall_failed_ids_1.txt")
+johnson_bbduk_reads_path <- file.path(data_dir, "COMO4_bbduk_failed_ids.txt.gz")
+johnson_bbduk_highk_reads_path <- file.path(data_dir, "COMO4_bbduk_highk_failed_ids.txt.gz")
+johnson_rd_precision_reads_path <- file.path(data_dir, "COMO4_ribodetector_failed_ids_1.txt.gz")
+johnson_rd_recall_reads_path <- file.path(data_dir, "COMO4_ribodetector_recall_failed_ids_1.txt.gz")
 johnson_bbduk_reads <- readLines(johnson_bbduk_reads_path)
 johnson_bbduk_highk_reads <- readLines(johnson_bbduk_highk_reads_path)
 johnson_rd_precision_reads <- readLines(johnson_rd_precision_reads_path)
@@ -136,10 +136,10 @@ The overlap in reads identified by different tools in this case looked as follow
 
 ```{r}
 #| label: rrna-reads-rothman
-rothman_bbduk_reads_path <- file.path(data_dir, "SRR14530880_bbduk_failed_ids.txt")
-rothman_bbduk_highk_reads_path <- file.path(data_dir, "SRR14530880_bbduk_highk_failed_ids.txt")
-rothman_rd_precision_reads_path <- file.path(data_dir, "SRR14530880_ribodetector_failed_ids.txt")
-rothman_rd_recall_reads_path <- file.path(data_dir, "SRR14530880_ribodetector_recall_failed_ids.txt")
+rothman_bbduk_reads_path <- file.path(data_dir, "SRR14530880_bbduk_failed_ids.txt.gz")
+rothman_bbduk_highk_reads_path <- file.path(data_dir, "SRR14530880_bbduk_highk_failed_ids.txt.gz")
+rothman_rd_precision_reads_path <- file.path(data_dir, "SRR14530880_ribodetector_failed_ids.txt.gz")
+rothman_rd_recall_reads_path <- file.path(data_dir, "SRR14530880_ribodetector_recall_failed_ids.txt.gz")
 rothman_bbduk_reads <- readLines(rothman_bbduk_reads_path)
 rothman_bbduk_highk_reads <- readLines(rothman_bbduk_highk_reads_path)
 rothman_rd_precision_reads <- readLines(rothman_rd_precision_reads_path)
@@ -171,10 +171,10 @@ The overlap in reads identified by different tools in this case looked as follow
 
 ```{r}
 #| label: rrna-reads-cc
-cc_bbduk_reads_path <- file.path(data_dir, "SRR23998357_bbduk_failed_ids.txt")
-cc_bbduk_highk_reads_path <- file.path(data_dir, "SRR23998357_bbduk_highk_failed_ids.txt")
-cc_rd_precision_reads_path <- file.path(data_dir, "SRR23998357_ribodetector_failed_ids.txt")
-cc_rd_recall_reads_path <- file.path(data_dir, "/SRR23998357_ribodetector_recall_failed_ids.txt")
+cc_bbduk_reads_path <- file.path(data_dir, "SRR23998357_bbduk_failed_ids.txt.gz")
+cc_bbduk_highk_reads_path <- file.path(data_dir, "SRR23998357_bbduk_highk_failed_ids.txt.gz")
+cc_rd_precision_reads_path <- file.path(data_dir, "SRR23998357_ribodetector_failed_ids.txt.gz")
+cc_rd_recall_reads_path <- file.path(data_dir, "/SRR23998357_ribodetector_recall_failed_ids.txt.gz")
 cc_bbduk_reads <- readLines(cc_bbduk_reads_path)
 cc_bbduk_highk_reads <- readLines(cc_bbduk_highk_reads_path)
 cc_rd_precision_reads <- readLines(cc_rd_precision_reads_path)
