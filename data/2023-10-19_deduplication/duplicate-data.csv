@@ -1,0 +1,19 @@
+﻿dataset,sample,processing_stage,dedup_method,fastqc_pc_dup,fastqc_dup_test
+Johnson,COMO4,Preprocessed (FASTP),None,74.36,Failed
+Johnson,COMO4,Preprocessed (FASTP),Clumpify,24.19,Passed
+Johnson,COMO4,Preprocessed (FASTP),FASTP dedup,68.09,Failed
+Johnson,COMO4,Ribodepleted (BBDUK),None,69.72,Failed
+Johnson,COMO4,Ribodepleted (BBDUK),Clumpify,18.38,Passed
+Johnson,COMO4,Ribodepleted (BBDUK),FASTP dedup,59.78,Failed
+Rothman,SRR14530880,Preprocessed (FASTP),None,81.27,Failed
+Rothman,SRR14530880,Preprocessed (FASTP),Clumpify,27.9,Passed
+Rothman,SRR14530880,Preprocessed (FASTP),FASTP dedup,62.9,Failed
+Rothman,SRR14530880,Ribodepleted (BBDUK),None,78.79,Failed
+Rothman,SRR14530880,Ribodepleted (BBDUK),Clumpify,33,Warning
+Rothman,SRR14530880,Ribodepleted (BBDUK),FASTP dedup,63.2,Failed
+Crits-Christoph,SRR23998357,Preprocessed (FASTP),None,55.9,Failed
+Crits-Christoph,SRR23998357,Preprocessed (FASTP),Clumpify,10.64,Passed
+Crits-Christoph,SRR23998357,Preprocessed (FASTP),FASTP dedup,35.22,Warning
+Crits-Christoph,SRR23998357,Ribodepleted (BBDUK),None,53.1,Failed
+Crits-Christoph,SRR23998357,Ribodepleted (BBDUK),Clumpify,9.89,Passed
+Crits-Christoph,SRR23998357,Ribodepleted (BBDUK),FASTP dedup,32.07,Warning

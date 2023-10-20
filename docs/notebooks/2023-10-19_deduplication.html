@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Will Bradshaw">
+<meta name="dcterms.date" content="2023-10-19">
+<title>Will’s Public NAO Notebook - Comparing options for read deduplication</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><style>
+
+      .quarto-title-block .quarto-title-banner {
+        background: black;
+      }
+</style>
+<link href="../site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="../site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+</head>
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg navbar-dark "><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Will’s Public NAO Notebook</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools ms-auto">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav></header><!-- content --><header id="title-block-header" class="quarto-title-block default page-columns page-full"><div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">Comparing options for read deduplication</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Will Bradshaw </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">October 19, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content"><p><strong>See also:</strong></p>
+<ul>
+<li><a href="https://data.securebio.org/wills-public-notebook/notebooks/2023-10-12_fastp-vs-adapterremoval.html">Comparing FASTP and AdapterRemoval for MGS pre-processing</a></li>
+<li><a href="https://data.securebio.org/wills-public-notebook/notebooks/2023-10-13_rrna-removal.html">Comparing Ribodetector and bbduk for rRNA detection</a></li>
+</ul>
+<p>Duplicate read pairs can arise in sequencing data via several mechanisms.</p>
+<ul>
+<li><p><strong>Biological duplicates</strong> are sequences that arise from different source nucleic-acid molecules that genuinely have the same sequence; these tend to arise when a particular gene or taxon is both extremely abundant and has low sequence diversity. In our case, the most likely cause of biological duplicates are ribosomal RNAs.</p></li>
+<li><p><strong>Technical duplicates</strong>, meanwhile, arise when the same input molecule produces multiple reads. Subgroups of technical duplicates include <strong>PCR duplicates</strong> arising from amplification of a single input sequence into many library molecules, and several forms of <strong>sequencing duplicates</strong> arising from errors in the sequencing process. For example, Illumina sequencing on unpatterned flow cells can give rise to <strong>optical duplicates</strong>, where a single cluster on the flow cell is falsely identified as two by the base-calling algorithm.</p></li>
+</ul>
+<p>In general, we want to remove or collapse technical duplicates, while retaining biological duplicates. Unfortunately, in the absence of UMIs, there’s generally no way to distinguish biological and PCR duplicates; however, many forms of sequencing duplicates can often be identified from the sequence metadata provided in the FASTQ file.</p>
+<p>A number of tools are available that attempt to remove some or all of the duplicate sequences in a file. Some of these use cluster positioning information to distinguish sequencing duplicates from other duplicates, while others identify duplicates based purely on their base sequence. In the latter case, the tricky part is identifying the correct threshold for duplicate identification. Due to sequencing errors, requiring perfect base identity between two reads in order to designate them as duplicates often results in true duplicates surviving the deduplication process. On the other hand, designating two reads as duplicates based on too low a sequence identity (or too short a subsequence) will result in spurious deduplications that needlessly throw away useful data.</p>
+<p>At the time of writing, our standard sequencing pipeline carries out deduplication very late in the process, during generation of JSON files for the dashboard (i.e.&nbsp;after generating clade counts). Read pairs are identified as duplicates if they are identical in the first 25 bases of both the forward and the reverse read, requiring 50nt of matches overall.</p>
+<p>I wanted to see if there was a widely-used read deduplication tool that we could apply to our pipeline, ideally early on as part of sample preprocessing. I started out comparing four approaches, before fairly quickly cutting down to two:</p>
+<ul>
+<li><p>fastp is a FASTQ pre-processing tool previously investigated here. If run with the <code>--dedup</code>`flag, it will remove read pairs that are exact duplicates of one another. As far as I know, fastp doesn’t have the ability to identify or remove inexact duplicates, or to distinguish sequencing duplicates from other duplicates. It thus represents a fast but relatively unsophisticated option.</p></li>
+<li><p><a href="https://www.biostars.org/p/225338/">Clumpify</a> is a tool that was originally developed to reduce space and improve processing speed by rearranging fastq.gz files. It identifies duplicates by looking for reads (or read pairs) that match exactly in sequence, except for a specified number of permitted substitutions. This, to me, is the obvious way to detect duplicates, and this is the only deduplication tool I’ve found that does it this way. It also allows distinguishing of optical vs other duplicates and specific removal of only optical duplicates if desired.</p></li>
+<li><p>GATK Picard’s MarkDuplicates and samtools markdup are two functions for removing duplicate reads in SAM/BAM files. I tried both, but found them to be slow, confusing, and apparently unable to actually detect any duplicates in the files I ran them on. It’s possible that both of these tools only work on mapped reads (which would make sense given their demand for SAM/BAM files); it’s also possible that I could make them work given more time and effort, but I didn’t want to put this in unless the other tools I found proved inadequate.</p></li>
+</ul>
+<p>To test fastp and Clumpify, I ran them on the same samples I used for looking into ribodetection:</p>
+<table class="table">
+<thead><tr class="header">
+<th>Study</th>
+<th>Bioproject</th>
+<th>Sample</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Rothman et al.&nbsp;(2021)</td>
+<td><a href="https://www.ebi.ac.uk/ena/browser/view/PRJNA729801">PRJNA729801</a></td>
+<td>SRR14530880</td>
+</tr>
+<tr class="even">
+<td>Crits-Cristoph et al.&nbsp;(2021)</td>
+<td><a href="https://www.ebi.ac.uk/ena/browser/view/PRJNA661613">PRJNA661613</a></td>
+<td>SRR23998357</td>
+</tr>
+<tr class="odd">
+<td>Johnson (2023)</td>
+<td>N/A</td>
+<td>COMO4</td>
+</tr>
+</tbody>
+</table>
+<p>In each case, I tested deduplication at two points in the pipeline: immediately after preprocessing (with FASTP, without deduplication), and following segregation of rRNA reads using bbduk.</p>
+<section id="johnson-como4" class="level1"><h1>1. Johnson (COMO4)</h1>
+<p>Following fastp preprocessing, the Johnson sample contains 15.25M read pairs, 74.36% of which are identified by FASTQC as duplicates based on the first read in the pair. Among non-ribosomal reads (as identified by bbduk), this number fell to 69.72%, while for ribosomal reads it rose to 79.13%. Needless to say, all of these fail FASTQC’s read-duplication QC test.</p>
+<p>Running clumpify on the fastp output took 16 seconds and removed 5.04M read pairs (33.0%) as duplicates, 11576 of which were optical. Running it on the bbduk non-ribosomal output took 9 seconds and removed 2.71M (35.3%) reads as duplicates, 7107 of which were optical. After deduplication with clumpify, FASTQC identifies 24.19% of sequences as duplicates in the post-fastp dataset, and 18.38% in the post-bbduk dataset. In both cases, this is a dramatic reduction, sufficient for FASTQC to now mark the duplication level QC as passing where it was previously failing.</p>
+<p>Running fastp with deduplication enabled on the fastp output took 33 seconds and removed 4.21M read pairs (27.6%) as duplicates. Running it on the bbduk non-ribosomal output took 17 seconds and removed 2.33M read pairs (30.4%) as duplicates. In both cases, the number of reads removed is lower than that removed by clumpify, consistent with the fact that fastp requires complete identity between duplicates while clumpify allows a small number of mismatches. For whatever reason, this difference resulted in a dramatic difference in FASTQC quality metrics: after deduplication with fastp, FASTQC identifies 68.09% of reads as duplicates in the full dataset, and 59.78% in the post-bbduk dataset. Both of these are high enough to result in a failure for the corresponding QC test.</p>
+<table class="table">
+<thead><tr class="header">
+<th>Dataset</th>
+<th>Dedup Method</th>
+<th>FASTQC % Dup</th>
+<th>FASTQC Dup Test</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Preprocessed (FASTP)</td>
+<td>Clumpify</td>
+<td>24.19</td>
+<td>Passed</td>
+</tr>
+<tr class="even">
+<td>Preprocessed (FASTP)</td>
+<td>FASTP dedup</td>
+<td>68.09</td>
+<td>Failed</td>
+</tr>
+<tr class="odd">
+<td>Ribodepleted (BBDUK)</td>
+<td>Clumpify</td>
+<td>18.38</td>
+<td>Passed</td>
+</tr>
+<tr class="even">
+<td>Ribodepleted (BBDUK)</td>
+<td>FASTP dedup</td>
+<td>59.78</td>
+<td>Failed</td>
+</tr>
+</tbody>
+</table></section><section id="rothman-srr14530880" class="level1"><h1>2. Rothman (SRR14530880)</h1>
+<p>Following fastp preprocessing, the Rothman sample contains 13.61M read pairs, 81.27% of which are identified by FASTQC as duplicates based on the first read in the pair. Among non-ribosomal reads (6.20M read pairs, as identified by bbduk), this number fell to 78.79%. Both of these failed QC.</p>
+<p>Running clumpify on the fastp output took 14 seconds and removed 7.41M read pairs (54.5%) as duplicates. Running it on the bbduk non-ribosomal output took 7 seconds and removed 2.96M read pairs (47.8%) as duplicates. In both cases, trying to specifically detect optical reads caused the program to crash, suggesting that the relevant metadata was unavailable.</p>
+<p>Running fastp with deduplication enabled on the fastp output took 26 seconds and removed 6.87M read pairs (50.5%) as duplicates. Running it on the bbduk non-ribosomal output took 14 seconds and removed 2.71M read pairs (43.6%) as duplicates. As before, the number of reads removed was lower than clumpify in both cases.</p>
+<p>FASTQ QC results were as follows:</p>
+<table class="table">
+<thead><tr class="header">
+<th>Dataset</th>
+<th>Dedup Method</th>
+<th>FASTQC % Dup</th>
+<th>FASTQC Dup Test</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Preprocessed (FASTP)</td>
+<td>Clumpify</td>
+<td>27.9</td>
+<td>Passed</td>
+</tr>
+<tr class="even">
+<td>Preprocessed (FASTP)</td>
+<td>FASTP dedup</td>
+<td>62.9</td>
+<td>Failed</td>
+</tr>
+<tr class="odd">
+<td>Ribodepleted (BBDUK)</td>
+<td>Clumpify</td>
+<td>33.0</td>
+<td>Warning</td>
+</tr>
+<tr class="even">
+<td>Ribodepleted (BBDUK)</td>
+<td>FASTP dedup</td>
+<td>63.2</td>
+<td>Failed</td>
+</tr>
+</tbody>
+</table>
+<p>As before, the difference is large, with Clumpify performing dramatically better.</p>
+</section><section id="crits-christoph-et-al.-srr23998357" class="level1"><h1>3. Crits-Christoph et al.&nbsp;(SRR23998357)</h1>
+<p>Finally, we have the sample from Crits-Christoph et al.&nbsp;(2021). Following fastp processing, this sample contained 47.47M read pairs, 55.9% of which are identified by FASTQC as duplicates based on the first read in the pair. Among non-ribosomal reads (42.45M read pairs, as identified by bbduk), this number fell to 53.1%. Both of these failed QC.</p>
+<p>Running clumpify on the fastp output took 90 seconds and removed 19.25M read pairs (40.6%) as duplicates. Running it on the bbduk non-ribosomal output took 65 seconds and removed 16.49M read pairs (38.8%) as duplicates. As with Rothman, trying to specifically detect optical reads caused the program to crash, suggesting that the relevant metadata was unavailable.</p>
+<p>Running fastp with deduplication enabled on the fastp output took 94 seconds and removed 16.58M read pairs (34.9%) as duplicates. Running it on the bbduk non-ribosomal output took 85 seconds and removed 14.12M read pairs (33.3%) as duplicates. As before, the number of reads removed was lower than clumpify in both cases.</p>
+<p>FASTQ QC results were as follows:</p>
+<table class="table">
+<caption>Both programs perform much better here than for previous samples, with even fastp reducing levels of duplicates low enough to avoid failing. Nevertheless, clumpify continues to perform substantially better.</caption>
+<thead><tr class="header">
+<th>Dataset</th>
+<th>Dedup Method</th>
+<th>FASTQC % Dup</th>
+<th>FASTQC Dup Test</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Preprocessed (FASTP)</td>
+<td>Clumpify</td>
+<td>10.64</td>
+<td>Passed</td>
+</tr>
+<tr class="even">
+<td>Preprocessed (FASTP)</td>
+<td>FASTP dedup</td>
+<td>35.22</td>
+<td>Warning</td>
+</tr>
+<tr class="odd">
+<td>Ribodepleted (BBDUK)</td>
+<td>Clumpify</td>
+<td>9.89</td>
+<td>Passed</td>
+</tr>
+<tr class="even">
+<td>Ribodepleted (BBDUK)</td>
+<td>FASTP dedup</td>
+<td>32.07</td>
+<td>Warning</td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">duplicate_data_path</span> <span class="op">&lt;-</span> <span class="st">"../data/2023-10-19_deduplication/duplicate-data.csv"</span></span>
+<span><span class="va">duplicate_data</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span><span class="va">duplicate_data_path</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>sample_display <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">sample</span>, <span class="st">" ("</span>, <span class="va">dataset</span>, <span class="st">")"</span><span class="op">)</span>,</span>
+<span>         dedup_method <span class="op">=</span> <span class="fu">fct_inorder</span><span class="op">(</span><span class="va">dedup_method</span><span class="op">)</span>,</span>
+<span>         sample_display <span class="op">=</span> <span class="fu">fct_inorder</span><span class="op">(</span><span class="va">sample_display</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">g_duplicate</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">duplicate_data</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">dedup_method</span>, y<span class="op">=</span><span class="va">fastqc_pc_dup</span>, fill<span class="op">=</span><span class="va">sample_display</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span>position <span class="op">=</span> <span class="st">"dodge"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"% Duplicates (FASTQC)"</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">100</span><span class="op">)</span>,</span>
+<span>                     breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">100</span>,<span class="fl">20</span><span class="op">)</span>, expand <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_x_discrete</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Deduplication method"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_fill_brewer</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dark2"</span>, name <span class="op">=</span> <span class="st">"Sample"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_grid</span><span class="op">(</span><span class="va">.</span> <span class="op">~</span> <span class="va">processing_stage</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">theme_base</span></span>
+<span><span class="va">g_duplicate</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2023-10-19_deduplication_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section><section id="conclusion" class="level1"><h1>4. Conclusion</h1>
+<p>I was originally planning to do more validation here, but I honestly don’t think it’s required. Of the two methods I managed to successfully apply to these samples, Clumpify is faster; applies an intuitively more appealing deduplication method; removes more sequences; and achieves much better FASTQC results. It’s also very easy to use and configure. I recommend it as our deduplication tool going forward.</p>
+<p>In terms of when to apply the tool, I think it probably makes most sense to apply deduplication downstream of counting (if we use Ribodetector) or detecting and filtering (if we use bbduk) ribosomal reads, to avoid spurious filtering of rRNA biological duplicates.</p>
+
+
+<!-- -->
+
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Comparing options for read deduplication"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> ""</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Will Bradshaw"</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> 2023-10-19</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">    code-link: true</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">    df-print: paged</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span><span class="co"> visual</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="an">title-block-banner:</span><span class="co"> black</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: load-packages</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggrepel)</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"../scripts/aux_plot-theme.R"</span>)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>**See also:**</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="co">[</span><span class="ot">Comparing FASTP and AdapterRemoval for MGS pre-processing</span><span class="co">](https://data.securebio.org/wills-public-notebook/notebooks/2023-10-12_fastp-vs-adapterremoval.html)</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="co">[</span><span class="ot">Comparing Ribodetector and bbduk for rRNA detection</span><span class="co">](https://data.securebio.org/wills-public-notebook/notebooks/2023-10-13_rrna-removal.html)</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>Duplicate read pairs can arise in sequencing data via several mechanisms.</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>**Biological duplicates** are sequences that arise from different source nucleic-acid molecules that genuinely have the same sequence; these tend to arise when a particular gene or taxon is both extremely abundant and has low sequence diversity. In our case, the most likely cause of biological duplicates are ribosomal RNAs.</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>**Technical duplicates**, meanwhile, arise when the same input molecule produces multiple reads. Subgroups of technical duplicates include **PCR duplicates** arising from amplification of a single input sequence into many library molecules, and several forms of **sequencing duplicates** arising from errors in the sequencing process. For example, Illumina sequencing on unpatterned flow cells can give rise to **optical duplicates**, where a single cluster on the flow cell is falsely identified as two by the base-calling algorithm.</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>In general, we want to remove or collapse technical duplicates, while retaining biological duplicates. Unfortunately, in the absence of UMIs, there's generally no way to distinguish biological and PCR duplicates; however, many forms of sequencing duplicates can often be identified from the sequence metadata provided in the FASTQ file.</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>A number of tools are available that attempt to remove some or all of the duplicate sequences in a file. Some of these use cluster positioning information to distinguish sequencing duplicates from other duplicates, while others identify duplicates based purely on their base sequence. In the latter case, the tricky part is identifying the correct threshold for duplicate identification. Due to sequencing errors, requiring perfect base identity between two reads in order to designate them as duplicates often results in true duplicates surviving the deduplication process. On the other hand, designating two reads as duplicates based on too low a sequence identity (or too short a subsequence) will result in spurious deduplications that needlessly throw away useful data.</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>At the time of writing, our standard sequencing pipeline carries out deduplication very late in the process, during generation of JSON files for the dashboard (i.e. after generating clade counts). Read pairs are identified as duplicates if they are identical in the first 25 bases of both the forward and the reverse read, requiring 50nt of matches overall.</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>I wanted to see if there was a widely-used read deduplication tool that we could apply to our pipeline, ideally early on as part of sample preprocessing. I started out comparing four approaches, before fairly quickly cutting down to two:</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>fastp is a FASTQ pre-processing tool previously investigated here. If run with the <span class="in">`--dedup`</span><span class="sc">\`</span>flag, it will remove read pairs that are exact duplicates of one another. As far as I know, fastp doesn't have the ability to identify or remove inexact duplicates, or to distinguish sequencing duplicates from other duplicates. It thus represents a fast but relatively unsophisticated option.</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span><span class="co">[</span><span class="ot">Clumpify</span><span class="co">](https://www.biostars.org/p/225338/)</span> is a tool that was originally developed to reduce space and improve processing speed by rearranging fastq.gz files. It identifies duplicates by looking for reads (or read pairs) that match exactly in sequence, except for a specified number of permitted substitutions. This, to me, is the obvious way to detect duplicates, and this is the only deduplication tool I've found that does it this way. It also allows distinguishing of optical vs other duplicates and specific removal of only optical duplicates if desired.</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>GATK Picard's MarkDuplicates and samtools markdup are two functions for removing duplicate reads in SAM/BAM files. I tried both, but found them to be slow, confusing, and apparently unable to actually detect any duplicates in the files I ran them on. It's possible that both of these tools only work on mapped reads (which would make sense given their demand for SAM/BAM files); it's also possible that I could make them work given more time and effort, but I didn't want to put this in unless the other tools I found proved inadequate.</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>To test fastp and Clumpify, I ran them on the same samples I used for looking into ribodetection:</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>| Study                        | Bioproject                                                        | Sample      |</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>|-------------------|----------------------------------|-------------------|</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>| Rothman et al. (2021)        | <span class="co">[</span><span class="ot">PRJNA729801</span><span class="co">](https://www.ebi.ac.uk/ena/browser/view/PRJNA729801)</span> | SRR14530880 |</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>| Crits-Cristoph et al. (2021) | <span class="co">[</span><span class="ot">PRJNA661613</span><span class="co">](https://www.ebi.ac.uk/ena/browser/view/PRJNA661613)</span> | SRR23998357 |</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>| Johnson (2023)               | N/A                                                               | COMO4       |</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>In each case, I tested deduplication at two points in the pipeline: immediately after preprocessing (with FASTP, without deduplication), and following segregation of rRNA reads using bbduk.</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="fu"># 1. Johnson (COMO4)</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>Following fastp preprocessing, the Johnson sample contains 15.25M read pairs, 74.36% of which are identified by FASTQC as duplicates based on the first read in the pair. Among non-ribosomal reads (as identified by bbduk), this number fell to 69.72%, while for ribosomal reads it rose to 79.13%. Needless to say, all of these fail FASTQC's read-duplication QC test.</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>Running clumpify on the fastp output took 16 seconds and removed 5.04M read pairs (33.0%) as duplicates, 11576 of which were optical. Running it on the bbduk non-ribosomal output took 9 seconds and removed 2.71M (35.3%) reads as duplicates, 7107 of which were optical. After deduplication with clumpify, FASTQC identifies 24.19% of sequences as duplicates in the post-fastp dataset, and 18.38% in the post-bbduk dataset. In both cases, this is a dramatic reduction, sufficient for FASTQC to now mark the duplication level QC as passing where it was previously failing.</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>Running fastp with deduplication enabled on the fastp output took 33 seconds and removed 4.21M read pairs (27.6%) as duplicates. Running it on the bbduk non-ribosomal output took 17 seconds and removed 2.33M read pairs (30.4%) as duplicates. In both cases, the number of reads removed is lower than that removed by clumpify, consistent with the fact that fastp requires complete identity between duplicates while clumpify allows a small number of mismatches. For whatever reason, this difference resulted in a dramatic difference in FASTQC quality metrics: after deduplication with fastp, FASTQC identifies 68.09% of reads as duplicates in the full dataset, and 59.78% in the post-bbduk dataset. Both of these are high enough to result in a failure for the corresponding QC test.</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>| Dataset              | Dedup Method | FASTQC % Dup | FASTQC Dup Test |</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>|----------------------|--------------|--------------|-----------------|</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>| Preprocessed (FASTP) | Clumpify     | 24.19        | Passed          |</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>| Preprocessed (FASTP) | FASTP dedup  | 68.09        | Failed          |</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>| Ribodepleted (BBDUK) | Clumpify     | 18.38        | Passed          |</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>| Ribodepleted (BBDUK) | FASTP dedup  | 59.78        | Failed          |</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a><span class="fu"># 2. Rothman (SRR14530880)</span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>Following fastp preprocessing, the Rothman sample contains 13.61M read pairs, 81.27% of which are identified by FASTQC as duplicates based on the first read in the pair. Among non-ribosomal reads (6.20M read pairs, as identified by bbduk), this number fell to 78.79%. Both of these failed QC.</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>Running clumpify on the fastp output took 14 seconds and removed 7.41M read pairs (54.5%) as duplicates. Running it on the bbduk non-ribosomal output took 7 seconds and removed 2.96M read pairs (47.8%) as duplicates. In both cases, trying to specifically detect optical reads caused the program to crash, suggesting that the relevant metadata was unavailable.</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>Running fastp with deduplication enabled on the fastp output took 26 seconds and removed 6.87M read pairs (50.5%) as duplicates. Running it on the bbduk non-ribosomal output took 14 seconds and removed 2.71M read pairs (43.6%) as duplicates. As before, the number of reads removed was lower than clumpify in both cases.</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>FASTQ QC results were as follows:</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>| Dataset              | Dedup Method | FASTQC % Dup | FASTQC Dup Test |</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>|----------------------|--------------|--------------|-----------------|</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>| Preprocessed (FASTP) | Clumpify     | 27.9         | Passed          |</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>| Preprocessed (FASTP) | FASTP dedup  | 62.9         | Failed          |</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>| Ribodepleted (BBDUK) | Clumpify     | 33.0         | Warning         |</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>| Ribodepleted (BBDUK) | FASTP dedup  | 63.2         | Failed          |</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>As before, the difference is large, with Clumpify performing dramatically better.</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a><span class="fu"># 3. Crits-Christoph et al. (SRR23998357)</span></span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>Finally, we have the sample from Crits-Christoph et al. (2021). Following fastp processing, this sample contained 47.47M read pairs, 55.9% of which are identified by FASTQC as duplicates based on the first read in the pair. Among non-ribosomal reads (42.45M read pairs, as identified by bbduk), this number fell to 53.1%. Both of these failed QC.</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>Running clumpify on the fastp output took 90 seconds and removed 19.25M read pairs (40.6%) as duplicates. Running it on the bbduk non-ribosomal output took 65 seconds and removed 16.49M read pairs (38.8%) as duplicates. As with Rothman, trying to specifically detect optical reads caused the program to crash, suggesting that the relevant metadata was unavailable.</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>Running fastp with deduplication enabled on the fastp output took 94 seconds and removed 16.58M read pairs (34.9%) as duplicates. Running it on the bbduk non-ribosomal output took 85 seconds and removed 14.12M read pairs (33.3%) as duplicates. As before, the number of reads removed was lower than clumpify in both cases.</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>FASTQ QC results were as follows:</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>| Dataset              | Dedup Method | FASTQC % Dup | FASTQC Dup Test |</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>|----------------------|--------------|--------------|-----------------|</span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>| Preprocessed (FASTP) | Clumpify     | 10.64        | Passed          |</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>| Preprocessed (FASTP) | FASTP dedup  | 35.22        | Warning         |</span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>| Ribodepleted (BBDUK) | Clumpify     | 9.89         | Passed          |</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>| Ribodepleted (BBDUK) | FASTP dedup  | 32.07        | Warning         |</span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>: Both programs perform much better here than for previous samples, with even fastp reducing levels of duplicates low enough to avoid failing. Nevertheless, clumpify continues to perform substantially better.</span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>duplicate_data_path <span class="ot">&lt;-</span> <span class="st">"../data/2023-10-19_deduplication/duplicate-data.csv"</span></span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>duplicate_data <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(duplicate_data_path, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sample_display =</span> <span class="fu">paste0</span>(sample, <span class="st">" ("</span>, dataset, <span class="st">")"</span>),</span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>         <span class="at">dedup_method =</span> <span class="fu">fct_inorder</span>(dedup_method),</span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>         <span class="at">sample_display =</span> <span class="fu">fct_inorder</span>(sample_display))</span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>g_duplicate <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(duplicate_data, <span class="fu">aes</span>(<span class="at">x=</span>dedup_method, <span class="at">y=</span>fastqc_pc_dup, <span class="at">fill=</span>sample_display)) <span class="sc">+</span></span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">"% Duplicates (FASTQC)"</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">100</span>),</span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>                     <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">100</span>,<span class="dv">20</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_discrete</span>(<span class="at">name =</span> <span class="st">"Deduplication method"</span>) <span class="sc">+</span></span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>, <span class="at">name =</span> <span class="st">"Sample"</span>) <span class="sc">+</span></span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(. <span class="sc">~</span> processing_stage) <span class="sc">+</span></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>  theme_base</span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>g_duplicate</span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a><span class="fu"># 4. Conclusion</span></span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>I was originally planning to do more validation here, but I honestly don't think it's required. Of the two methods I managed to successfully apply to these samples, Clumpify is faster; applies an intuitively more appealing deduplication method; removes more sequences; and achieves much better FASTQC results. It's also very easy to use and configure. I recommend it as our deduplication tool going forward.</span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>In terms of when to apply the tool, I think it probably makes most sense to apply deduplication downstream of counting (if we use Ribodetector) or detecting and filtering (if we use bbduk) ribosomal reads, to avoid spurious filtering of rRNA biological duplicates.</span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+</body></html>

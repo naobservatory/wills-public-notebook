@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/notebooks/2023-10-19_deduplication.html",
       "/notebooks/2023-10-13_rrna-removal.html",
       "/notebooks/2023-10-12_fastp-vs-adapterremoval.html",
       "/notebooks/2023-10-12_how-does-element-sequencing-work.html",
