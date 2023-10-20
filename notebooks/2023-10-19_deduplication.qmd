@@ -1,6 +1,6 @@
 ---
 title: "Comparing options for read deduplication"
-subtitle: ""
+subtitle: "Clumpify vs fastp"
 author: "Will Bradshaw"
 date: 2023-10-19
 format:
