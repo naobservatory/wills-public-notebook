@@ -170,7 +170,7 @@ g_hit
 
 -   For difference 2 (ribodepletion) results here are equivocal. The single read pair I inspected that got removed during ribodepletion appears to include both a true ribosomal read and a true viral read. I think some internal discussion is needed to decide how to handle these cases.
 
--   For difference 3 (deduplication) I updated negatively about Clumpify, which appeared to be unable to handle duplicates where the forward and reverse reads in a pair are switched (this is also a case where FASTQC will be unable to detect these duplicates).
+-   For difference 3 (deduplication) I initially updated negatively about Clumpify, which appeared to be unable to handle duplicates where the forward and reverse reads in a pair are switched (this is also a case where FASTQC will be unable to detect these duplicates).
 
     -   However, I found an option for Clumpify which addresses this issue, at least in this case. Specifically, one can configure Clumpify to unpair reads, perform deduplication on the forward and reverse reads all together, and then restore pairing. This successfully removes this class of duplicates.
 
