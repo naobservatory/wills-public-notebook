@@ -2,7 +2,7 @@
 title: "Initial analysis of Project Runway protocol testing data"
 subtitle: ""
 author: "Will Bradshaw"
-date: 2023-10-24
+date: 2023-10-31
 format:
   html:
     code-fold: true

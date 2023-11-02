@@ -1,0 +1,9 @@
+﻿sample,status,n_reads,n_hit
+D23-13405-1,clash,6,0
+D23-13406-2,clash,8,1
+D23-13405-1,agree,8,5
+D23-13406-2,agree,9,9
+D23-13405-2,clash,6,1
+D23-13405-2,agree,7,4
+Overall,clash,20,2
+Overall,agree,24,18

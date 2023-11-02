@@ -253,7 +253,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span></span>
 <span><span class="va">g_reads_raw</span> <span class="op">+</span> <span class="va">g_bases_raw</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
-<p><img src="2023-10-24_project-runway-initial_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+<p><img src="2023-10-31_project-runway-initial_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>Data quality appears good, with all libraries passing per-base and per-sequence quality checks as well as per-base N content checks. Sequence composition checks either pass or raise a warning; none fail. Duplication levels are low, with FASTQC predicting less than 10% duplicated sequences for all libraries. The only real issue with sequence quality is a high prevalence of adapter sequences, which is unsurprising for raw sequencing data.</p>
@@ -318,7 +318,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span></span>
 <span><span class="fu">plot_grid</span><span class="op">(</span><span class="va">g_reads_preproc_2</span> <span class="op">+</span> <span class="va">g_bases_preproc</span>, <span class="va">g_preproc_legend</span>, nrow <span class="op">=</span> <span class="fl">2</span>, rel_heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">0.15</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
-<p><img src="2023-10-24_project-runway-initial_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+<p><img src="2023-10-31_project-runway-initial_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>In total, roughly 103 Gb of sequence data (63.1%) was lost during preprocessing. Per-kit losses ranged from 61.7% to 65.1%. Conversely, very few reads (&lt;1%) were discarded entirely.</p>
@@ -379,7 +379,7 @@ done</code></pre>
 <span></span>
 <span><span class="fu">plot_grid</span><span class="op">(</span><span class="va">g_reads_ribo_2</span> <span class="op">+</span> <span class="va">g_bases_ribo</span>, <span class="va">g_ribo_legend</span>, nrow <span class="op">=</span> <span class="fl">2</span>, rel_heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">0.15</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
-<p><img src="2023-10-24_project-runway-initial_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+<p><img src="2023-10-31_project-runway-initial_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section><section id="deduplication" class="level1"><h1>Deduplication</h1>
@@ -436,7 +436,7 @@ done</code></pre>
 <span></span>
 <span><span class="fu">plot_grid</span><span class="op">(</span><span class="va">g_reads_dedup_2</span> <span class="op">+</span> <span class="va">g_bases_dedup</span>, <span class="va">g_dedup_legend</span>, nrow <span class="op">=</span> <span class="fl">2</span>, rel_heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">0.15</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
-<p><img src="2023-10-24_project-runway-initial_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+<p><img src="2023-10-31_project-runway-initial_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>As expected, the number of duplicate reads was low: in total, 9.6M read pairs (1.8%) were removed during deduplication, with levels for individual input samples ranging from 1.4% to 2.1%. After deduplication using these parameters, the detected fraction of duplicates identified by FASTQC roughly halved for all samples:</p>
@@ -454,7 +454,7 @@ done</code></pre>
 <span>        axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>hjust <span class="op">=</span> <span class="fl">1</span>, angle <span class="op">=</span> <span class="fl">45</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">g_dups</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
-<p><img src="2023-10-24_project-runway-initial_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+<p><img src="2023-10-31_project-runway-initial_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section><section id="kraken2-initial-assignments" class="level1"><h1>Kraken2 – Initial Assignments</h1>
@@ -500,7 +500,7 @@ done</code></pre>
 <span></span>
 <span><span class="fu">plot_grid</span><span class="op">(</span><span class="va">g_domains_2</span> <span class="op">+</span> <span class="va">g_domains_minor</span>, <span class="va">g_domains_legend</span>, nrow <span class="op">=</span> <span class="fl">2</span>, rel_heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">0.2</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
-<p><img src="2023-10-24_project-runway-initial_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+<p><img src="2023-10-31_project-runway-initial_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section><section id="kraken2-human-infecting-viruses" class="level1"><h1>Kraken2 – Human-Infecting Viruses</h1>
@@ -532,7 +532,7 @@ done</code></pre>
 <span><span class="va">g_hv_n_2</span> <span class="op">&lt;-</span> <span class="va">g_hv_n</span> <span class="op">+</span> <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
 <span><span class="fu">plot_grid</span><span class="op">(</span><span class="va">g_hv_n_2</span> <span class="op">+</span> <span class="va">g_hv_p</span>, <span class="va">g_hv_legend</span>, nrow <span class="op">=</span> <span class="fl">2</span>, rel_heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">0.15</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
-<p><img src="2023-10-24_project-runway-initial_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+<p><img src="2023-10-31_project-runway-initial_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>Summarizing over kits, the results are as follows:</p>
@@ -556,7 +556,7 @@ done</code></pre>
 <span><span class="va">g_hv_summ_n_2</span> <span class="op">&lt;-</span> <span class="va">g_hv_summ_n</span> <span class="op">+</span> <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
 <span><span class="fu">plot_grid</span><span class="op">(</span><span class="va">g_hv_summ_n_2</span> <span class="op">+</span> <span class="va">g_hv_summ_p</span>, <span class="va">g_hv_summ_legend</span>, nrow <span class="op">=</span> <span class="fl">2</span>, rel_heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">0.15</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details><div class="cell-output-display">
-<p><img src="2023-10-24_project-runway-initial_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+<p><img src="2023-10-31_project-runway-initial_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>I’m not sure what exactly is giving rise to the discrepancy between the two pipelines. While some degree of disagreement between two different pipelines isn’t surprising, it would be good to have a deeper understanding of what’s causing it, and which pipeline is giving results that are more “believable”. I’ll look more deeply into this in a subsequent notebook entry.</p>

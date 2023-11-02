@@ -1,0 +1,19 @@
+﻿sample,status,n_reads
+D23-13405-1,Pipelines agree,8
+D23-13406-2,Pipelines agree,9
+D23-13405-1,Hit but no assignment,3
+D23-13406-2,Hit but no assignment,6
+D23-13405-1,No viral hit,2
+D23-13406-2,No viral hit,1
+D23-13405-1,Excluded during deduplication,0
+D23-13406-2,Excluded during deduplication,0
+D23-13405-1,Excluded during ribodepletion,0
+D23-13406-2,Excluded during ribodepletion,1
+D23-13405-1,Excluded by FASTP,1
+D23-13406-2,Excluded by FASTP,0
+D23-13405-2,Pipelines agree,7
+D23-13405-2,Hit but no assignment,4
+D23-13405-2,No viral hit,0
+D23-13405-2,Excluded during deduplication,1
+D23-13405-2,Excluded during ribodepletion,0
+D23-13405-2,Excluded by FASTP,1
