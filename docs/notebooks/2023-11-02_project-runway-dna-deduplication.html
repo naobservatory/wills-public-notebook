@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Will Bradshaw">
+<meta name="dcterms.date" content="2023-11-02">
+<title>Will’s Public NAO Notebook - Estimating the effect of read depth on duplication rate for Project Runway DNA data</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><style>
+
+      .quarto-title-block .quarto-title-banner {
+        background: black;
+      }
+</style>
+<link href="../site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="../site_libs/pagedtable-1.1/js/pagedtable.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+</head>
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg navbar-dark "><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Will’s Public NAO Notebook</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools ms-auto">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav></header><!-- content --><header id="title-block-header" class="quarto-title-block default page-columns page-full"><div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">Estimating the effect of read depth on duplication rate for Project Runway DNA data</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+            <p class="subtitle lead">How deep can we go?</p>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Will Bradshaw </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">November 2, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content"><p>One relevant question for both Project Runway and other NAO sequencing is: what is the maximum read depth at which we can sequence a given sample while retaining an acceptable level of sequence duplication?</p>
+<p>As discussed in a previous entry, duplicate reads can arise in sequencing data from a variety of processes, including true biological duplicates present in the raw sample; processing duplicates arising from amplification and other processes during sample and library prep; and sequencing duplicates arising from various processes on the actual flow cell.</p>
+<p>As we sequence more deeply, we expect the fraction of biological and processing duplicates (but not, I think, sequencing duplicates) in our read data to increase. In the former case, this is because we are capturing a larger fraction of all the input molecules in our sample; in the latter, because we are sequencing copies of the same sequence over and over again. Intuitively, I expect the increase in processing duplicates to swamp that in biological duplicates at high read depth, at least for library prep protocols that involve amplification<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>One simple approach to investigate the overall effect of read depth on duplication levels in the sample is rarefaction: downsampling a library to different numbers of reads and seeing how the duplication rate changes as a function of read count. In this notebook entry, I apply this approach to sequencing data from the Project Runway initial DNA dataset, to see how duplication rate behaves in this case.</p>
+<section id="methods" class="level1"><h1>Methods</h1>
+<p>To analyze the effect of read depth on duplication rates in this data, I first concatenated the raw reads from the two sequencing replicates of each sample together. This allowed the analysis to detect duplicates across replicates, that would have been missed by analyzing them separately.</p>
+<p>Next, I performed preprocessing to remove adapter sequences and low-quality bases that might interfere with duplicate detection. I didn’t collapse read pairs together or discard read pairs with overall low quality.</p>
+<pre><code>for p in $(cat prefixes.txt); do echo $p; fastp -i raw/${p}_1.fastq.gz -I raw/${p}_2.fastq.gz -o preproc/${p}_fastp_1.fastq.gz -O preproc/${p}_fastp_2.fastq.gz --failed_out preproc/${p}_fastp_failed.fastq.gz --cut_tail --correction --detect_adapter_for_pe --adapter_fasta adapters.fa  --trim_poly_x --thread 16 -Q -L; done</code></pre>
+<p>I then took each pair of preprocessed FASTQ files and downsampled them to specified numbers of reads, from 10,000 to 100,000,000 in units of 1 OOM, using <code>seqtk sample</code>. I performed downsampling 3 times for each read count, with the intent of calculating duplication rate separately for each replicate and taking the average.</p>
+<p>Finally, I ran deduplication with Clumpify on each downsampled pair of read files, as well as the raw preprocessed files, and recorded the fraction of reads discarded in each case. I performed this twice, using different Clumpify settings each time:</p>
+<ol type="1">
+<li>
+<p>First, I attempted to perform deduplication in a maximally comprehensive way, using Clumpify’s <code>unpair repair</code> options to identify and remove duplicates in opposite orientation across read pairs (as discussed <a href="https://data.securebio.org/wills-public-notebook/notebooks/2023-11-02_project-runway-comparison.html#conclusions">here</a>). This configuration finds more duplicates, but (a) might overestimate duplicates in cases where only one read in a pair matches another read, and (b) causes memory-related errors for large subsample sizes.</p>
+<pre><code>clumpify.sh in=&lt;in1&gt; in2=&lt;in2&gt; out=&lt;out1&gt; out2=&lt;out2&gt; dedupe containment unpair repair</code></pre>
+</li>
+<li>
+<p>Second, due to the aforementioned issues with approach 1, I repeated deduplication without Clumpify’s <code>unpair repair</code> options enabled, providing a lower-bound estimate of duplication levels which should be more consistent with estimates provided by, for example, FASTQC.</p>
+<pre><code> clumpify.sh in=&lt;in1&gt; in2=&lt;in2&gt; out=&lt;out1&gt; out2=&lt;out2&gt; dedupe containment</code></pre>
+</li>
+</ol></section><section id="results" class="level1"><h1>Results</h1>
+<p>Plotting the fraction of duplicate reads (with or without Clumpify’s <code>unpair repair</code> options) gives us the following result:</p>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Import data</span></span>
+<span><span class="va">data_dir</span> <span class="op">&lt;-</span> <span class="st">"../data/2023-11-06_pr-dedup/"</span></span>
+<span><span class="va">n_dup_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"n_dup.csv"</span><span class="op">)</span></span>
+<span><span class="va">n_dup</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span><span class="va">n_dup_path</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>n_dup <span class="op">=</span> <span class="va">read_pairs_in</span> <span class="op">-</span> <span class="va">read_pairs_out</span>, p_dup <span class="op">=</span> <span class="va">n_dup</span><span class="op">/</span><span class="va">read_pairs_in</span>,</span>
+<span>         o_dup <span class="op">=</span> <span class="va">p_dup</span><span class="op">/</span><span class="op">(</span><span class="fl">1</span><span class="op">-</span><span class="va">p_dup</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Reshape data</span></span>
+<span><span class="va">n_dup_flat</span> <span class="op">&lt;-</span> <span class="va">n_dup</span> <span class="op">%&gt;%</span> <span class="fu">group_by</span><span class="op">(</span><span class="va">sample</span>, <span class="va">unpair_repair</span>, <span class="va">read_pairs_in</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">summarize</span><span class="op">(</span>p_dup_mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">p_dup</span><span class="op">)</span>, p_dup_sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">p_dup</span><span class="op">)</span>, p_dup_min <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="fl">0</span>,<span class="va">p_dup_mean</span><span class="op">-</span><span class="va">p_dup_sd</span><span class="op">)</span>, p_dup_max <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">p_dup_mean</span><span class="op">+</span><span class="va">p_dup_sd</span><span class="op">)</span>,</span>
+<span>            o_dup_mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">o_dup</span><span class="op">)</span>, o_dup_sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">o_dup</span><span class="op">)</span>, o_dup_min <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="fl">0</span>,<span class="va">o_dup_mean</span><span class="op">-</span><span class="va">o_dup_sd</span><span class="op">)</span>, o_dup_max <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">o_dup_mean</span><span class="op">+</span><span class="va">o_dup_sd</span><span class="op">)</span>, .groups <span class="op">=</span> <span class="st">"drop"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Plot data</span></span>
+<span><span class="va">g_dup_flat_base</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">n_dup_flat</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">read_pairs_in</span>, y<span class="op">=</span><span class="va">p_dup_mean</span>, color <span class="op">=</span> <span class="va">sample</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_errorbar</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>ymin<span class="op">=</span><span class="va">p_dup_min</span>, ymax<span class="op">=</span><span class="va">p_dup_max</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_point</span><span class="op">(</span>shape <span class="op">=</span> <span class="fl">16</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_x_log10</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"# Input Read Pairs"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_grid</span><span class="op">(</span><span class="va">.</span><span class="op">~</span><span class="va">unpair_repair</span>, labeller <span class="op">=</span> <span class="st">"label_both"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_color_brewer</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dark2"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">theme_base</span> <span class="op">+</span> <span class="fu">theme</span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">g_dup_flat_lin</span> <span class="op">&lt;-</span> <span class="va">g_dup_flat_base</span> <span class="op">+</span> </span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Fraction of duplicate reads"</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0.41</span><span class="op">)</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">0.1</span><span class="op">)</span>, expand <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">g_dup_flat_log</span> <span class="op">&lt;-</span> <span class="va">g_dup_flat_base</span> <span class="op">+</span> <span class="fu">scale_y_log10</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Fraction of duplicate reads"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Show plats</span></span>
+<span><span class="va">g_dup_flat_lin</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2023-11-02_project-runway-dna-deduplication_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+<details><summary>Code</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">g_dup_flat_log</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2023-11-02_project-runway-dna-deduplication_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>We can see that the fraction of duplicates reaches quite high levels as we approach the full read count, especially when <code>unpair repair</code> is enabled. It also looks like the gradient of increase is quite high on the linear-log plot, which would suggest that further OOM increases in read depth might result in quite large increases in the fraction of duplicates. It’s also apparent that, for whatever reason, D23-13406 has substantially fewer duplicates at any given read depth than the other two samples.</p>
+<p>However, further interpretation of these results, including extrapolation to greater read depths, is made difficult by the lack of a theoretical model for what we expect to see. It’s also not clear what mode of visualization (Linear-log? Log-linear? Log-log? Fraction of duplicates expressed as probabilities or odds? Etc) is most meaningful for interpretation.</p>
+<p>To start resolving some of these roadblocks, I spent some time working on a very simple model of read duplication, to see what it might tell us about the expected pattern of duplicates as a function of read depth.</p>
+</section><section id="a-very-very-simple-model-of-read-duplication" class="level1"><h1>A very very simple model of read duplication</h1>
+<ul>
+<li><p>Imagine a sample containing <span class="math inline">\(N\)</span> distinct molecules, which are uniformly amplified up to <span class="math inline">\(M = N \times 2^C\)</span> molecules by a perfectly unbiased <span class="math inline">\(C\)</span>-cycle PCR reaction. Adapters are ligated and the resulting library is washed across the flow cell to generate <span class="math inline">\(X\)</span> total clusters (again, without bias<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>). These clusters are then sequenced by a process that generates optical duplicates at some rate <span class="math inline">\(O\)</span>, for a total expectation of <span class="math inline">\(R=X\times(1+O)\)</span> reads.</p></li>
+<li><p>Each cluster is selected from the <span class="math inline">\(M\)</span> molecules in the library, without replacement. When <span class="math inline">\(C\)</span> is large and amplification is uniform across molecules, this is well-approximated by selecting from the <span class="math inline">\(N\)</span> input molecules with replacement. Under these conditions, the number of clusters generated from input molecule <span class="math inline">\(i\)</span> is approximately <span class="math inline">\(X_i \sim \mathrm{B}(X,N^{-1})\)</span>.</p></li>
+<li><p>The number of optical duplicates generated from a given input molecule is then approximately <span class="math inline">\(P_i \sim \mathrm{B}(X_i,O)\)</span>, and the total number of reads corresponding to a given input molecule is thus <span class="math inline">\(R_i = X_i + P_i\)</span>. The number of duplicates generated from that molecule is then <span class="math inline">\(D_i = \max(0,R_i - 1)\)</span>, and the overall fraction of duplicates is <span class="math inline">\(F=\frac{D}{R}=\frac{\sum_iD_i}{\sum_iR_i}\)</span> .</p></li>
+<li>
+<p>The expected fraction of duplicates under this model can be estimated analytically as follows<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>:</p>
+<ul>
+<li><p><span class="math inline">\(E(R_i)=\sum_{r=1}^{2X} r \cdot P(R_i = r) = \sum_{r=1}^{2X}r\cdot\left[\sum_{k=0}^{r}P(X_i = k)\cdot{}P(P_i=r-k|X_i=k)\right]\)</span></p></li>
+<li><p><span class="math inline">\(E(D_i) = \sum_{r=1}^{2X} (r-1) \cdot P(R_i = r)\)</span></p></li>
+<li><p><span class="math inline">\(E(D) = E\left(\sum_i D_i\right) = N \cdot E(D_i)\)</span></p></li>
+<li>
+<p><span class="math inline">\(R = \sum_i R_i = \sum_r r \cdot \mathbb{N}(R_i = r)\)</span></p>
+<ul>
+<li><p>When <span class="math inline">\(N\)</span> is large, <span class="math inline">\(\mathbb{N}(R_i = r) \approx N \cdot P(R_i = r)\)</span>, and so <span class="math inline">\(R \approx \sum_r r \cdot N \cdot P(R_i = r) = N \cdot E(R_i)\)</span></p></li>
+<li><p>Hence <span class="math inline">\(E\left(\frac{1}{R}\right) \approx \frac{1}{N \cdot E(R_i)}\)</span></p></li>
+</ul>
+</li>
+<li><p>Thus <span class="math inline">\(E(F) = E\left(\frac{D}{R}\right) = E(D) \cdot E\left(\frac{1}{R}\right) \approx \frac{N \cdot E(D_i)}{N \cdot E(R_i)} = \frac{E(D_i)}{E(R_i)}\)</span></p></li>
+</ul>
+</li>
+</ul>
+<p>Using computational implementations of these formulae, we can investigate how the fraction of duplicates varies with the number of clusters for different parameter values.</p>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Define auxiliary functions</span></span>
+<span><span class="va">log_p_clusters</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n_clusters</span>, <span class="va">total_clusters</span>, <span class="va">n_molecules</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html">dbinom</a></span><span class="op">(</span><span class="va">n_clusters</span>, <span class="va">total_clusters</span>, <span class="fl">1</span><span class="op">/</span><span class="va">n_molecules</span>, log<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">log_p_opt_dups</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n_opt_dups</span>, <span class="va">n_clusters</span>, <span class="va">p_opt_dup</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html">dbinom</a></span><span class="op">(</span><span class="va">n_opt_dups</span>, <span class="va">n_clusters</span>, <span class="va">p_opt_dup</span>, log<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">p_reads</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n_reads</span>, <span class="va">total_clusters</span>, <span class="va">n_molecules</span>, <span class="va">p_opt_dup</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="va">n_clusters</span> <span class="op">&lt;-</span> <span class="va">n_reads</span> <span class="op">-</span> <span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="op">(</span><span class="va">n_reads</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">log_p_n_clusters</span> <span class="op">&lt;-</span> <span class="fu">log_p_clusters</span><span class="op">(</span><span class="va">n_clusters</span>, <span class="va">total_clusters</span>, <span class="va">n_molecules</span><span class="op">)</span></span>
+<span>  <span class="va">log_p_n_opt_dups</span> <span class="op">&lt;-</span> <span class="fu">log_p_opt_dups</span><span class="op">(</span><span class="va">n_reads</span> <span class="op">-</span> <span class="va">n_clusters</span>, <span class="va">n_clusters</span>, <span class="va">p_opt_dup</span><span class="op">)</span></span>
+<span>  <span class="va">log_p_reads_clusters</span> <span class="op">&lt;-</span> <span class="va">log_p_n_clusters</span> <span class="op">+</span> <span class="va">log_p_n_opt_dups</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="va">log_p_reads_clusters</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Define main function</span></span>
+<span><span class="va">exp_duplicates</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n_molecules</span>, <span class="va">total_clusters</span>, <span class="va">p_opt_dup</span>, <span class="va">initial_vector_length</span> <span class="op">=</span> <span class="fl">1e8</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="va">pr</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/partial.html">partial</a></span><span class="op">(</span><span class="va">p_reads</span>, total_clusters <span class="op">=</span> <span class="va">total_clusters</span>, n_molecules <span class="op">=</span> <span class="va">n_molecules</span>, p_opt_dup <span class="op">=</span> <span class="va">p_opt_dup</span><span class="op">)</span></span>
+<span>  <span class="co"># Calculate read count probabilities</span></span>
+<span>  <span class="va">n_reads</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="va">initial_vector_length</span></span>
+<span>  <span class="va">p_n_reads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">numeric</a></span><span class="op">(</span><span class="va">initial_vector_length</span><span class="op">)</span></span>
+<span>  <span class="va">break_zero</span> <span class="op">&lt;-</span> <span class="cn">FALSE</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">n</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">n_reads</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
+<span>    <span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">pr</span><span class="op">(</span><span class="va">n_reads</span><span class="op">[</span><span class="va">n</span><span class="op">]</span><span class="op">)</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="va">p</span> <span class="op">==</span> <span class="fl">0</span> <span class="op">&amp;&amp;</span> <span class="va">break_zero</span><span class="op">)</span><span class="op">{</span></span>
+<span>      <span class="va">n_reads</span> <span class="op">&lt;-</span> <span class="va">n_reads</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">]</span></span>
+<span>      <span class="va">p_n_reads</span> <span class="op">&lt;-</span> <span class="va">p_n_reads</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">]</span></span>
+<span>      <span class="kw">break</span></span>
+<span>    <span class="op">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="op">(</span><span class="va">p</span> <span class="op">!=</span> <span class="fl">0</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="va">break_zero</span><span class="op">)</span><span class="op">{</span></span>
+<span>      <span class="va">break_zero</span> <span class="op">&lt;-</span> <span class="cn">TRUE</span></span>
+<span>    <span class="op">}</span></span>
+<span>    <span class="va">p_n_reads</span><span class="op">[</span><span class="va">n</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">p</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="co"># Calculate fraction of duplicates</span></span>
+<span>  <span class="va">n_duplicates</span> <span class="op">&lt;-</span> <span class="va">n_reads</span> <span class="op">-</span> <span class="fl">1</span></span>
+<span>  <span class="va">p_duplicates</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">n_duplicates</span> <span class="op">*</span> <span class="va">p_n_reads</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">n_reads</span> <span class="op">*</span> <span class="va">p_n_reads</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">p_duplicates</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Parameter set 1: N = 1e6, O = 1e-6</span></span>
+<span><span class="va">tab_model_1</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>n_molecules <span class="op">=</span> <span class="fl">1e6</span>,</span>
+<span>                      p_opt_dup <span class="op">=</span> <span class="fl">1e-6</span>,</span>
+<span>                      total_clusters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">10</span><span class="op">^</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">4</span>,<span class="fl">8</span>,<span class="fl">0.5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">n_molecules</span>, <span class="va">p_opt_dup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>p_duplicates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">total_clusters</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">exp_duplicates</span><span class="op">(</span><span class="va">n_molecules</span>, <span class="va">x</span>, <span class="va">p_opt_dup</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">g_1</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">tab_model_1</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">total_clusters</span>, y<span class="op">=</span><span class="va">p_duplicates</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_vline</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="va">n_molecules</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, colour <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_point</span><span class="op">(</span>shape <span class="op">=</span> <span class="fl">16</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_x_log10</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"# Total Clusters"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Fraction of duplicate reads"</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">0.2</span><span class="op">)</span>, expand <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"N = "</span>, <span class="va">tab_model_1</span><span class="op">$</span><span class="va">n_molecules</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">", O = "</span>, <span class="va">tab_model_1</span><span class="op">$</span><span class="va">p_opt_dup</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">theme_base</span> <span class="op">+</span> <span class="fu">theme</span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Parameter set 2: N = 1e9, O = 1e-6</span></span>
+<span><span class="va">tab_model_2</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>n_molecules <span class="op">=</span> <span class="fl">1e9</span>,</span>
+<span>                      p_opt_dup <span class="op">=</span> <span class="fl">1e-6</span>,</span>
+<span>                      total_clusters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">10</span><span class="op">^</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">6</span>,<span class="fl">12</span>,<span class="fl">0.5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">n_molecules</span>, <span class="va">p_opt_dup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>p_duplicates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">total_clusters</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">exp_duplicates</span><span class="op">(</span><span class="va">n_molecules</span>, <span class="va">x</span>, <span class="va">p_opt_dup</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">g_2</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">tab_model_2</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">total_clusters</span>, y<span class="op">=</span><span class="va">p_duplicates</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_vline</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="va">n_molecules</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, colour <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_point</span><span class="op">(</span>shape <span class="op">=</span> <span class="fl">16</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_x_log10</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"# Total Clusters"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Fraction of duplicate reads"</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">0.2</span><span class="op">)</span>, expand <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"N = "</span>, <span class="va">tab_model_2</span><span class="op">$</span><span class="va">n_molecules</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">", O = "</span>, <span class="va">tab_model_2</span><span class="op">$</span><span class="va">p_opt_dup</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">theme_base</span> <span class="op">+</span> <span class="fu">theme</span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Parameter set 3: N = 1e12, O = 1e-6</span></span>
+<span><span class="va">tab_model_3</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>n_molecules <span class="op">=</span> <span class="fl">1e12</span>,</span>
+<span>                      p_opt_dup <span class="op">=</span> <span class="fl">1e-6</span>,</span>
+<span>                      total_clusters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">10</span><span class="op">^</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">9</span>,<span class="fl">15</span>,<span class="fl">0.5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">n_molecules</span>, <span class="va">p_opt_dup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>p_duplicates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">total_clusters</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">exp_duplicates</span><span class="op">(</span><span class="va">n_molecules</span>, <span class="va">x</span>, <span class="va">p_opt_dup</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">g_3</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">tab_model_3</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">total_clusters</span>, y<span class="op">=</span><span class="va">p_duplicates</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_vline</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="va">n_molecules</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, colour <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_point</span><span class="op">(</span>shape <span class="op">=</span> <span class="fl">16</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_x_log10</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"# Total Clusters"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Fraction of duplicate reads"</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">0.2</span><span class="op">)</span>, expand <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"N = "</span>, <span class="va">tab_model_3</span><span class="op">$</span><span class="va">n_molecules</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">", O = "</span>, <span class="va">tab_model_3</span><span class="op">$</span><span class="va">p_opt_dup</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">theme_base</span> <span class="op">+</span> <span class="fu">theme</span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">g_1</span> <span class="op">+</span> <span class="va">g_2</span> <span class="op">+</span> <span class="va">g_3</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2023-11-02_project-runway-dna-deduplication_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>I don’t want to take these results too seriously, since they’re based on an extremely simple model, but there are some qualitative takeaways that I found helpful to keep in mind when looking at the real data. In particular, the general pattern of the model results is that <strong>the fraction of duplicate reads follows a sigmoidal pattern on a linear-log plot</strong>:</p>
+<ul>
+<li><p>When <span class="math inline">\(X &lt;&lt; N\)</span>, the fraction of duplicates <span class="math inline">\(F\)</span> is close to zero.</p></li>
+<li><p>As <span class="math inline">\(X\)</span> approaches <span class="math inline">\(N\)</span>, the fraction of duplicates begins increasing, first slowly and then (after <span class="math inline">\(F\)</span> reaches about 0.1) rapidly, before leveling off after <span class="math inline">\(F\)</span> exceeds about 0.9.</p></li>
+<li><p>When <span class="math inline">\(X &gt;&gt; N\)</span>, <span class="math inline">\(F \approx 1\)</span>.</p></li>
+</ul>
+<p>At least under the assumptions used here, once the fraction of duplicates goes above 15% or so, further OOM increases in the number of clusters (e.g.&nbsp;by buying more or larger flow cells) will lead to a dramatic increase in the fraction of duplicate reads.</p>
+</section><section id="applying-model-takeaways" class="level1"><h1>Applying model takeaways</h1>
+<p>Returning to the results from the BMC data with these modeling results in mind:</p>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">g_dup_flat_lin</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2023-11-02_project-runway-dna-deduplication_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Assuming that the real data will follow a sigmoidal pattern roughly resembling that from the model, we see that all samples (with the possible exception of D23-13406 when <code>unpair repair</code> is disabled) are in the “danger zone”, such that further OOM increases in read depth will likely lead to a dramatic increase in the fraction of duplicate reads. As such, <strong>it probably isn’t worth paying for a further OOM increase (or even half-OOM increase) in read depth for these samples</strong>.</p>
+</section><section id="conclusions" class="level1"><h1>Conclusions</h1>
+<ul>
+<li>
+<p>Overall, running this analysis was a frustrating experience, due to difficulties finding a configuration of Clumpify (or any other deduplication tool I know of) that (i) I trust to remove duplicates appropriately without predictably over- or under-counting, and (ii) runs well on large FASTQ files. Ultimately, I think we should treat the true level of duplicates as somewhere in between that measured by method 1 (Clumpify with <code>unpair repair</code> enabled) and method 2 (Clumpify with <code>unpair repair</code> disabled).</p>
+<ul>
+<li>For the actual virus-detection pipeline, my current best bet is that we should run method 2 on the full dataset, then method 1 on the specific viral hits identified by Kraken2 (or the alignment tool used for validation, once that’s been implemented). However, we ultimately might want to implement our own tool for dealing with this problem.</li>
+</ul>
+</li>
+<li><p>Nevertheless, I was able to generate rarefaction curves for duplication rate as a function of the number of reads using both methods. The results, in combination with a very simple model I generated to aid interpretation, suggest that we’re probably at about the highest OOM read depth we should aim for in terms of getting useful information from these samples (with the possible exception of D23-13406).</p></li>
+</ul>
+
+
+<!-- -->
+
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>It might be worth explicitly modeling the difference in behavior between different kinds of duplicates as sequencing depth increases, to see if these intuitions are borne out.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Probably the biggest two improvements that could be made to this model in future are (i) introducing biological duplicates, and (ii) introducing sequence-specific bias in PCR amplification and cluster formation.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>I’d appreciate it if someone else on the team can check my math here.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb8" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Estimating the effect of read depth on duplication rate for Project Runway DNA data"</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "How deep can we go?"</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Will Bradshaw"</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> 2023-11-02</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">    code-link: true</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">    df-print: paged</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span><span class="co"> visual</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="an">title-block-banner:</span><span class="co"> black</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: load-packages</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cowplot)</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fastqcr)</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"../scripts/aux_plot-theme.R"</span>)</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>One relevant question for both Project Runway and other NAO sequencing is: what is the maximum read depth at which we can sequence a given sample while retaining an acceptable level of sequence duplication?</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>As discussed in a previous entry, duplicate reads can arise in sequencing data from a variety of processes, including true biological duplicates present in the raw sample; processing duplicates arising from amplification and other processes during sample and library prep; and sequencing duplicates arising from various processes on the actual flow cell.</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>As we sequence more deeply, we expect the fraction of biological and processing duplicates (but not, I think, sequencing duplicates) in our read data to increase. In the former case, this is because we are capturing a larger fraction of all the input molecules in our sample; in the latter, because we are sequencing copies of the same sequence over and over again. Intuitively, I expect the increase in processing duplicates to swamp that in biological duplicates at high read depth, at least for library prep protocols that involve amplification<span class="ot">[^1]</span>.</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="ot">[^1]: </span>It might be worth explicitly modeling the difference in behavior between different kinds of duplicates as sequencing depth increases, to see if these intuitions are borne out.</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>One simple approach to investigate the overall effect of read depth on duplication levels in the sample is rarefaction: downsampling a library to different numbers of reads and seeing how the duplication rate changes as a function of read count. In this notebook entry, I apply this approach to sequencing data from the Project Runway initial DNA dataset, to see how duplication rate behaves in this case.</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="fu"># Methods</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>To analyze the effect of read depth on duplication rates in this data, I first concatenated the raw reads from the two sequencing replicates of each sample together. This allowed the analysis to detect duplicates across replicates, that would have been missed by analyzing them separately.</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>Next, I performed preprocessing to remove adapter sequences and low-quality bases that might interfere with duplicate detection. I didn't collapse read pairs together or discard read pairs with overall low quality.</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a><span class="in">```         </span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a><span class="in">for p in $(cat prefixes.txt); do echo $p; fastp -i raw/${p}_1.fastq.gz -I raw/${p}_2.fastq.gz -o preproc/${p}_fastp_1.fastq.gz -O preproc/${p}_fastp_2.fastq.gz --failed_out preproc/${p}_fastp_failed.fastq.gz --cut_tail --correction --detect_adapter_for_pe --adapter_fasta adapters.fa  --trim_poly_x --thread 16 -Q -L; done</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>I then took each pair of preprocessed FASTQ files and downsampled them to specified numbers of reads, from 10,000 to 100,000,000 in units of 1 OOM, using <span class="in">`seqtk sample`</span>. I performed downsampling 3 times for each read count, with the intent of calculating duplication rate separately for each replicate and taking the average.</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>Finally, I ran deduplication with Clumpify on each downsampled pair of read files, as well as the raw preprocessed files, and recorded the fraction of reads discarded in each case. I performed this twice, using different Clumpify settings each time:</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>First, I attempted to perform deduplication in a maximally comprehensive way, using Clumpify's <span class="in">`unpair repair`</span> options to identify and remove duplicates in opposite orientation across read pairs (as discussed <span class="co">[</span><span class="ot">here</span><span class="co">](https://data.securebio.org/wills-public-notebook/notebooks/2023-11-02_project-runway-comparison.html#conclusions)</span>). This configuration finds more duplicates, but (a) might overestimate duplicates in cases where only one read in a pair matches another read, and (b) causes memory-related errors for large subsample sizes.</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>    <span class="in">```         </span></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a><span class="in">    clumpify.sh in=&lt;in1&gt; in2=&lt;in2&gt; out=&lt;out1&gt; out2=&lt;out2&gt; dedupe containment unpair repair</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a><span class="in">    ```</span></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>Second, due to the aforementioned issues with approach 1, I repeated deduplication without Clumpify's <span class="in">`unpair repair`</span> options enabled, providing a lower-bound estimate of duplication levels which should be more consistent with estimates provided by, for example, FASTQC.</span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>    <span class="in">```         </span></span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a><span class="in">     clumpify.sh in=&lt;in1&gt; in2=&lt;in2&gt; out=&lt;out1&gt; out2=&lt;out2&gt; dedupe containment</span></span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a><span class="in">    ```</span></span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a><span class="fu"># Results</span></span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>Plotting the fraction of duplicate reads (with or without Clumpify's <span class="in">`unpair repair`</span> options) gives us the following result:</span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a><span class="co"># Import data</span></span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>data_dir <span class="ot">&lt;-</span> <span class="st">"../data/2023-11-06_pr-dedup/"</span></span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>n_dup_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"n_dup.csv"</span>)</span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>n_dup <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(n_dup_path, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">n_dup =</span> read_pairs_in <span class="sc">-</span> read_pairs_out, <span class="at">p_dup =</span> n_dup<span class="sc">/</span>read_pairs_in,</span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>         <span class="at">o_dup =</span> p_dup<span class="sc">/</span>(<span class="dv">1</span><span class="sc">-</span>p_dup))</span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a><span class="co"># Reshape data</span></span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>n_dup_flat <span class="ot">&lt;-</span> n_dup <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(sample, unpair_repair, read_pairs_in) <span class="sc">%&gt;%</span></span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">p_dup_mean =</span> <span class="fu">mean</span>(p_dup), <span class="at">p_dup_sd =</span> <span class="fu">sd</span>(p_dup), <span class="at">p_dup_min =</span> <span class="fu">max</span>(<span class="dv">0</span>,p_dup_mean<span class="sc">-</span>p_dup_sd), <span class="at">p_dup_max =</span> <span class="fu">min</span>(<span class="dv">1</span>, p_dup_mean<span class="sc">+</span>p_dup_sd),</span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a>            <span class="at">o_dup_mean =</span> <span class="fu">mean</span>(o_dup), <span class="at">o_dup_sd =</span> <span class="fu">sd</span>(o_dup), <span class="at">o_dup_min =</span> <span class="fu">max</span>(<span class="dv">0</span>,o_dup_mean<span class="sc">-</span>o_dup_sd), <span class="at">o_dup_max =</span> <span class="fu">min</span>(<span class="dv">1</span>, o_dup_mean<span class="sc">+</span>o_dup_sd), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot data</span></span>
+<span id="cb8-85"><a href="#cb8-85" aria-hidden="true" tabindex="-1"></a>g_dup_flat_base <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(n_dup_flat, <span class="fu">aes</span>(<span class="at">x=</span>read_pairs_in, <span class="at">y=</span>p_dup_mean, <span class="at">color =</span> sample)) <span class="sc">+</span></span>
+<span id="cb8-86"><a href="#cb8-86" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin=</span>p_dup_min, <span class="at">ymax=</span>p_dup_max)) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">shape =</span> <span class="dv">16</span>) <span class="sc">+</span></span>
+<span id="cb8-87"><a href="#cb8-87" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>(<span class="at">name =</span> <span class="st">"# Input Read Pairs"</span>) <span class="sc">+</span></span>
+<span id="cb8-88"><a href="#cb8-88" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(.<span class="sc">~</span>unpair_repair, <span class="at">labeller =</span> <span class="st">"label_both"</span>) <span class="sc">+</span></span>
+<span id="cb8-89"><a href="#cb8-89" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>) <span class="sc">+</span></span>
+<span id="cb8-90"><a href="#cb8-90" aria-hidden="true" tabindex="-1"></a>  theme_base <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>)</span>
+<span id="cb8-91"><a href="#cb8-91" aria-hidden="true" tabindex="-1"></a>g_dup_flat_lin <span class="ot">&lt;-</span> g_dup_flat_base <span class="sc">+</span> </span>
+<span id="cb8-92"><a href="#cb8-92" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">"Fraction of duplicate reads"</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="fl">0.41</span>), <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="fl">0.1</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>))</span>
+<span id="cb8-93"><a href="#cb8-93" aria-hidden="true" tabindex="-1"></a>g_dup_flat_log <span class="ot">&lt;-</span> g_dup_flat_base <span class="sc">+</span> <span class="fu">scale_y_log10</span>(<span class="at">name =</span> <span class="st">"Fraction of duplicate reads"</span>)</span>
+<span id="cb8-94"><a href="#cb8-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-95"><a href="#cb8-95" aria-hidden="true" tabindex="-1"></a><span class="co"># Show plats</span></span>
+<span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a>g_dup_flat_lin</span>
+<span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a>g_dup_flat_log</span>
+<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-99"><a href="#cb8-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-100"><a href="#cb8-100" aria-hidden="true" tabindex="-1"></a>We can see that the fraction of duplicates reaches quite high levels as we approach the full read count, especially when <span class="in">`unpair repair`</span> is enabled. It also looks like the gradient of increase is quite high on the linear-log plot, which would suggest that further OOM increases in read depth might result in quite large increases in the fraction of duplicates. It's also apparent that, for whatever reason, D23-13406 has substantially fewer duplicates at any given read depth than the other two samples.</span>
+<span id="cb8-101"><a href="#cb8-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-102"><a href="#cb8-102" aria-hidden="true" tabindex="-1"></a>However, further interpretation of these results, including extrapolation to greater read depths, is made difficult by the lack of a theoretical model for what we expect to see. It's also not clear what mode of visualization (Linear-log? Log-linear? Log-log? Fraction of duplicates expressed as probabilities or odds? Etc) is most meaningful for interpretation.</span>
+<span id="cb8-103"><a href="#cb8-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-104"><a href="#cb8-104" aria-hidden="true" tabindex="-1"></a>To start resolving some of these roadblocks, I spent some time working on a very simple model of read duplication, to see what it might tell us about the expected pattern of duplicates as a function of read depth.</span>
+<span id="cb8-105"><a href="#cb8-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-106"><a href="#cb8-106" aria-hidden="true" tabindex="-1"></a><span class="fu"># A very very simple model of read duplication</span></span>
+<span id="cb8-107"><a href="#cb8-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-108"><a href="#cb8-108" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Imagine a sample containing $N$ distinct molecules, which are uniformly amplified up to $M = N \times 2^C$ molecules by a perfectly unbiased $C$-cycle PCR reaction. Adapters are ligated and the resulting library is washed across the flow cell to generate $X$ total clusters (again, without bias<span class="ot">[^2]</span>). These clusters are then sequenced by a process that generates optical duplicates at some rate $O$, for a total expectation of $R=X\times(1+O)$ reads.</span>
+<span id="cb8-109"><a href="#cb8-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-110"><a href="#cb8-110" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Each cluster is selected from the $M$ molecules in the library, without replacement. When $C$ is large and amplification is uniform across molecules, this is well-approximated by selecting from the $N$ input molecules with replacement. Under these conditions, the number of clusters generated from input molecule $i$ is approximately $X_i \sim \mathrm{B}(X,N^{-1})$.</span>
+<span id="cb8-111"><a href="#cb8-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-112"><a href="#cb8-112" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The number of optical duplicates generated from a given input molecule is then approximately $P_i \sim \mathrm{B}(X_i,O)$, and the total number of reads corresponding to a given input molecule is thus $R_i = X_i + P_i$. The number of duplicates generated from that molecule is then $D_i = \max(0,R_i - 1)$, and the overall fraction of duplicates is $F=\frac{D}{R}=\frac{\sum_iD_i}{\sum_iR_i}$ .</span>
+<span id="cb8-113"><a href="#cb8-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-114"><a href="#cb8-114" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The expected fraction of duplicates under this model can be estimated analytically as follows<span class="ot">[^3]</span>:</span>
+<span id="cb8-115"><a href="#cb8-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-116"><a href="#cb8-116" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>$E(R_i)=\sum_{r=1}^{2X} r \cdot P(R_i = r) = \sum_{r=1}^{2X}r\cdot\left[\sum_{k=0}^{r}P(X_i = k)\cdot{}P(P_i=r-k|X_i=k)\right]$</span>
+<span id="cb8-117"><a href="#cb8-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-118"><a href="#cb8-118" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>$E(D_i) = \sum_{r=1}^{2X} (r-1) \cdot P(R_i = r)$</span>
+<span id="cb8-119"><a href="#cb8-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-120"><a href="#cb8-120" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>$E(D) = E\left(\sum_i D_i\right) = N \cdot E(D_i)$</span>
+<span id="cb8-121"><a href="#cb8-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-122"><a href="#cb8-122" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>$R = \sum_i R_i = \sum_r r \cdot \mathbb{N}(R_i = r)$</span>
+<span id="cb8-123"><a href="#cb8-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-124"><a href="#cb8-124" aria-hidden="true" tabindex="-1"></a><span class="ss">        -   </span>When $N$ is large, $\mathbb{N}(R_i = r) \approx N \cdot P(R_i = r)$, and so $R \approx \sum_r r \cdot N \cdot P(R_i = r) = N \cdot E(R_i)$</span>
+<span id="cb8-125"><a href="#cb8-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-126"><a href="#cb8-126" aria-hidden="true" tabindex="-1"></a><span class="ss">        -   </span>Hence $E\left(\frac{1}{R}\right) \approx \frac{1}{N \cdot E(R_i)}$</span>
+<span id="cb8-127"><a href="#cb8-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-128"><a href="#cb8-128" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>Thus $E(F) = E\left(\frac{D}{R}\right) = E(D) \cdot E\left(\frac{1}{R}\right) \approx \frac{N \cdot E(D_i)}{N \cdot E(R_i)} = \frac{E(D_i)}{E(R_i)}$</span>
+<span id="cb8-129"><a href="#cb8-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-130"><a href="#cb8-130" aria-hidden="true" tabindex="-1"></a><span class="ot">[^2]: </span>Probably the biggest two improvements that could be made to this model in future are (i) introducing biological duplicates, and (ii) introducing sequence-specific bias in PCR amplification and cluster formation.</span>
+<span id="cb8-131"><a href="#cb8-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-132"><a href="#cb8-132" aria-hidden="true" tabindex="-1"></a><span class="ot">[^3]: </span>I'd appreciate it if someone else on the team can check my math here.</span>
+<span id="cb8-133"><a href="#cb8-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-134"><a href="#cb8-134" aria-hidden="true" tabindex="-1"></a>Using computational implementations of these formulae, we can investigate how the fraction of duplicates varies with the number of clusters for different parameter values.</span>
+<span id="cb8-135"><a href="#cb8-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-138"><a href="#cb8-138" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb8-139"><a href="#cb8-139" aria-hidden="true" tabindex="-1"></a><span class="co"># Define auxiliary functions</span></span>
+<span id="cb8-140"><a href="#cb8-140" aria-hidden="true" tabindex="-1"></a>log_p_clusters <span class="ot">&lt;-</span> <span class="cf">function</span>(n_clusters, total_clusters, n_molecules) <span class="fu">dbinom</span>(n_clusters, total_clusters, <span class="dv">1</span><span class="sc">/</span>n_molecules, <span class="at">log=</span><span class="cn">TRUE</span>)</span>
+<span id="cb8-141"><a href="#cb8-141" aria-hidden="true" tabindex="-1"></a>log_p_opt_dups <span class="ot">&lt;-</span> <span class="cf">function</span>(n_opt_dups, n_clusters, p_opt_dup) <span class="fu">dbinom</span>(n_opt_dups, n_clusters, p_opt_dup, <span class="at">log=</span><span class="cn">TRUE</span>)</span>
+<span id="cb8-142"><a href="#cb8-142" aria-hidden="true" tabindex="-1"></a>p_reads <span class="ot">&lt;-</span> <span class="cf">function</span>(n_reads, total_clusters, n_molecules, p_opt_dup){</span>
+<span id="cb8-143"><a href="#cb8-143" aria-hidden="true" tabindex="-1"></a>  n_clusters <span class="ot">&lt;-</span> n_reads <span class="sc">-</span> (<span class="dv">0</span><span class="sc">:</span>(n_reads<span class="sc">/</span><span class="dv">2</span>))</span>
+<span id="cb8-144"><a href="#cb8-144" aria-hidden="true" tabindex="-1"></a>  log_p_n_clusters <span class="ot">&lt;-</span> <span class="fu">log_p_clusters</span>(n_clusters, total_clusters, n_molecules)</span>
+<span id="cb8-145"><a href="#cb8-145" aria-hidden="true" tabindex="-1"></a>  log_p_n_opt_dups <span class="ot">&lt;-</span> <span class="fu">log_p_opt_dups</span>(n_reads <span class="sc">-</span> n_clusters, n_clusters, p_opt_dup)</span>
+<span id="cb8-146"><a href="#cb8-146" aria-hidden="true" tabindex="-1"></a>  log_p_reads_clusters <span class="ot">&lt;-</span> log_p_n_clusters <span class="sc">+</span> log_p_n_opt_dups</span>
+<span id="cb8-147"><a href="#cb8-147" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">sum</span>(<span class="fu">exp</span>(log_p_reads_clusters)))</span>
+<span id="cb8-148"><a href="#cb8-148" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-149"><a href="#cb8-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-150"><a href="#cb8-150" aria-hidden="true" tabindex="-1"></a><span class="co"># Define main function</span></span>
+<span id="cb8-151"><a href="#cb8-151" aria-hidden="true" tabindex="-1"></a>exp_duplicates <span class="ot">&lt;-</span> <span class="cf">function</span>(n_molecules, total_clusters, p_opt_dup, <span class="at">initial_vector_length =</span> <span class="fl">1e8</span>){</span>
+<span id="cb8-152"><a href="#cb8-152" aria-hidden="true" tabindex="-1"></a>  pr <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">partial</span>(p_reads, <span class="at">total_clusters =</span> total_clusters, <span class="at">n_molecules =</span> n_molecules, <span class="at">p_opt_dup =</span> p_opt_dup)</span>
+<span id="cb8-153"><a href="#cb8-153" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate read count probabilities</span></span>
+<span id="cb8-154"><a href="#cb8-154" aria-hidden="true" tabindex="-1"></a>  n_reads <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>initial_vector_length</span>
+<span id="cb8-155"><a href="#cb8-155" aria-hidden="true" tabindex="-1"></a>  p_n_reads <span class="ot">&lt;-</span> <span class="fu">numeric</span>(initial_vector_length)</span>
+<span id="cb8-156"><a href="#cb8-156" aria-hidden="true" tabindex="-1"></a>  break_zero <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span>
+<span id="cb8-157"><a href="#cb8-157" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(n_reads)){</span>
+<span id="cb8-158"><a href="#cb8-158" aria-hidden="true" tabindex="-1"></a>    p <span class="ot">&lt;-</span> <span class="fu">pr</span>(n_reads[n])</span>
+<span id="cb8-159"><a href="#cb8-159" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (p <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;&amp;</span> break_zero){</span>
+<span id="cb8-160"><a href="#cb8-160" aria-hidden="true" tabindex="-1"></a>      n_reads <span class="ot">&lt;-</span> n_reads[<span class="dv">1</span><span class="sc">:</span>n]</span>
+<span id="cb8-161"><a href="#cb8-161" aria-hidden="true" tabindex="-1"></a>      p_n_reads <span class="ot">&lt;-</span> p_n_reads[<span class="dv">1</span><span class="sc">:</span>n]</span>
+<span id="cb8-162"><a href="#cb8-162" aria-hidden="true" tabindex="-1"></a>      <span class="cf">break</span></span>
+<span id="cb8-163"><a href="#cb8-163" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> <span class="cf">if</span> (p <span class="sc">!=</span> <span class="dv">0</span> <span class="sc">&amp;&amp;</span> <span class="sc">!</span>break_zero){</span>
+<span id="cb8-164"><a href="#cb8-164" aria-hidden="true" tabindex="-1"></a>      break_zero <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb8-165"><a href="#cb8-165" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb8-166"><a href="#cb8-166" aria-hidden="true" tabindex="-1"></a>    p_n_reads[n] <span class="ot">&lt;-</span> p</span>
+<span id="cb8-167"><a href="#cb8-167" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-168"><a href="#cb8-168" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate fraction of duplicates</span></span>
+<span id="cb8-169"><a href="#cb8-169" aria-hidden="true" tabindex="-1"></a>  n_duplicates <span class="ot">&lt;-</span> n_reads <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb8-170"><a href="#cb8-170" aria-hidden="true" tabindex="-1"></a>  p_duplicates <span class="ot">&lt;-</span> <span class="fu">sum</span>(n_duplicates <span class="sc">*</span> p_n_reads)<span class="sc">/</span><span class="fu">sum</span>(n_reads <span class="sc">*</span> p_n_reads)</span>
+<span id="cb8-171"><a href="#cb8-171" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(p_duplicates)</span>
+<span id="cb8-172"><a href="#cb8-172" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-173"><a href="#cb8-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-174"><a href="#cb8-174" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameter set 1: N = 1e6, O = 1e-6</span></span>
+<span id="cb8-175"><a href="#cb8-175" aria-hidden="true" tabindex="-1"></a>tab_model_1 <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">n_molecules =</span> <span class="fl">1e6</span>,</span>
+<span id="cb8-176"><a href="#cb8-176" aria-hidden="true" tabindex="-1"></a>                      <span class="at">p_opt_dup =</span> <span class="fl">1e-6</span>,</span>
+<span id="cb8-177"><a href="#cb8-177" aria-hidden="true" tabindex="-1"></a>                      <span class="at">total_clusters =</span> <span class="fu">round</span>(<span class="dv">10</span><span class="sc">^</span><span class="fu">seq</span>(<span class="dv">4</span>,<span class="dv">8</span>,<span class="fl">0.5</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb8-178"><a href="#cb8-178" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(n_molecules, p_opt_dup) <span class="sc">%&gt;%</span></span>
+<span id="cb8-179"><a href="#cb8-179" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">p_duplicates =</span> <span class="fu">sapply</span>(total_clusters, <span class="cf">function</span>(x) <span class="fu">exp_duplicates</span>(n_molecules, x, p_opt_dup)))</span>
+<span id="cb8-180"><a href="#cb8-180" aria-hidden="true" tabindex="-1"></a>g_1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(tab_model_1, <span class="fu">aes</span>(<span class="at">x=</span>total_clusters, <span class="at">y=</span>p_duplicates)) <span class="sc">+</span></span>
+<span id="cb8-181"><a href="#cb8-181" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> n_molecules), <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">colour =</span> <span class="st">"red"</span>) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">shape =</span> <span class="dv">16</span>) <span class="sc">+</span></span>
+<span id="cb8-182"><a href="#cb8-182" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>(<span class="at">name =</span> <span class="st">"# Total Clusters"</span>) <span class="sc">+</span></span>
+<span id="cb8-183"><a href="#cb8-183" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">"Fraction of duplicate reads"</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>), <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="fl">0.2</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span> </span>
+<span id="cb8-184"><a href="#cb8-184" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="fu">paste0</span>(<span class="st">"N = "</span>, tab_model_1<span class="sc">$</span>n_molecules[<span class="dv">1</span>], <span class="st">", O = "</span>, tab_model_1<span class="sc">$</span>p_opt_dup[<span class="dv">1</span>])) <span class="sc">+</span></span>
+<span id="cb8-185"><a href="#cb8-185" aria-hidden="true" tabindex="-1"></a>  theme_base <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>)</span>
+<span id="cb8-186"><a href="#cb8-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-187"><a href="#cb8-187" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameter set 2: N = 1e9, O = 1e-6</span></span>
+<span id="cb8-188"><a href="#cb8-188" aria-hidden="true" tabindex="-1"></a>tab_model_2 <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">n_molecules =</span> <span class="fl">1e9</span>,</span>
+<span id="cb8-189"><a href="#cb8-189" aria-hidden="true" tabindex="-1"></a>                      <span class="at">p_opt_dup =</span> <span class="fl">1e-6</span>,</span>
+<span id="cb8-190"><a href="#cb8-190" aria-hidden="true" tabindex="-1"></a>                      <span class="at">total_clusters =</span> <span class="fu">round</span>(<span class="dv">10</span><span class="sc">^</span><span class="fu">seq</span>(<span class="dv">6</span>,<span class="dv">12</span>,<span class="fl">0.5</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb8-191"><a href="#cb8-191" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(n_molecules, p_opt_dup) <span class="sc">%&gt;%</span></span>
+<span id="cb8-192"><a href="#cb8-192" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">p_duplicates =</span> <span class="fu">sapply</span>(total_clusters, <span class="cf">function</span>(x) <span class="fu">exp_duplicates</span>(n_molecules, x, p_opt_dup)))</span>
+<span id="cb8-193"><a href="#cb8-193" aria-hidden="true" tabindex="-1"></a>g_2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(tab_model_2, <span class="fu">aes</span>(<span class="at">x=</span>total_clusters, <span class="at">y=</span>p_duplicates)) <span class="sc">+</span></span>
+<span id="cb8-194"><a href="#cb8-194" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> n_molecules), <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">colour =</span> <span class="st">"red"</span>) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">shape =</span> <span class="dv">16</span>) <span class="sc">+</span></span>
+<span id="cb8-195"><a href="#cb8-195" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>(<span class="at">name =</span> <span class="st">"# Total Clusters"</span>) <span class="sc">+</span></span>
+<span id="cb8-196"><a href="#cb8-196" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">"Fraction of duplicate reads"</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>), <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="fl">0.2</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span> </span>
+<span id="cb8-197"><a href="#cb8-197" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="fu">paste0</span>(<span class="st">"N = "</span>, tab_model_2<span class="sc">$</span>n_molecules[<span class="dv">1</span>], <span class="st">", O = "</span>, tab_model_2<span class="sc">$</span>p_opt_dup[<span class="dv">1</span>])) <span class="sc">+</span></span>
+<span id="cb8-198"><a href="#cb8-198" aria-hidden="true" tabindex="-1"></a>  theme_base <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>)</span>
+<span id="cb8-199"><a href="#cb8-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-200"><a href="#cb8-200" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameter set 3: N = 1e12, O = 1e-6</span></span>
+<span id="cb8-201"><a href="#cb8-201" aria-hidden="true" tabindex="-1"></a>tab_model_3 <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">n_molecules =</span> <span class="fl">1e12</span>,</span>
+<span id="cb8-202"><a href="#cb8-202" aria-hidden="true" tabindex="-1"></a>                      <span class="at">p_opt_dup =</span> <span class="fl">1e-6</span>,</span>
+<span id="cb8-203"><a href="#cb8-203" aria-hidden="true" tabindex="-1"></a>                      <span class="at">total_clusters =</span> <span class="fu">round</span>(<span class="dv">10</span><span class="sc">^</span><span class="fu">seq</span>(<span class="dv">9</span>,<span class="dv">15</span>,<span class="fl">0.5</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb8-204"><a href="#cb8-204" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(n_molecules, p_opt_dup) <span class="sc">%&gt;%</span></span>
+<span id="cb8-205"><a href="#cb8-205" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">p_duplicates =</span> <span class="fu">sapply</span>(total_clusters, <span class="cf">function</span>(x) <span class="fu">exp_duplicates</span>(n_molecules, x, p_opt_dup)))</span>
+<span id="cb8-206"><a href="#cb8-206" aria-hidden="true" tabindex="-1"></a>g_3 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(tab_model_3, <span class="fu">aes</span>(<span class="at">x=</span>total_clusters, <span class="at">y=</span>p_duplicates)) <span class="sc">+</span></span>
+<span id="cb8-207"><a href="#cb8-207" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> n_molecules), <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">colour =</span> <span class="st">"red"</span>) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">shape =</span> <span class="dv">16</span>) <span class="sc">+</span></span>
+<span id="cb8-208"><a href="#cb8-208" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>(<span class="at">name =</span> <span class="st">"# Total Clusters"</span>) <span class="sc">+</span></span>
+<span id="cb8-209"><a href="#cb8-209" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">"Fraction of duplicate reads"</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>), <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="fl">0.2</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span> </span>
+<span id="cb8-210"><a href="#cb8-210" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="fu">paste0</span>(<span class="st">"N = "</span>, tab_model_3<span class="sc">$</span>n_molecules[<span class="dv">1</span>], <span class="st">", O = "</span>, tab_model_3<span class="sc">$</span>p_opt_dup[<span class="dv">1</span>])) <span class="sc">+</span></span>
+<span id="cb8-211"><a href="#cb8-211" aria-hidden="true" tabindex="-1"></a>  theme_base <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>)</span>
+<span id="cb8-212"><a href="#cb8-212" aria-hidden="true" tabindex="-1"></a>g_1 <span class="sc">+</span> g_2 <span class="sc">+</span> g_3</span>
+<span id="cb8-213"><a href="#cb8-213" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-214"><a href="#cb8-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-215"><a href="#cb8-215" aria-hidden="true" tabindex="-1"></a>I don't want to take these results too seriously, since they're based on an extremely simple model, but there are some qualitative takeaways that I found helpful to keep in mind when looking at the real data. In particular, the general pattern of the model results is that **the fraction of duplicate reads follows a sigmoidal pattern on a linear-log plot**:</span>
+<span id="cb8-216"><a href="#cb8-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-217"><a href="#cb8-217" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>When $X &lt;&lt; N$, the fraction of duplicates $F$ is close to zero.</span>
+<span id="cb8-218"><a href="#cb8-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-219"><a href="#cb8-219" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>As $X$ approaches $N$, the fraction of duplicates begins increasing, first slowly and then (after $F$ reaches about 0.1) rapidly, before leveling off after $F$ exceeds about 0.9.</span>
+<span id="cb8-220"><a href="#cb8-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-221"><a href="#cb8-221" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>When $X &gt;&gt; N$, $F \approx 1$.</span>
+<span id="cb8-222"><a href="#cb8-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-223"><a href="#cb8-223" aria-hidden="true" tabindex="-1"></a>At least under the assumptions used here, once the fraction of duplicates goes above 15% or so, further OOM increases in the number of clusters (e.g. by buying more or larger flow cells) will lead to a dramatic increase in the fraction of duplicate reads.</span>
+<span id="cb8-224"><a href="#cb8-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-225"><a href="#cb8-225" aria-hidden="true" tabindex="-1"></a><span class="fu"># Applying model takeaways</span></span>
+<span id="cb8-226"><a href="#cb8-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-227"><a href="#cb8-227" aria-hidden="true" tabindex="-1"></a>Returning to the results from the BMC data with these modeling results in mind:</span>
+<span id="cb8-228"><a href="#cb8-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-231"><a href="#cb8-231" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb8-232"><a href="#cb8-232" aria-hidden="true" tabindex="-1"></a>g_dup_flat_lin</span>
+<span id="cb8-233"><a href="#cb8-233" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-234"><a href="#cb8-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-235"><a href="#cb8-235" aria-hidden="true" tabindex="-1"></a>Assuming that the real data will follow a sigmoidal pattern roughly resembling that from the model, we see that all samples (with the possible exception of D23-13406 when <span class="in">`unpair repair`</span> is disabled) are in the "danger zone", such that further OOM increases in read depth will likely lead to a dramatic increase in the fraction of duplicate reads. As such, **it probably isn't worth paying for a further OOM increase (or even half-OOM increase) in read depth for these samples**.</span>
+<span id="cb8-236"><a href="#cb8-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-237"><a href="#cb8-237" aria-hidden="true" tabindex="-1"></a><span class="fu"># Conclusions</span></span>
+<span id="cb8-238"><a href="#cb8-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-239"><a href="#cb8-239" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Overall, running this analysis was a frustrating experience, due to difficulties finding a configuration of Clumpify (or any other deduplication tool I know of) that (i) I trust to remove duplicates appropriately without predictably over- or under-counting, and (ii) runs well on large FASTQ files. Ultimately, I think we should treat the true level of duplicates as somewhere in between that measured by method 1 (Clumpify with <span class="in">`unpair repair`</span> enabled) and method 2 (Clumpify with <span class="in">`unpair repair`</span> disabled).</span>
+<span id="cb8-240"><a href="#cb8-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-241"><a href="#cb8-241" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>For the actual virus-detection pipeline, my current best bet is that we should run method 2 on the full dataset, then method 1 on the specific viral hits identified by Kraken2 (or the alignment tool used for validation, once that's been implemented). However, we ultimately might want to implement our own tool for dealing with this problem.</span>
+<span id="cb8-242"><a href="#cb8-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-243"><a href="#cb8-243" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Nevertheless, I was able to generate rarefaction curves for duplication rate as a function of the number of reads using both methods. The results, in combination with a very simple model I generated to aid interpretation, suggest that we're probably at about the highest OOM read depth we should aim for in terms of getting useful information from these samples (with the possible exception of D23-13406).</span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+</body></html>
