@@ -2,7 +2,7 @@
 title: "Estimating the effect of read depth on duplication rate for Project Runway DNA data"
 subtitle: "How deep can we go?"
 author: "Will Bradshaw"
-date: 2023-11-02
+date: 2023-11-08
 format:
   html:
     code-fold: true

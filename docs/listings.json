@@ -2,8 +2,8 @@
   {
     "listing": "/index.html",
     "items": [
-      "/notebooks/2023-11-02_project-runway-comparison.html",
       "/notebooks/2023-11-02_project-runway-dna-deduplication.html",
+      "/notebooks/2023-11-02_project-runway-comparison.html",
       "/notebooks/2023-10-31_project-runway-initial.html",
       "/notebooks/2023-10-19_deduplication.html",
       "/notebooks/2023-10-13_rrna-removal.html",
