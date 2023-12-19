@@ -32,7 +32,7 @@
     "href": "index.html",
     "title": "Will's Public NAO Notebook",
     "section": "",
-    "text": "Estimating the effect of read depth on duplication rate for Project Runway DNA data\n\n\nHow deep can we go?\n\n\n\n\n\n\nNov 8, 2023\n\n\n\n\n\n\n  \n\n\n\n\nComparing viral read assignments between pipelines on Project Runway data\n\n\n\n\n\n\n\n\n\nNov 2, 2023\n\n\n\n\n\n\n  \n\n\n\n\nInitial analysis of Project Runway protocol testing data\n\n\n\n\n\n\n\n\n\nOct 31, 2023\n\n\n\n\n\n\n  \n\n\n\n\nComparing options for read deduplication\n\n\nClumpify vs fastp\n\n\n\n\n\n\nOct 19, 2023\n\n\n\n\n\n\n  \n\n\n\n\nComparing Ribodetector and bbduk for rRNA detection\n\n\nIn search of quick rRNA filtering.\n\n\n\n\n\n\nOct 16, 2023\n\n\n\n\n\n\n  \n\n\n\n\nComparing FASTP and AdapterRemoval for MGS pre-processing\n\n\nTwo tools – how do they perform?\n\n\n\n\n\n\nOct 12, 2023\n\n\n\n\n\n\n  \n\n\n\n\nHow does Element AVITI sequencing work?\n\n\nFindings of a shallow investigation\n\n\n\n\n\n\nOct 11, 2023\n\n\n\n\n\n\n  \n\n\n\n\nExtraction experiment 2: high-level results & interpretation\n\n\nComparing RNA yields and quality across extraction kits for settled solids\n\n\n\n\n\n\nSep 21, 2023\n\n\n\n\n\n\nNo matching items"
+    "text": "Workflow analysis of Project Runway RNA-seq testing data\n\n\nApplying a new workflow to some oldish data.\n\n\n\n\n\n\nDec 19, 2023\n\n\n\n\n\n\n  \n\n\n\n\nEstimating the effect of read depth on duplication rate for Project Runway DNA data\n\n\nHow deep can we go?\n\n\n\n\n\n\nNov 8, 2023\n\n\n\n\n\n\n  \n\n\n\n\nComparing viral read assignments between pipelines on Project Runway data\n\n\n\n\n\n\n\n\n\nNov 2, 2023\n\n\n\n\n\n\n  \n\n\n\n\nInitial analysis of Project Runway protocol testing data\n\n\n\n\n\n\n\n\n\nOct 31, 2023\n\n\n\n\n\n\n  \n\n\n\n\nComparing options for read deduplication\n\n\nClumpify vs fastp\n\n\n\n\n\n\nOct 19, 2023\n\n\n\n\n\n\n  \n\n\n\n\nComparing Ribodetector and bbduk for rRNA detection\n\n\nIn search of quick rRNA filtering.\n\n\n\n\n\n\nOct 16, 2023\n\n\n\n\n\n\n  \n\n\n\n\nComparing FASTP and AdapterRemoval for MGS pre-processing\n\n\nTwo tools – how do they perform?\n\n\n\n\n\n\nOct 12, 2023\n\n\n\n\n\n\n  \n\n\n\n\nHow does Element AVITI sequencing work?\n\n\nFindings of a shallow investigation\n\n\n\n\n\n\nOct 11, 2023\n\n\n\n\n\n\n  \n\n\n\n\nExtraction experiment 2: high-level results & interpretation\n\n\nComparing RNA yields and quality across extraction kits for settled solids\n\n\n\n\n\n\nSep 21, 2023\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "notebooks/2023-10-12_fastp-vs-adapterremoval.html",
@@ -152,5 +152,33 @@
     "title": "Estimating the effect of read depth on duplication rate for Project Runway DNA data",
     "section": "Footnotes",
     "text": "Footnotes\n\nIt might be worth explicitly modeling the difference in behavior between different kinds of duplicates as sequencing depth increases, to see if these intuitions are borne out.↩︎\nProbably the biggest two improvements that could be made to this model in future are (i) introducing biological duplicates, and (ii) introducing sequence-specific bias in PCR amplification and cluster formation.↩︎\nI’d appreciate it if someone else on the team can check my math here.↩︎"
+  },
+  {
+    "objectID": "notebooks/2023-10-31_project-runway-bmc-rna.html",
+    "href": "notebooks/2023-10-31_project-runway-bmc-rna.html",
+    "title": "Workflow analysis of Project Runway RNA-seq testing data",
+    "section": "",
+    "text": "On 2023-11-06, we received the RNA-sequencing portion of the testing data we ordered in late September, partner to the DNA data I analyzed in a previous notebook. At the time, I didn’t do much in-depth analysis of these data, other than doing some basic QC and preprocessing and noting that the ribosomal fraction seemed very high. Now, having spent some time working on a new Nextflow workflow for analyzing sequencing data, I’m coming back to these data to apply that workflow and look at the results."
+  },
+  {
+    "objectID": "notebooks/2023-10-31_project-runway-bmc-rna.html#footnotes",
+    "href": "notebooks/2023-10-31_project-runway-bmc-rna.html#footnotes",
+    "title": "Workflow analysis of Project Runway RNA-seq testing data",
+    "section": "Footnotes",
+    "text": "Footnotes\n\nThough they might be too short; I don’t use CD-search enough to have a great sense of minimum length requirements.↩︎"
+  },
+  {
+    "objectID": "notebooks/2023-12-19_project-runway-bmc-rna.html",
+    "href": "notebooks/2023-12-19_project-runway-bmc-rna.html",
+    "title": "Workflow analysis of Project Runway RNA-seq testing data",
+    "section": "",
+    "text": "On 2023-11-06, we received the RNA-sequencing portion of the testing data we ordered in late September, partner to the DNA data I analyzed in a previous notebook. At the time, I didn’t do much in-depth analysis of these data, other than doing some basic QC and preprocessing and noting that the ribosomal fraction seemed very high. Now, having spent some time working on a new Nextflow workflow for analyzing sequencing data, I’m coming back to these data to apply that workflow and look at the results."
+  },
+  {
+    "objectID": "notebooks/2023-12-19_project-runway-bmc-rna.html#footnotes",
+    "href": "notebooks/2023-12-19_project-runway-bmc-rna.html#footnotes",
+    "title": "Workflow analysis of Project Runway RNA-seq testing data",
+    "section": "Footnotes",
+    "text": "Footnotes\n\nThough they might be too short; I don’t use CD-search enough to have a great sense of minimum length requirements.↩︎"
   }
 ]

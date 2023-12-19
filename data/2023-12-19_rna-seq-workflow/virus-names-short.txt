@@ -1,0 +1,39 @@
+virus_name	virus_name_short
+Influenza A virus (A/New York/392/2004(H3N2))	Influenza A virus
+Human picobirnavirus	Human picobirnavirus
+Human astrovirus 1	Mamastrovirus
+Human astrovirus 4	Mamastrovirus
+Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2
+Influenza A virus (A/Puerto Rico/8/1934(H1N1))	Influenza A virus
+Husavirus sp.	Husavirus
+Mamastrovirus 1	Mamastrovirus
+Sapovirus Hu/Dresden/pJG-Sap01/DE	Sapovirus
+Astrovirus MLB1 HK05	Mamastrovirus
+Salivirus CH	Salivirus
+Aichi virus 1	Aichivirus
+Human mastadenovirus C	Mastadenovirus
+Norovirus Hu/GII.6/CHDC4073/1984/USA	Norovirus GII
+Sapovirus Hu/G1/BE-HPI01/DE/2012	Sapovirus
+Norovirus GII/Hu/HK/2016/GII.P16_GII.2/CUHK-NS-1082	Norovirus GII
+Norwalk-like virus	Norwalk-like virus
+Salivirus A	Salivirus
+Norovirus Hu/GII/CN/2014/GII.17/FX141226-31	Norovirus GII
+Salivirus NG-J1	Salivirus
+Astrovirus VA3	Mamastrovirus
+Hudisavirus sp.	Hudisavirus
+Human adenovirus 1	Adenovirus
+Human astrovirus 1 Beijing/291/2007/CHN	Mamastrovirus
+Norovirus GI.6	Norovirus GI
+Norovirus Hu/GII.4/CHDC2094/1974/US	Norovirus GII
+Astrovirus VA2	Mamastrovirus
+Human astrovirus 2	Mamastrovirus
+Human mastadenovirus A	Mastadenovirus
+Norovirus Hu/GII.4/Saga4/2009/JP	Norovirus GII
+Coxsackievirus A14	Coxsackievirus
+Human immunodeficiency virus 1	HIV
+Influenza A virus (A/Korea/426/1968(H2N2))	Influenza A virus
+Norovirus GII.6	Norovirus GII
+Norovirus Hu/GII.3/HK71/1978/CHN	Norovirus GII
+Rhinovirus C	Rhinovirus
+SARS coronavirus HGZ8L2	SARS-CoV-2
+aichivirus B3	Aichivirus
