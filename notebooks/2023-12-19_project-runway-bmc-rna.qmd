@@ -297,7 +297,9 @@ To identify human-viral reads, I used a multi-stage process similar to the one o
 Applying all of these filtering steps leaves a total of 241 read pairs across all kits.
 
 ```{r}
-#| fig-width: 10
+#| warning: false
+#| fig-width: 8
+#| fig-height: 8
 # Import Bowtie2/Kraken data and perform filtering steps
 mrg_path <- file.path(data_dir, "hv_hits_putative.tsv")
 mrg0 <- read_tsv(mrg_path, show_col_types = FALSE) %>%
@@ -318,7 +320,7 @@ g_mrg <- ggplot(mrg_all, aes(x=adj_score_fwd, y=adj_score_rev, color=assigned_hv
   scale_color_brewer(palette="Set1", name="Assigned to\nhuman virus\nby Kraken2") +
   scale_x_continuous(name="S(forward read)", limits=c(0,65), breaks=seq(0,100,20), expand = c(0,0)) +
   scale_y_continuous(name="S(reverse read)", limits=c(0,65), breaks=seq(0,100,20), expand = c(0,0)) +
-  facet_grid(filter_step~kit, labeller = labeller(filter_step=function(x) paste("Step", x))) +
+  facet_grid(filter_step~kit, labeller = labeller(filter_step=function(x) paste("Step", x), kit = label_wrap_gen(20))) +
   theme_base + theme(aspect.ratio=1)
 g_mrg
 ```
@@ -326,6 +328,9 @@ g_mrg
 This was few enough that it was feasible for me to run all of them through NCBI BLAST (megablast against nt) and investigate which further filtering criteria give the best results in terms of sensitivity and specificity for human-infecting viruses:
 
 ```{r}
+#| warning: false
+#| fig-width: 8
+#| fig-height: 8
 hv_blast <- list(
   `1A` = c(rep(TRUE, 40), TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE),
   `1C` = c(rep(TRUE, 5), "COWS", TRUE, TRUE, FALSE, TRUE, rep(FALSE, 9)),
@@ -363,7 +368,7 @@ g_mrg3_1 <- mrg3 %>% mutate(hv_blast = hv_blast == "TRUE") %>%
   scale_color_brewer(palette="Set1", name="Assigned to\nhuman virus\nby BLAST") +
   scale_x_continuous(name="S(forward read)", limits=c(0,65), breaks=seq(0,100,20), expand = c(0,0)) +
   scale_y_continuous(name="S(reverse read)", limits=c(0,65), breaks=seq(0,100,20), expand = c(0,0)) +
-  facet_grid(kraken_label~kit) +
+  facet_grid(kraken_label~kit, labeller = labeller(kit = label_wrap_gen(20))) +
   theme_base + theme(aspect.ratio=1)
 g_mrg3_1
 ```
@@ -373,6 +378,8 @@ As we can see, 100% of the reads that were marked as human-viral by both Kraken2
 A natural approach to making overall HV read assignments would be to (1) accept reads that are assigned to HV by both Kraken2 and Bowtie2, and then (2) apply a length-normalised score threshold to reads that aren't assigned to HV by Kraken. This threshold could either be conjunctive, requiring both the forward and reverse read to beat the threshold, or disjunctive, requiring only one or the other to do so. By treating the BLAST results as ground truth, we can evaluate what score threshold would provide the best overall method for identifying HV reads.
 
 ```{r}
+#| fig-width: 8
+#| fig-height: 4
 # Test sensitivity and specificity
 test_sens_spec <- function(tab, score_threshold, conjunctive, include_special){
   if (!include_special) tab <- filter(tab, hv_blast %in% c("TRUE", "FALSE"))
@@ -406,6 +413,8 @@ g_stats_withcow <- ggplot(stats_withcow, aes(x=threshold, y=value, color=metric)
   geom_line() +
   geom_vline(data = threshold_opt_withcow, mapping=aes(xintercept=threshold), color="red",
              linetype = "dashed") +
+  scale_y_continuous(name = "Value", limits=c(0,1), breaks = seq(0,1,0.2), expand = c(0,0)) +
+  scale_x_continuous(name = "Threshold", expand = c(0,0)) +
   facet_wrap(~conj_label) +
   theme_base
 g_stats_withcow
@@ -418,6 +427,9 @@ The red dashed lines indicate the threshold value with the highest F1 score (har
 One odd pattern I noticed while doing the BLAST assignments was that a surprising number of read pairs were showing very strong alignment to bovine species (*Bos taurus, Bos mutus,* and relatives), as well as one showing strong alignment to pigs. These actually accounted for a pretty large fraction of high-scoring non-viral reads:
 
 ```{r}
+#| warning: false
+#| fig-width: 8
+#| fig-height: 8
 g_mrg3_2 <- mrg3 %>%
   mutate(hv_blast = factor(hv_blast, levels = c("FALSE", "TRUE", "COWS", "PIGS"))) %>%
   ggplot(aes(x=adj_score_fwd, y=adj_score_rev, color=hv_blast)) +
@@ -425,7 +437,7 @@ g_mrg3_2 <- mrg3 %>%
   scale_color_brewer(palette="Set1", name="Assigned to\nhuman virus\nby BLAST") +
   scale_x_continuous(name="S(forward read)", limits=c(0,65), breaks=seq(0,100,20), expand = c(0,0)) +
   scale_y_continuous(name="S(reverse read)", limits=c(0,65), breaks=seq(0,100,20), expand = c(0,0)) +
-  facet_grid(kraken_label~kit) +
+  facet_grid(kraken_label~kit, labeller = labeller(kit = label_wrap_gen(20))) +
   theme_base + theme(aspect.ratio=1)
 g_mrg3_2
 ```
@@ -439,6 +451,8 @@ As such, I'm not really sure what these sequences are. That said, the idea of se
 If we remove these sequences from the dataset, we get a decent improvement in F1 score (\>0.95) at a significantly lower score threshold:
 
 ```{r}
+#| fig-width: 8
+#| fig-height: 4
 stats_nocow_conj <- lapply(15:45, test_sens_spec, tab=mrg3, include_special=FALSE, conjunctive=TRUE) %>% bind_rows
 stats_nocow_disj <- lapply(15:45, test_sens_spec, tab=mrg3, include_special=FALSE, conjunctive=FALSE) %>% bind_rows
 stats_nocow <- bind_rows(stats_nocow_conj, stats_nocow_disj) %>%
@@ -449,6 +463,8 @@ g_stats_nocow <- ggplot(stats_nocow, aes(x=threshold, y=value, color=metric)) +
   geom_line() +
   geom_vline(data = threshold_opt_nocow, mapping=aes(xintercept=threshold), color="red",
              linetype = "dashed") +
+  scale_y_continuous(name = "Value", limits=c(0,1), breaks = seq(0,1,0.2), expand = c(0,0)) +
+  scale_x_continuous(name = "Threshold", expand = c(0,0)) +
   facet_wrap(~conj_label) +
   theme_base
 g_stats_nocow
