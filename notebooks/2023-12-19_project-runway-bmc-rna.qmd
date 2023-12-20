@@ -494,7 +494,7 @@ g_hv_abundance
 
 Among the three recent protocols, the Zymo quick-RNA achieves roughly double the mean relative HV abundance of the other kits. Comparing the two QIAamp protocols, the samples that didn't undergo pre-extraction freezing also achieve more than double the relative HV abundance of those that did. It's hard to know how much weight to put on these results, though, in the absence of replication.
 
-Counting up reads by target virus, we see that the most common target across all protocols is Influenza A virus (various strains), following by human picobirnavirus, mamastroviruses, and norovirus GII. The Zymo quick-RNA kit finds way more influenza A viruses than other kits, suggesting it may have some methodological advantage for some viruses.
+Counting up reads by target virus, we see that the most common target across all protocols is Influenza A virus (various strains), following by human picobirnavirus, mamastroviruses, and norovirus GII. The Zymo quick-RNA kit finds way more influenza A viruses than other kits, suggesting it may have some methodological advantage for some viruses:
 
 ```{r}
 human_virus_path <- file.path(data_dir, "human-viruses.tsv")
@@ -516,6 +516,24 @@ virus_counts <- mrg4 %>% group_by(kit, virus_name_short) %>%
   select(virus_name_short, Total, everything()) %>%
   arrange(desc(Total))
 virus_counts
+```
+
+However, in the DNA data from this BMC submission we previously observed contamination with Influenza A H3N2 segment 4 reads, which might also be affecting this run. Checking, it seems like a large fraction (but not all) of the flu-assigned reads mapping here do indeed align to H3N2 segment 4. Filtering out these likely-contaminant reads removes the apparent advantage of the Zymo quick-RNA kit, while retaining the high-performance of the non-freeze-thaw QIAamp protocol:
+
+```{r}
+flu_path <- file.path(data_dir, "flu-reads.tsv")
+flu <- read_tsv(flu_path, show_col_types = FALSE)
+
+n_reads_hv_filtered <- mrg3 %>% filter(hv_blast == "TRUE") %>% full_join(flu, by=c("sample", "seq_num")) %>% mutate(h3n2s4 = (blast_strain == "H3N2" & blast_segment == 4) %>% replace_na((FALSE))) %>% filter(!h3n2s4) %>% group_by(kit) %>% count %>% rename(n_reads_hv = n)
+hv_abundance_filtered <- inner_join(basic_stats %>% filter(stage == "raw_concat"),
+                                    n_reads_hv_filtered, by="kit") %>%
+  mutate(hv_abundance = n_reads_hv/n_read_pairs)
+g_hv_abundance_filtered <- ggplot(hv_abundance_filtered, aes(x=kit, y=hv_abundance)) +
+  geom_point(shape=16) + 
+  scale_y_continuous(name = "Relative HV abundance (filtered)", limits=c(0,1.2e-6),
+                     breaks = seq(0, 1.2e-6, 2e-7), expand = c(0,0)) + 
+  theme_kit
+g_hv_abundance_filtered
 ```
 
 # Next actions
