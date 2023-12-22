@@ -288,7 +288,7 @@ To identify human-viral reads, I used a multi-stage process similar to the one o
 
 1.  Align reads to a database of human-infecting virus genomes with Bowtie2, with permissive parameters, & retain reads with at least one match. (Roughly 20k read pairs per kit, or 0.25% of all surviving non-host reads.)
 2.  Run reads that successfully align with Bowtie2 through Kraken2 (using the standard 16GB database) and exclude reads assigned by Kraken2 to any non-human-infecting-virus taxon. (Roughly 5500 surviving read pairs per kit.)
-3.  Calculate length-adjusted alignment score $S=\frac{\text{bowtie2 alignment score}}{\ln(\text{read length})}$. Filter out reads that don't meet at least one of the following three criteria:
+3.  Calculate length-adjusted alignment score $S=\frac{\text{bowtie2 alignment score}}{\ln(\text{read length})}$. Filter out reads that don't meet at least one of the following four criteria:
     -   The read pair is *assigned* to a human-infecting virus by both Kraken and Bowtie2
     -   The read pair contains a Kraken2 *hit* to the same taxid as it is assigned to by Bowtie2.
     -   The read pair is unassigned by Kraken and $S>15$ for the forward read

@@ -1,0 +1,251 @@
+---
+title: "Project Runway RNA-seq testing data: removing livestock reads"
+subtitle: ""
+author: "Will Bradshaw"
+date: 2023-12-22
+format:
+  html:
+    code-fold: true
+    code-tools: true
+    code-link: true
+    df-print: paged
+editor: visual
+title-block-banner: black
+---
+
+```{r}
+#| label: load-packages
+#| include: false
+library(tidyverse)
+library(cowplot)
+library(patchwork)
+library(fastqcr)
+source("../scripts/aux_plot-theme.R")
+theme_kit <- theme_base + theme(
+  aspect.ratio = 1,
+  axis.text.x = element_text(hjust = 1, angle = 45),
+  axis.title.x = element_blank()
+)
+```
+
+In my [last entry](https://data.securebio.org/wills-public-notebook/notebooks/2023-12-19_project-runway-bmc-rna.html), I presented my [Nextflow workflow](https://github.com/naobservatory/mgs-workflow) for analyzing viral MGS data, as well as the results of that workflow applied to our recent BMC RNA-seq dataset. One surprising thing I observed in those data was the presence of bovine and porcine sequences confounding my pipeline for identifying human-infecting-virus reads. To address this problem, I added a step to the pipeline to remove mammalian livestock sequences in a manner similar to the pre-existing human-removal step, by screening reads against cow and pig genomes using BBMap. In this short entry, I present the results of that change.
+
+As expected, the bulk of the pipeline performed identically to the last analysis. Mammalian read depletion removed between 8k and 18k reads per protocol (0.007% to 0.017%):
+
+```{r}
+# Import stats
+kits <- tibble(sample = c("1A", "1C", "2A", "2C", "6A", "6C", "SS1", "SS2"),
+               kit = c(rep("Zymo quick-RNA kit", 2),
+                       rep("Zymo quick-DNA/RNA kit", 2),
+                       rep("QIAamp Viral RNA mini kit (new)", 2),
+                       rep("QIAamp Viral RNA mini kit (old)", 2))) %>%
+  mutate(kit = fct_inorder(kit))
+stages <- c("raw_concat", "cleaned", "dedup", "ribo_initial", "remove_human", "remove_other", "ribo_secondary")
+data_dir_1 <- "../data/2023-12-19_rna-seq-workflow/"
+data_dir_2 <- "../data/2023-12-22_bmc-cow-depletion/"
+basic_stats_path <- file.path(data_dir_2, "qc_basic_stats.tsv")
+adapter_stats_path <- file.path(data_dir_2, "qc_adapter_stats.tsv")
+quality_base_stats_path <- file.path(data_dir_2, "qc_quality_base_stats.tsv")
+quality_seq_stats_path <- file.path(data_dir_2, "qc_quality_sequence_stats.tsv")
+# Extract stats
+basic_stats <- read_tsv(basic_stats_path, show_col_types = FALSE) %>% 
+  inner_join(kits, by="sample") %>% mutate(stage = factor(stage, levels = stages))
+adapter_stats <- read_tsv(adapter_stats_path, show_col_types = FALSE) %>% 
+  inner_join(kits, by="sample") %>% mutate(stage = factor(stage, levels = stages), read_pair = fct_inorder(as.character(read_pair)))
+quality_base_stats <- read_tsv(quality_base_stats_path, show_col_types = FALSE) %>% 
+  inner_join(kits, by="sample") %>% mutate(stage = factor(stage, levels = stages), read_pair = fct_inorder(as.character(read_pair)))
+quality_seq_stats <- read_tsv(quality_seq_stats_path, show_col_types = FALSE) %>% 
+  inner_join(kits, by="sample") %>% mutate(stage = factor(stage, levels = stages), read_pair = fct_inorder(as.character(read_pair)))
+# Plot stages
+basic_stats_stages <- basic_stats %>% group_by(kit,stage) %>% 
+  summarize(n_read_pairs = sum(n_read_pairs), n_bases_approx = sum(n_bases_approx), .groups = "drop", mean_seq_len = mean(mean_seq_len), percent_duplicates = mean(percent_duplicates))
+g_reads_stages <- ggplot(basic_stats_stages, aes(x=kit, y=n_read_pairs, fill=stage)) +
+  geom_col(position="dodge") + scale_fill_brewer(palette = "Set3", name="Stage") +
+  scale_y_continuous("# Read pairs", expand=c(0,0)) +
+  theme_kit
+g_bases_stages <- ggplot(basic_stats_stages, aes(x=kit, y=n_bases_approx, fill=stage)) +
+  geom_col(position="dodge") + scale_fill_brewer(palette = "Set3", name="Stage") +
+  scale_y_continuous("# Bases (approx)", expand=c(0,0)) +
+  theme_kit
+legend <- get_legend(g_reads_stages)
+tnl <- theme(legend.position = "none")
+plot_grid((g_reads_stages + tnl) + (g_bases_stages + tnl), legend, nrow = 2,
+          rel_heights = c(4,1))
+
+```
+
+```{r}
+# Import composition data
+comp_path <- file.path(data_dir_2, "taxonomic_composition.tsv")
+comp <- read_tsv(comp_path, show_col_types = FALSE) %>%
+  mutate(classification = sub("Other_filtered", "Other filtered", classification)) %>%
+  arrange(desc(p_reads)) %>% mutate(classification = fct_inorder(classification))
+comp_kits <- inner_join(comp, kits, by="sample") %>%
+  group_by(kit, classification) %>%
+  summarize(t_reads = sum(n_reads/p_reads), n_reads = sum(n_reads), .groups = "drop") %>%
+  mutate(p_reads = n_reads/t_reads) %>% ungroup
+# Plot overall composition
+g_comp <- ggplot(comp_kits, aes(x=kit, y=p_reads, fill=classification)) +
+  geom_col(position = "stack") +
+  scale_y_continuous(name = "% Reads", limits = c(0,1), breaks = seq(0,1,0.2),
+                     expand = c(0,0), labels = function(x) x*100) +
+  scale_fill_brewer(palette = "Set1", name = "Classification") +
+  theme_kit + theme(aspect.ratio = 1/3)
+g_comp
+# Plot composition of minor components
+read_comp_minor <- comp_kits %>% filter(p_reads < 0.1)
+g_comp_minor <- ggplot(read_comp_minor, aes(x=kit, y=p_reads, fill=classification)) +
+  geom_col(position = "stack") +
+  scale_y_continuous(name = "% Reads", limits = c(0,0.02), breaks = seq(0,0.02,0.004),
+                     expand = c(0,0), labels = function(x) x*100) +
+  scale_fill_brewer(palette = "Set1", name = "Classification") +
+  theme_kit + theme(aspect.ratio = 1/3)
+g_comp_minor
+```
+
+To identify human-viral reads, I used the multi-stage process specified in the last entry. Specifically, after removing human reads with BBmap, the remaining reads went through the following steps:
+
+1.  Align reads to a database of human-infecting virus genomes with Bowtie2, with permissive parameters, & retain reads with at least one match. (Roughly 20k read pairs per kit, or 0.25% of all surviving non-host reads.)
+2.  Run reads that successfully align with Bowtie2 through Kraken2 (using the standard 16GB database) and exclude reads assigned by Kraken2 to any non-human-infecting-virus taxon. (Roughly 5500 surviving read pairs per kit.)
+3.  Calculate length-adjusted alignment score $S=\frac{\text{bowtie2 alignment score}}{\ln(\text{read length})}$. Filter out reads that don't meet at least one of the following four criteria:
+    -   The read pair is *assigned* to a human-infecting virus by both Kraken and Bowtie2
+    -   The read pair contains a Kraken2 *hit* to the same taxid as it is assigned to by Bowtie2.
+    -   The read pair is unassigned by Kraken and $S>15$ for the forward read
+    -   The read pair is unassigned by Kraken and $S>15$ for the reverse read
+
+```{r}
+#| warning: false
+#| fig-width: 8
+#| fig-height: 8
+# Import Bowtie2/Kraken data and perform filtering steps
+mrg_path <- file.path(data_dir_2, "hv_hits_putative_all.tsv")
+mrg0 <- read_tsv(mrg_path, show_col_types = FALSE) %>%
+  inner_join(kits, by="sample") %>% mutate(filter_step=1) %>%
+  select(kit, sample, seq_id, taxid, assigned_taxid, adj_score_fwd, adj_score_rev, 
+         classified, assigned_hv, query_seq_fwd, query_seq_rev, encoded_hits, 
+         filter_step) %>%
+  arrange(sample, desc(adj_score_fwd), desc(adj_score_rev))
+mrg1 <- mrg0 %>% filter((!classified) | assigned_hv) %>% mutate(filter_step=2)
+mrg2 <- mrg1 %>% 
+  mutate(hit_hv = !is.na(str_match(encoded_hits, paste0(" ", as.character(taxid), ":")))) %>%
+  filter(adj_score_fwd > 15 | adj_score_rev > 15 | assigned_hv | hit_hv) %>% 
+  mutate(filter_step=3)
+mrg_all <- bind_rows(mrg0, mrg1, mrg2)
+# Visualize
+g_mrg <- ggplot(mrg_all, aes(x=adj_score_fwd, y=adj_score_rev, color=assigned_hv)) +
+  geom_point(alpha=0.5, shape=16) + 
+  scale_color_brewer(palette="Set1", name="Assigned to\nhuman virus\nby Kraken2") +
+  scale_x_continuous(name="S(forward read)", limits=c(0,65), breaks=seq(0,100,20), expand = c(0,0)) +
+  scale_y_continuous(name="S(reverse read)", limits=c(0,65), breaks=seq(0,100,20), expand = c(0,0)) +
+  facet_grid(filter_step~kit, labeller = labeller(filter_step=function(x) paste("Step", x), kit = label_wrap_gen(20))) +
+  theme_base + theme(aspect.ratio=1)
+g_mrg
+```
+
+Applying all of these filtering steps left a total of 227 read pairs across all kits: 14 fewer than in the previous analysis. The 14 excluded read pairs included all 11 cow and pig reads, as well as three other read pairs classified as non-viral by BLAST. After removing these reads, the distribution of read scores vs BLAST HV status looked like the following, with many fewer high-scoring non-HV reads:
+
+```{r}
+#| warning: false
+#| fig-width: 8
+#| fig-height: 8
+
+mrg_old_path <- file.path(data_dir_1, "hv_hits_putative.tsv")
+mrg_old <- read_tsv(mrg_old_path, show_col_types = FALSE) %>%
+  inner_join(kits, by="sample") %>% mutate(filter_step=1) %>%
+  select(kit, sample, seq_id, taxid, assigned_taxid, adj_score_fwd, adj_score_rev, 
+         classified, assigned_hv, query_seq_fwd, query_seq_rev, encoded_hits, 
+         filter_step) %>%
+  arrange(sample, desc(adj_score_fwd), desc(adj_score_rev)) %>% 
+  filter((!classified) | assigned_hv) %>% mutate(filter_step=2) %>%
+  mutate(hit_hv = !is.na(str_match(encoded_hits, paste0(" ", as.character(taxid), ":")))) %>%
+  filter(adj_score_fwd > 15 | adj_score_rev > 15 | assigned_hv | hit_hv) %>% 
+  mutate(filter_step=3)
+hv_blast_old <- list(
+  `1A` = c(rep(TRUE, 40), TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE),
+  `1C` = c(rep(TRUE, 5), "COWS", TRUE, TRUE, FALSE, TRUE, rep(FALSE, 9)),
+  `2A` = c(rep(TRUE, 10), "COWS", TRUE, "COWS", "COWS", TRUE,
+           FALSE, "COWS", FALSE, TRUE, TRUE,
+           FALSE, FALSE, FALSE, FALSE, TRUE),
+  `2C` = c(rep(TRUE, 5), TRUE, "COWS", TRUE, TRUE, TRUE, 
+           TRUE, TRUE, "COWS", TRUE, "COWS", 
+           FALSE, FALSE, FALSE), 
+  `6A` = c(rep(TRUE, 10), FALSE, TRUE, FALSE, FALSE, FALSE, 
+           FALSE, TRUE, TRUE, FALSE), 
+  `6C` = c(rep(TRUE, 5), "PIGS", TRUE, TRUE, TRUE, TRUE,
+           FALSE, TRUE, FALSE, FALSE, FALSE), 
+  SS1  = c(rep(TRUE, 5), rep(FALSE, 10),
+           "FALSE", "COWS", "FALSE", "FALSE", "FALSE",
+           rep(FALSE, 15)
+           ),
+  SS2  = c(rep(TRUE, 25), TRUE, "COWS", TRUE, TRUE, TRUE,
+           TRUE, TRUE, TRUE, TRUE, TRUE,
+           FALSE, TRUE, TRUE, FALSE, FALSE,
+           FALSE, FALSE, TRUE, FALSE, FALSE,
+           rep(FALSE, 5),
+           FALSE, FALSE, FALSE, FALSE, TRUE,
+           FALSE, FALSE, TRUE, TRUE, FALSE)
+  )
+mrg_old_blast <- mrg_old %>% group_by(sample) %>%
+  mutate(seq_num = row_number()) %>% ungroup %>%
+  mutate(hv_blast = unlist(hv_blast_old),
+         kraken_label = ifelse(assigned_hv, "Kraken2 HV\nassignment",
+                               ifelse(hit_hv, "Kraken2 HV\nhit",
+                                      "No hit or\nassignment")))
+mrg_old_blast_filtered <- mrg_old_blast %>% filter(seq_id %in% mrg2$seq_id)
+g_mrg3_1 <- mrg_old_blast_filtered %>% mutate(hv_blast = hv_blast == "TRUE") %>%
+  ggplot(aes(x=adj_score_fwd, y=adj_score_rev, color=hv_blast)) +
+  geom_point(alpha=0.5, shape=16) + 
+  scale_color_brewer(palette="Set1", name="Assigned to\nhuman virus\nby BLAST") +
+  scale_x_continuous(name="S(forward read)", limits=c(0,65), breaks=seq(0,100,20), expand = c(0,0)) +
+  scale_y_continuous(name="S(reverse read)", limits=c(0,65), breaks=seq(0,100,20), expand = c(0,0)) +
+  facet_grid(kraken_label~kit, labeller = labeller(kit = label_wrap_gen(20))) +
+  theme_base + theme(aspect.ratio=1)
+g_mrg3_1
+```
+
+Repeating the exercise from the last entry, in which different score thresholds are assessed along different performance metrics, we find a significant improvement in optimal F1 score compared to the pre-filtering dataset, with a maximum F1 of 0.958 for a conjunctive threshold and 0.966 for a disjunctive threshold (both at a threshold score value of 20):
+
+```{r}
+#| fig-width: 8
+#| fig-height: 4
+# Test sensitivity and specificity
+test_sens_spec <- function(tab, score_threshold, conjunctive, include_special){
+  if (!include_special) tab <- filter(tab, hv_blast %in% c("TRUE", "FALSE"))
+  tab_retained <- tab %>% mutate(
+    conjunctive = conjunctive,
+    retain_score_conjunctive = (adj_score_fwd > score_threshold & adj_score_rev > score_threshold), 
+    retain_score_disjunctive = (adj_score_fwd > score_threshold | adj_score_rev > score_threshold),
+    retain_score = ifelse(conjunctive, retain_score_conjunctive, retain_score_disjunctive),
+    retain = assigned_hv | hit_hv | retain_score) %>%
+    group_by(hv_blast, retain) %>% count
+  pos_tru <- tab_retained %>% filter(hv_blast == "TRUE", retain) %>% pull(n) %>% sum
+  pos_fls <- tab_retained %>% filter(hv_blast != "TRUE", retain) %>% pull(n) %>% sum
+  neg_tru <- tab_retained %>% filter(hv_blast != "TRUE", !retain) %>% pull(n) %>% sum
+  neg_fls <- tab_retained %>% filter(hv_blast == "TRUE", !retain) %>% pull(n) %>% sum
+  sensitivity <- pos_tru / (pos_tru + neg_fls)
+  specificity <- neg_tru / (neg_tru + pos_fls)
+  precision   <- pos_tru / (pos_tru + pos_fls)
+  f1 <- 2 * precision * sensitivity / (precision + sensitivity)
+  out <- tibble(threshold=score_threshold, include_special = include_special, 
+                conjunctive = conjunctive, sensitivity=sensitivity, 
+                specificity=specificity, precision=precision, f1=f1)
+  return(out)
+}
+stats_conj <- lapply(15:45, test_sens_spec, tab=mrg_old_blast_filtered, include_special=TRUE, conjunctive=TRUE) %>% bind_rows
+stats_disj <- lapply(15:45, test_sens_spec, tab=mrg_old_blast_filtered, include_special=TRUE, conjunctive=FALSE) %>% bind_rows
+stats_all <- bind_rows(stats_conj, stats_disj) %>%
+  pivot_longer(!(threshold:conjunctive), names_to="metric", values_to="value") %>%
+  mutate(conj_label = ifelse(conjunctive, "Conjunctive", "Disjunctive"))
+threshold_opt <- stats_all %>% group_by(conj_label) %>% filter(metric == "f1") %>% filter(value == max(value)) %>% filter(threshold == min(threshold))
+g_stats <- ggplot(stats_all, aes(x=threshold, y=value, color=metric)) +
+  geom_line() +
+  geom_vline(data = threshold_opt, mapping=aes(xintercept=threshold), color="red",
+             linetype = "dashed") +
+  scale_y_continuous(name = "Value", limits=c(0,1), breaks = seq(0,1,0.2), expand = c(0,0)) +
+  scale_x_continuous(name = "Threshold", expand = c(0,0)) +
+  facet_wrap(~conj_label) +
+  theme_base
+g_stats
+```
+
+As such, it appears that filtering mammalian livestock genomes is quite successful in improving our HV detection pipeline, at least for this dataset.

@@ -412,7 +412,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol type="1">
 <li>Align reads to a database of human-infecting virus genomes with Bowtie2, with permissive parameters, &amp; retain reads with at least one match. (Roughly 20k read pairs per kit, or 0.25% of all surviving non-host reads.)</li>
 <li>Run reads that successfully align with Bowtie2 through Kraken2 (using the standard 16GB database) and exclude reads assigned by Kraken2 to any non-human-infecting-virus taxon. (Roughly 5500 surviving read pairs per kit.)</li>
-<li>Calculate length-adjusted alignment score <span class="math inline">\(S=\frac{\text{bowtie2 alignment score}}{\ln(\text{read length})}\)</span>. Filter out reads that don’t meet at least one of the following three criteria:
+<li>Calculate length-adjusted alignment score <span class="math inline">\(S=\frac{\text{bowtie2 alignment score}}{\ln(\text{read length})}\)</span>. Filter out reads that don’t meet at least one of the following four criteria:
 <ul>
 <li>The read pair is <em>assigned</em> to a human-infecting virus by both Kraken and Bowtie2</li>
 <li>The read pair contains a Kraken2 <em>hit</em> to the same taxid as it is assigned to by Bowtie2.</li>
@@ -1243,7 +1243,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb20-302"><a href="#cb20-302" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-303"><a href="#cb20-303" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>Align reads to a database of human-infecting virus genomes with Bowtie2, with permissive parameters, &amp; retain reads with at least one match. (Roughly 20k read pairs per kit, or 0.25% of all surviving non-host reads.)</span>
 <span id="cb20-304"><a href="#cb20-304" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>Run reads that successfully align with Bowtie2 through Kraken2 (using the standard 16GB database) and exclude reads assigned by Kraken2 to any non-human-infecting-virus taxon. (Roughly 5500 surviving read pairs per kit.)</span>
-<span id="cb20-305"><a href="#cb20-305" aria-hidden="true" tabindex="-1"></a><span class="ss">3.  </span>Calculate length-adjusted alignment score $S=\frac{\text{bowtie2 alignment score}}{\ln(\text{read length})}$. Filter out reads that don't meet at least one of the following three criteria:</span>
+<span id="cb20-305"><a href="#cb20-305" aria-hidden="true" tabindex="-1"></a><span class="ss">3.  </span>Calculate length-adjusted alignment score $S=\frac{\text{bowtie2 alignment score}}{\ln(\text{read length})}$. Filter out reads that don't meet at least one of the following four criteria:</span>
 <span id="cb20-306"><a href="#cb20-306" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>The read pair is *assigned* to a human-infecting virus by both Kraken and Bowtie2</span>
 <span id="cb20-307"><a href="#cb20-307" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>The read pair contains a Kraken2 *hit* to the same taxid as it is assigned to by Bowtie2.</span>
 <span id="cb20-308"><a href="#cb20-308" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>The read pair is unassigned by Kraken and $S&gt;15$ for the forward read</span>
