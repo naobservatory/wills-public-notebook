@@ -227,4 +227,4 @@ blast_performance_qcov <- bind_rows(blast_performance_qcov_1, blast_performance_
 blast_performance_qcov
 ```
 
-In summary, using command-line `blastn -remote,` combined with tabular processing in R against a reference class of all viral taxids, works well as a substitute for manual inspection of online BLAST results for validating human-viral read assignments. It's too slow and failure-prone to be added to the pipeline as a replacement or supplement to the Bowtie/Kraken automated approach, but will be my go-to approach in future for manual validation and refinement of human-viral assignment criteria.
+In summary, using command-line `blastn -remote,` combined with tabular processing in R against a reference class of all viral taxids, works well as a substitute for manual inspection of online BLAST results for validating human-viral read assignments. It's too slow and failure-prone to be added to the pipeline as a replacement or supplement to the Bowtie/Kraken automated approach, but will be my go-to approach in future for manual validation and refinement of human-viral assignment criteria – at least until I'm able to try out Elastic-BLAST.
