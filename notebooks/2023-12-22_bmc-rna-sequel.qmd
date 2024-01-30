@@ -157,7 +157,7 @@ mrg_old <- read_tsv(mrg_old_path, show_col_types = FALSE) %>%
          filter_step) %>%
   arrange(sample, desc(adj_score_fwd), desc(adj_score_rev)) %>% 
   filter((!classified) | assigned_hv) %>% mutate(filter_step=2) %>%
-  mutate(hit_hv = !is.na(str_match(encoded_hits, paste0(" ", as.character(taxid), ":")))) %>%
+  mutate(hit_hv = !is.na(str_match(encoded_hits, paste0(" ", as.character(taxid), ":"))[1])) %>%
   filter(adj_score_fwd > 15 | adj_score_rev > 15 | assigned_hv | hit_hv) %>% 
   mutate(filter_step=3)
 hv_blast_old <- list(
