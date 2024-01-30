@@ -1,6 +1,6 @@
 ---
 title: "Automating BLAST validation of human viral read assignment"
-subtitle: ""
+subtitle: "Experiments with BLASTN remote mode"
 author: "Will Bradshaw"
 date: 2024-01-30
 format:
