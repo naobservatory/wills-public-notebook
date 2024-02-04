@@ -2,7 +2,7 @@
 title: "Workflow analysis of Crits-Christoph et al. (2021), part 1"
 subtitle: "Preprocessing and composition."
 author: "Will Bradshaw"
-date: 2024-01-23
+date: 2024-02-04
 format:
   html:
     code-fold: true
