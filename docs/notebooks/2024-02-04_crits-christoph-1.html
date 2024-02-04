@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Will Bradshaw">
+<meta name="dcterms.date" content="2024-01-23">
+<title>Will’s Public NAO Notebook - Workflow analysis of Crits-Christoph et al.&nbsp;(2021), part 1</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><style>
+
+      .quarto-title-block .quarto-title-banner {
+        background: black;
+      }
+</style>
+<link href="../site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="../site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+</head>
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg navbar-dark "><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Will’s Public NAO Notebook</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools ms-auto">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav></header><!-- content --><header id="title-block-header" class="quarto-title-block default page-columns page-full"><div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">Workflow analysis of Crits-Christoph et al.&nbsp;(2021), part 1</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+            <p class="subtitle lead">Preprocessing and composition.</p>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Will Bradshaw </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">January 23, 2024</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content"><p>Since my <a href="https://data.securebio.org/wills-public-notebook/notebooks/2023-12-22_bmc-rna-sequel.html">last entry</a>, I’ve continued to work on the <a href="https://github.com/naobservatory/mgs-workflow">new Nextflow MGS pipeline</a>. Changes since the last entry include:</p>
+<ul>
+<li><p>Successful modification of the pipeline to run using working and output directories on S3 rather than locally, and several other QOL improvements (e.g.&nbsp;implementation of a Nextflow config file).</p></li>
+<li><p>Various bug fixes.</p></li>
+<li><p>Modification of the human-viral identification sub-pipeline to include <a href="https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#concordant-pairs-match-pair-expectations-discordant-pairs-dont">singly or discordantly aligned read pairs</a>.</p></li>
+<li><p>Implementation of a “trial run” mode for the main workflow in which the raw read files are automatically subset prior to analysis to speed up testing.</p></li>
+<li><p>Creation of a separate workflow for generating large index and reference files, so that these don’t need to be stored locally or generated during every run of the main workflow.</p></li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="../img/2024-01-23_nextflow.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>In order to validate pipeline performance on datasets other than our own BMC data, I’ve begun running it on pre-existing datasets from the <a href="https://naobservatory.org/reports/predicting-virus-relative-abundance-in-wastewater/">P2RA project</a>, starting with <a href="https://doi.org/10.1128%2FmBio.02703-20">Crits-Christoph et al.&nbsp;(2021)</a>:</p>
+<ul>
+<li><p>This was first and foremost a SARS-CoV-2 sequencing project that took place in the San Francisco Bay Area in 2020. Our data consists of 18 samples, all of which were collected as 24-hour composite samples of raw sewage collected from wastewater interceptor lines in four different locations (Berkeley, Oakland, San Francisco, and Marin).</p></li>
+<li><p>Samples were concentrated using three different methods (Amicon ultrafiltration, silica columns, or milk of silica); see paper methods for more details.</p></li>
+<li><p>Six samples (the “unenriched” fraction) underwent bacterial ribodepletion with RiboZero Plus, followed by untargeted metagenomic RNA-sequencing. The rest (the “enriched” fraction) underwent panel enrichment for respiratory viruses using the Illumina Respiratory Virus Oligo Panel, and no ribodepletion.</p></li>
+</ul>
+<section id="the-raw-data" class="level1"><h1>The raw data</h1>
+<p>The raw data obtained from SRA comprised 18 pairs of FASTQ files corresponding to 18 different samples. Unlike for the BMC data, there was no need to concatenate multiple FASTQ files for a given sample. What remained was roughly 298M read pairs of non-RVP-enriched data and 9M read pairs of RVP-enriched data, corresponding to roughly 45 Gb and 1 Gb of sequencing data, respectively. Reads were typically 70-80bp in length. Read qualities were high, adapter levels were relatively low, and FASTQC-measured duplication levels were moderate at 50-70%.</p>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Data input paths</span></span>
+<span><span class="va">data_dir</span> <span class="op">&lt;-</span> <span class="st">"../data/2024-02-04_crits-christoph-1/"</span></span>
+<span><span class="va">libraries_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"cc-libraries.txt"</span><span class="op">)</span></span>
+<span><span class="va">basic_stats_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"qc_basic_stats.tsv"</span><span class="op">)</span></span>
+<span><span class="va">adapter_stats_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"qc_adapter_stats.tsv"</span><span class="op">)</span></span>
+<span><span class="va">quality_base_stats_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"qc_quality_base_stats.tsv"</span><span class="op">)</span></span>
+<span><span class="va">quality_seq_stats_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"qc_quality_sequence_stats.tsv"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Import data</span></span>
+<span><span class="va">stages</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"raw_concat"</span>, <span class="st">"cleaned"</span>, <span class="st">"dedup"</span>, <span class="st">"ribo_initial"</span>, <span class="st">"remove_human"</span>, <span class="st">"remove_other"</span>, <span class="st">"ribo_secondary"</span><span class="op">)</span></span>
+<span><span class="va">libraries</span> <span class="op">&lt;-</span> <span class="fu">read_tsv</span><span class="op">(</span><span class="va">libraries_path</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>enrichment <span class="op">=</span> <span class="fu">str_to_title</span><span class="op">(</span><span class="va">enrichment</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">basic_stats</span> <span class="op">&lt;-</span> <span class="fu">read_tsv</span><span class="op">(</span><span class="va">basic_stats_path</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
+<span>  <span class="fu">inner_join</span><span class="op">(</span><span class="va">libraries</span>, by<span class="op">=</span><span class="st">"sample"</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
+<span>  <span class="fu">arrange</span><span class="op">(</span><span class="va">enrichment</span>, <span class="va">location</span>, <span class="va">collection_date</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>stage <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">stage</span>, levels <span class="op">=</span> <span class="va">stages</span><span class="op">)</span>,</span>
+<span>         sample <span class="op">=</span> <span class="fu">fct_inorder</span><span class="op">(</span><span class="va">sample</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">adapter_stats</span> <span class="op">&lt;-</span> <span class="fu">read_tsv</span><span class="op">(</span><span class="va">adapter_stats_path</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
+<span>  <span class="fu">inner_join</span><span class="op">(</span><span class="va">libraries</span>, by<span class="op">=</span><span class="st">"sample"</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>stage <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">stage</span>, levels <span class="op">=</span> <span class="va">stages</span><span class="op">)</span>, </span>
+<span>         read_pair <span class="op">=</span> <span class="fu">fct_inorder</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">read_pair</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">quality_base_stats</span> <span class="op">&lt;-</span> <span class="fu">read_tsv</span><span class="op">(</span><span class="va">quality_base_stats_path</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
+<span>  <span class="fu">inner_join</span><span class="op">(</span><span class="va">libraries</span>, by<span class="op">=</span><span class="st">"sample"</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>stage <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">stage</span>, levels <span class="op">=</span> <span class="va">stages</span><span class="op">)</span>, </span>
+<span>         read_pair <span class="op">=</span> <span class="fu">fct_inorder</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">read_pair</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">quality_seq_stats</span> <span class="op">&lt;-</span> <span class="fu">read_tsv</span><span class="op">(</span><span class="va">quality_seq_stats_path</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
+<span>  <span class="fu">inner_join</span><span class="op">(</span><span class="va">libraries</span>, by<span class="op">=</span><span class="st">"sample"</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>stage <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">stage</span>, levels <span class="op">=</span> <span class="va">stages</span><span class="op">)</span>, </span>
+<span>         read_pair <span class="op">=</span> <span class="fu">fct_inorder</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">read_pair</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Filter to raw data</span></span>
+<span><span class="va">basic_stats_raw</span> <span class="op">&lt;-</span> <span class="va">basic_stats</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">stage</span> <span class="op">==</span> <span class="st">"raw_concat"</span><span class="op">)</span></span>
+<span><span class="va">adapter_stats_raw</span> <span class="op">&lt;-</span> <span class="va">adapter_stats</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">stage</span> <span class="op">==</span> <span class="st">"raw_concat"</span><span class="op">)</span></span>
+<span><span class="va">quality_base_stats_raw</span> <span class="op">&lt;-</span> <span class="va">quality_base_stats</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">stage</span> <span class="op">==</span> <span class="st">"raw_concat"</span><span class="op">)</span></span>
+<span><span class="va">quality_seq_stats_raw</span> <span class="op">&lt;-</span> <span class="va">quality_seq_stats</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">stage</span> <span class="op">==</span> <span class="st">"raw_concat"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Visualize basic stats</span></span>
+<span><span class="va">g_nreads_raw</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">basic_stats_raw</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">enrichment</span>, y<span class="op">=</span><span class="va">n_read_pairs</span>, fill<span class="op">=</span><span class="va">location</span>, group<span class="op">=</span><span class="va">sample</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_col</span><span class="op">(</span>position<span class="op">=</span><span class="st">"dodge"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_y_continuous</span><span class="op">(</span>name<span class="op">=</span><span class="st">"# Read pairs"</span>, expand<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_fill_brewer</span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Dark2"</span>, name<span class="op">=</span><span class="st">"Location"</span><span class="op">)</span> <span class="op">+</span> <span class="va">theme_kit</span></span>
+<span><span class="va">legend_location</span> <span class="op">&lt;-</span> <span class="fu">get_legend</span><span class="op">(</span><span class="va">g_nreads_raw</span><span class="op">)</span></span>
+<span><span class="va">g_nreads_raw_2</span> <span class="op">&lt;-</span> <span class="va">g_nreads_raw</span> <span class="op">+</span> <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
+<span><span class="va">g_nbases_raw</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">basic_stats_raw</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">enrichment</span>, y<span class="op">=</span><span class="va">n_bases_approx</span>, fill<span class="op">=</span><span class="va">location</span>, group<span class="op">=</span><span class="va">sample</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_col</span><span class="op">(</span>position<span class="op">=</span><span class="st">"dodge"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_y_continuous</span><span class="op">(</span>name<span class="op">=</span><span class="st">"Total base pairs (approx)"</span>, expand<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_fill_brewer</span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Dark2"</span>, name<span class="op">=</span><span class="st">"Location"</span><span class="op">)</span> <span class="op">+</span> <span class="va">theme_kit</span> <span class="op">+</span> <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
+<span><span class="va">g_ndup_raw</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">basic_stats_raw</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">enrichment</span>, y<span class="op">=</span><span class="va">percent_duplicates</span>, fill<span class="op">=</span><span class="va">location</span>, group<span class="op">=</span><span class="va">sample</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_col</span><span class="op">(</span>position<span class="op">=</span><span class="st">"dodge"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_y_continuous</span><span class="op">(</span>name<span class="op">=</span><span class="st">"% Duplicates (FASTQC)"</span>, expand<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">100</span><span class="op">)</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">100</span>,<span class="fl">20</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_fill_brewer</span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Dark2"</span>, name<span class="op">=</span><span class="st">"Location"</span><span class="op">)</span> <span class="op">+</span> <span class="va">theme_kit</span> <span class="op">+</span> <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
+<span><span class="va">g_basic_raw</span> <span class="op">&lt;-</span> <span class="fu">plot_grid</span><span class="op">(</span><span class="va">g_nreads_raw_2</span> <span class="op">+</span> <span class="va">g_nbases_raw</span> <span class="op">+</span> <span class="va">g_ndup_raw</span>, <span class="va">legend_location</span>, ncol <span class="op">=</span> <span class="fl">1</span>, rel_heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">g_basic_raw</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2024-02-04_crits-christoph-1_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+<details><summary>Code</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize adapters</span></span>
+<span><span class="va">g_adapters_raw</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">adapter_stats_raw</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">position</span>, y<span class="op">=</span><span class="va">pc_adapters</span>, color<span class="op">=</span><span class="va">location</span>, linetype <span class="op">=</span> <span class="va">read_pair</span>, group<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/interaction.html">interaction</a></span><span class="op">(</span><span class="va">sample</span>, <span class="va">read_pair</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_color_brewer</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dark2"</span>, name <span class="op">=</span> <span class="st">"Location"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_linetype_discrete</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Read Pair"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>name<span class="op">=</span><span class="st">"% Adapters"</span>, limits<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">50</span><span class="op">)</span>,</span>
+<span>                     breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">50</span>,<span class="fl">10</span><span class="op">)</span>, expand<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_x_continuous</span><span class="op">(</span>name<span class="op">=</span><span class="st">"Position"</span>, limits<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">80</span><span class="op">)</span>,</span>
+<span>                     breaks<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">80</span>,<span class="fl">20</span><span class="op">)</span>, expand<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">guides</span><span class="op">(</span>color<span class="op">=</span><span class="fu">guide_legend</span><span class="op">(</span>nrow<span class="op">=</span><span class="fl">2</span>,byrow<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>         linetype <span class="op">=</span> <span class="fu">guide_legend</span><span class="op">(</span>nrow<span class="op">=</span><span class="fl">2</span>,byrow<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">adapter</span><span class="op">)</span> <span class="op">+</span> <span class="va">theme_base</span></span>
+<span><span class="va">g_adapters_raw</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2024-02-04_crits-christoph-1_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid" width="672"></p>
+</div>
+<details><summary>Code</summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Visualize quality</span></span>
+<span><span class="va">g_quality_base_raw</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">quality_base_stats_raw</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">position</span>, y<span class="op">=</span><span class="va">mean_phred_score</span>, color<span class="op">=</span><span class="va">location</span>, linetype <span class="op">=</span> <span class="va">read_pair</span>, group<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/interaction.html">interaction</a></span><span class="op">(</span><span class="va">sample</span>,<span class="va">read_pair</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_hline</span><span class="op">(</span>yintercept<span class="op">=</span><span class="fl">25</span>, linetype<span class="op">=</span><span class="st">"dashed"</span>, color<span class="op">=</span><span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_hline</span><span class="op">(</span>yintercept<span class="op">=</span><span class="fl">30</span>, linetype<span class="op">=</span><span class="st">"dashed"</span>, color<span class="op">=</span><span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">scale_color_brewer</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dark2"</span>, name <span class="op">=</span> <span class="st">"Location"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_linetype_discrete</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Read Pair"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>name<span class="op">=</span><span class="st">"Mean Phred score"</span>, expand<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span>, limits<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">20</span>,<span class="fl">45</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_x_continuous</span><span class="op">(</span>name<span class="op">=</span><span class="st">"Position"</span>, limits<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">80</span><span class="op">)</span>,</span>
+<span>                     breaks<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">80</span>,<span class="fl">20</span><span class="op">)</span>, expand<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">guides</span><span class="op">(</span>color<span class="op">=</span><span class="fu">guide_legend</span><span class="op">(</span>nrow<span class="op">=</span><span class="fl">2</span>,byrow<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>         linetype <span class="op">=</span> <span class="fu">guide_legend</span><span class="op">(</span>nrow<span class="op">=</span><span class="fl">2</span>,byrow<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">theme_base</span></span>
+<span><span class="va">g_quality_seq_raw</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">quality_seq_stats_raw</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">mean_phred_score</span>, y<span class="op">=</span><span class="va">n_sequences</span>, color<span class="op">=</span><span class="va">location</span>, linetype <span class="op">=</span> <span class="va">read_pair</span>, group<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/interaction.html">interaction</a></span><span class="op">(</span><span class="va">sample</span>,<span class="va">read_pair</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept<span class="op">=</span><span class="fl">25</span>, linetype<span class="op">=</span><span class="st">"dashed"</span>, color<span class="op">=</span><span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept<span class="op">=</span><span class="fl">30</span>, linetype<span class="op">=</span><span class="st">"dashed"</span>, color<span class="op">=</span><span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">scale_color_brewer</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dark2"</span>, name <span class="op">=</span> <span class="st">"Location"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_linetype_discrete</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Read Pair"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_x_continuous</span><span class="op">(</span>name<span class="op">=</span><span class="st">"Mean Phred score"</span>, expand<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>name<span class="op">=</span><span class="st">"# Sequences"</span>, expand<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">guides</span><span class="op">(</span>color<span class="op">=</span><span class="fu">guide_legend</span><span class="op">(</span>nrow<span class="op">=</span><span class="fl">2</span>,byrow<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>         linetype <span class="op">=</span> <span class="fu">guide_legend</span><span class="op">(</span>nrow<span class="op">=</span><span class="fl">2</span>,byrow<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">theme_base</span></span>
+<span><span class="va">g_quality_base_raw</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2024-02-04_crits-christoph-1_files/figure-html/unnamed-chunk-2-3.png" class="img-fluid" width="672"></p>
+</div>
+<details><summary>Code</summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">g_quality_seq_raw</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2024-02-04_crits-christoph-1_files/figure-html/unnamed-chunk-2-4.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section><section id="preprocessing" class="level1"><h1>Preprocessing</h1>
+<p>Both RVP-enriched and unenriched samples showed significant, but not overwhelming, reductions in read counts during preprocessing. In the case of unenriched samples, most reads were lost during the deduplication stage, with low losses observed at other stages. In enriched samples, a much larger fraction of reads were lost during the ribodepletion stages; this is consistent with all of the unenriched samples having undergone ribodepletion, while the unenriched samples did not.</p>
+<p>On average, cleaning, deduplication and conservative ribodepletion together removed about 44% and 66% of total reads in unenriched and enriched samples, respectively. Host depletion, livestock depletion and secondary ribodepletion removed a further 2% and 5%, respectively.</p>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot reads over preprocessing</span></span>
+<span><span class="va">g_reads_stages</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">basic_stats</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">stage</span>, y<span class="op">=</span><span class="va">n_read_pairs</span>,fill<span class="op">=</span><span class="va">location</span>,group<span class="op">=</span><span class="va">sample</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span>position<span class="op">=</span><span class="st">"dodge"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_fill_brewer</span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Dark2"</span>, name<span class="op">=</span><span class="st">"Location"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span><span class="st">"# Read pairs"</span>, expand<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="va">.</span><span class="op">~</span><span class="va">enrichment</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">theme_kit</span></span>
+<span><span class="va">g_reads_stages</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2024-02-04_crits-christoph-1_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+<details><summary>Code</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot relative read losses during preprocessing</span></span>
+<span><span class="va">n_reads_rel</span> <span class="op">&lt;-</span> <span class="va">basic_stats</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">sample</span>, <span class="va">location</span>, <span class="va">stage</span>, <span class="va">enrichment</span>, <span class="va">n_read_pairs</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">sample</span>, <span class="va">location</span>, <span class="va">enrichment</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">arrange</span><span class="op">(</span><span class="va">sample</span>, <span class="va">location</span>, <span class="va">enrichment</span>, <span class="va">stage</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>p_reads_retained <span class="op">=</span> <span class="va">n_read_pairs</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/lag.html">lag</a></span><span class="op">(</span><span class="va">n_read_pairs</span><span class="op">)</span>,</span>
+<span>         p_reads_lost <span class="op">=</span> <span class="fl">1</span> <span class="op">-</span> <span class="va">p_reads_retained</span>,</span>
+<span>         p_reads_retained_abs <span class="op">=</span> <span class="va">n_read_pairs</span> <span class="op">/</span> <span class="va">n_read_pairs</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
+<span>         p_reads_lost_abs <span class="op">=</span> <span class="fl">1</span><span class="op">-</span><span class="va">p_reads_retained_abs</span><span class="op">)</span></span>
+<span><span class="va">g_reads_rel</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">n_reads_rel</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">stage</span>, y<span class="op">=</span><span class="va">p_reads_lost</span>,fill<span class="op">=</span><span class="va">location</span>,group<span class="op">=</span><span class="va">sample</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span>position<span class="op">=</span><span class="st">"dodge"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_fill_brewer</span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Dark2"</span>, name<span class="op">=</span><span class="st">"Location"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span><span class="st">"% Reads Lost"</span>, expand<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span>, labels <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">*</span><span class="fl">100</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="va">.</span><span class="op">~</span><span class="va">enrichment</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">theme_kit</span></span>
+<span><span class="va">g_reads_rel</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2024-02-04_crits-christoph-1_files/figure-html/unnamed-chunk-3-2.png" class="img-fluid" width="672"></p>
+</div>
+<details><summary>Code</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot bases over preprocessing</span></span>
+<span><span class="va">g_bases_stages</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">basic_stats</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">stage</span>, y<span class="op">=</span><span class="va">n_bases_approx</span>,fill<span class="op">=</span><span class="va">location</span>,group<span class="op">=</span><span class="va">sample</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span>position<span class="op">=</span><span class="st">"dodge"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_fill_brewer</span><span class="op">(</span>palette<span class="op">=</span><span class="st">"Dark2"</span>, name<span class="op">=</span><span class="st">"Enrichment"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span><span class="st">"# Bases (approx)"</span>, expand<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="va">.</span><span class="op">~</span><span class="va">enrichment</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">theme_kit</span></span>
+<span><span class="va">g_bases_stages</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2024-02-04_crits-christoph-1_files/figure-html/unnamed-chunk-3-3.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Data cleaning with FASTP was very successful at removing adapters, with no adapter sequences found by FASTQC at any stage after the raw data. Preprocessing had little effect on sequence quality, but this is unsurprising since raw sequence quality was already high.</p>
+<p>Deduplication and ribodepletion were collectively quite effective at reducing measured duplicate levels, with the former and latter respectively having the greatest effect in unenriched vs enriched samples. In both cases, the average detected duplication level after both processes was roughly 15%. <strong>Note that the pipeline still doesn’t have a reverse-complement-sensitive deduplication pipeline, so only same-orientation duplicates have been removed.</strong></p>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">g_dup_stages</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">basic_stats</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">stage</span>, y<span class="op">=</span><span class="va">percent_duplicates</span>, fill<span class="op">=</span><span class="va">location</span>, group<span class="op">=</span><span class="va">sample</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span>position<span class="op">=</span><span class="st">"dodge"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_fill_brewer</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dark2"</span>, name<span class="op">=</span><span class="st">"Location"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span><span class="st">"% Duplicates"</span>, limits<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">100</span><span class="op">)</span>, breaks<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">100</span>,<span class="fl">20</span><span class="op">)</span>, expand<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="va">.</span><span class="op">~</span><span class="va">enrichment</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">theme_kit</span></span>
+<span><span class="va">g_readlen_stages</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">basic_stats</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">stage</span>, y<span class="op">=</span><span class="va">mean_seq_len</span>, fill<span class="op">=</span><span class="va">location</span>, group<span class="op">=</span><span class="va">sample</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span>position<span class="op">=</span><span class="st">"dodge"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_fill_brewer</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dark2"</span>, name<span class="op">=</span><span class="st">"Location"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span><span class="st">"Mean read length (nt)"</span>, expand<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="va">.</span><span class="op">~</span><span class="va">enrichment</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">theme_kit</span></span>
+<span><span class="va">legend_loc</span> <span class="op">&lt;-</span> <span class="fu">get_legend</span><span class="op">(</span><span class="va">g_dup_stages</span><span class="op">)</span></span>
+<span><span class="va">g_dup_stages</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2024-02-04_crits-christoph-1_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+<details><summary>Code</summary><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">g_readlen_stages</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2024-02-04_crits-christoph-1_files/figure-html/unnamed-chunk-4-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section><section id="high-level-composition" class="level1"><h1>High-level composition</h1>
+<p>As before, to assess the high-level composition of the reads, I ran the ribodepleted files through Kraken (using the Standard 16 database) and summarized the results with Bracken. Combining these results with the read counts above gives us a breakdown of the inferred composition of the samples:</p>
+<div class="cell">
+<details><summary>Code</summary><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Import Bracken data</span></span>
+<span><span class="va">bracken_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"bracken_counts.tsv"</span><span class="op">)</span></span>
+<span><span class="va">bracken</span> <span class="op">&lt;-</span> <span class="fu">read_tsv</span><span class="op">(</span><span class="va">bracken_path</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">total_assigned</span> <span class="op">&lt;-</span> <span class="va">bracken</span> <span class="op">%&gt;%</span> <span class="fu">group_by</span><span class="op">(</span><span class="va">sample</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">summarize</span><span class="op">(</span></span>
+<span>  name <span class="op">=</span> <span class="st">"Total"</span>,</span>
+<span>  kraken_assigned_reads <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">kraken_assigned_reads</span><span class="op">)</span>,</span>
+<span>  added_reads <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">added_reads</span><span class="op">)</span>,</span>
+<span>  new_est_reads <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">new_est_reads</span><span class="op">)</span>,</span>
+<span>  fraction_total_reads <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">fraction_total_reads</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">bracken_spread</span> <span class="op">&lt;-</span> <span class="va">bracken</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">name</span>, <span class="va">sample</span>, <span class="va">new_est_reads</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/chartr.html">tolower</a></span><span class="op">(</span><span class="va">name</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">pivot_wider</span><span class="op">(</span>id_cols <span class="op">=</span> <span class="st">"sample"</span>, names_from <span class="op">=</span> <span class="st">"name"</span>, values_from <span class="op">=</span> <span class="st">"new_est_reads"</span><span class="op">)</span></span>
+<span><span class="co"># Count reads</span></span>
+<span><span class="va">read_counts_preproc</span> <span class="op">&lt;-</span> <span class="va">basic_stats</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">sample</span>, <span class="va">location</span>, <span class="va">method</span>, <span class="va">enrichment</span>, <span class="va">stage</span>, <span class="va">n_read_pairs</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">pivot_wider</span><span class="op">(</span>id_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"sample"</span>, <span class="st">"location"</span>, <span class="st">"method"</span>, <span class="st">"enrichment"</span><span class="op">)</span>, names_from<span class="op">=</span><span class="st">"stage"</span>, values_from<span class="op">=</span><span class="st">"n_read_pairs"</span><span class="op">)</span></span>
+<span><span class="va">read_counts</span> <span class="op">&lt;-</span> <span class="va">read_counts_preproc</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">inner_join</span><span class="op">(</span><span class="va">total_assigned</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">sample</span>, <span class="va">new_est_reads</span><span class="op">)</span>, by <span class="op">=</span> <span class="st">"sample"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">rename</span><span class="op">(</span>assigned <span class="op">=</span> <span class="va">new_est_reads</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">inner_join</span><span class="op">(</span><span class="va">bracken_spread</span>, by<span class="op">=</span><span class="st">"sample"</span><span class="op">)</span></span>
+<span><span class="co"># Assess composition</span></span>
+<span><span class="va">read_comp</span> <span class="op">&lt;-</span> <span class="fu">transmute</span><span class="op">(</span><span class="va">read_counts</span>, sample<span class="op">=</span><span class="va">sample</span>, location<span class="op">=</span><span class="va">location</span>, method<span class="op">=</span><span class="va">method</span>,</span>
+<span>                       enrichment<span class="op">=</span><span class="va">enrichment</span>,</span>
+<span>                       n_filtered <span class="op">=</span> <span class="va">raw_concat</span><span class="op">-</span><span class="va">cleaned</span>,</span>
+<span>                       n_duplicate <span class="op">=</span> <span class="va">cleaned</span><span class="op">-</span><span class="va">dedup</span>,</span>
+<span>                       n_ribosomal <span class="op">=</span> <span class="op">(</span><span class="va">dedup</span><span class="op">-</span><span class="va">ribo_initial</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="va">remove_other</span><span class="op">-</span><span class="va">ribo_secondary</span><span class="op">)</span>,</span>
+<span>                       n_unassigned <span class="op">=</span> <span class="va">ribo_secondary</span><span class="op">-</span><span class="va">assigned</span>,</span>
+<span>                       n_bacterial <span class="op">=</span> <span class="va">bacteria</span>,</span>
+<span>                       n_archaeal <span class="op">=</span> <span class="va">archaea</span>,</span>
+<span>                       n_viral <span class="op">=</span> <span class="va">viruses</span>,</span>
+<span>                       n_human <span class="op">=</span> <span class="op">(</span><span class="va">ribo_initial</span><span class="op">-</span><span class="va">remove_human</span><span class="op">)</span> <span class="op">+</span> <span class="va">eukaryota</span>,</span>
+<span>                       n_other <span class="op">=</span> <span class="va">remove_human</span><span class="op">-</span><span class="va">remove_other</span><span class="op">)</span></span>
+<span><span class="va">read_comp_long</span> <span class="op">&lt;-</span> <span class="fu">pivot_longer</span><span class="op">(</span><span class="va">read_comp</span>, <span class="op">-</span><span class="op">(</span><span class="va">sample</span><span class="op">:</span><span class="va">enrichment</span><span class="op">)</span>, names_to <span class="op">=</span> <span class="st">"classification"</span>,</span>
+<span>                               names_prefix <span class="op">=</span> <span class="st">"n_"</span>, values_to <span class="op">=</span> <span class="st">"n_reads"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>classification <span class="op">=</span> <span class="fu">fct_inorder</span><span class="op">(</span><span class="fu">str_to_sentence</span><span class="op">(</span><span class="va">classification</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">sample</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">mutate</span><span class="op">(</span>p_reads <span class="op">=</span> <span class="va">n_reads</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">n_reads</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>loc_met <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">location</span>,<span class="va">method</span>,sep<span class="op">=</span><span class="st">"_"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">read_comp_summ</span> <span class="op">&lt;-</span> <span class="va">read_comp_long</span> <span class="op">%&gt;%</span> </span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">loc_met</span>, <span class="va">enrichment</span>, <span class="va">classification</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">summarize</span><span class="op">(</span>n_reads <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">n_reads</span><span class="op">)</span>, .groups <span class="op">=</span> <span class="st">"drop_last"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>n_reads <span class="op">=</span> <span class="fu">replace_na</span><span class="op">(</span><span class="va">n_reads</span>,<span class="fl">0</span><span class="op">)</span>,</span>
+<span>    p_reads <span class="op">=</span> <span class="va">n_reads</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">n_reads</span><span class="op">)</span>,</span>
+<span>    pc_reads <span class="op">=</span> <span class="va">p_reads</span><span class="op">*</span><span class="fl">100</span><span class="op">)</span></span>
+<span>  </span>
+<span><span class="co"># Plot overall composition</span></span>
+<span><span class="va">g_comp</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">read_comp_summ</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">loc_met</span>, y<span class="op">=</span><span class="va">p_reads</span>, fill<span class="op">=</span><span class="va">classification</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span>position <span class="op">=</span> <span class="st">"stack"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"% Reads"</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1.01</span><span class="op">)</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">0.2</span><span class="op">)</span>,</span>
+<span>                     expand <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span>, labels <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">*</span><span class="fl">100</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_fill_brewer</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Set1"</span>, name <span class="op">=</span> <span class="st">"Classification"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="va">.</span><span class="op">~</span><span class="va">enrichment</span>, scales<span class="op">=</span><span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">theme_kit</span></span>
+<span><span class="va">g_comp</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2024-02-04_crits-christoph-1_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+<details><summary>Code</summary><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot composition of minor components</span></span>
+<span><span class="va">read_comp_minor</span> <span class="op">&lt;-</span> <span class="va">read_comp_summ</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">classification</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Archaeal"</span>, <span class="st">"Viral"</span>, <span class="st">"Human"</span>, <span class="st">"Other"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">palette_minor</span> <span class="op">&lt;-</span> <span class="fu">brewer.pal</span><span class="op">(</span><span class="fl">9</span>, <span class="st">"Set1"</span><span class="op">)</span><span class="op">[</span><span class="fl">6</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span></span>
+<span><span class="va">g_comp_minor</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">read_comp_minor</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">loc_met</span>, y<span class="op">=</span><span class="va">p_reads</span>, fill<span class="op">=</span><span class="va">classification</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span>position <span class="op">=</span> <span class="st">"stack"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"% Reads"</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0.1</span>,<span class="fl">0.01</span><span class="op">)</span>,</span>
+<span>                     expand <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span>, labels <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">*</span><span class="fl">100</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_fill_manual</span><span class="op">(</span>values<span class="op">=</span><span class="va">palette_minor</span>, name <span class="op">=</span> <span class="st">"Classification"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="va">.</span><span class="op">~</span><span class="va">enrichment</span>, scales<span class="op">=</span><span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">theme_kit</span></span>
+<span><span class="va">g_comp_minor</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<p><img src="2024-02-04_crits-christoph-1_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>In the unenriched samples, about 80% of reads are low-quality, duplicates, ribosomal, or unassigned, leaving about 20% of other assignable reads. Of these, most (16-20%) were bacterial. The fraction of human reads ranged from 0.6 to 1.5%; that of livestock reads from 0.04 to 0.1%; and that of viral reads from 0.2 to 0.5% – about 2 orders of magnitude higher than observed in our BMC data.</p>
+<p>As expected, the panel-enriched samples show significantly higher levels of viral reads than the unenriched samples, between 0.5 and 6.4% of all reads. Conversely, with the exception of one sample with 33% bacterial reads, most enriched samples showed much lower bacterial read abundance (0.8 to 4.4%). Human reads are also moderately reduced (0 to 1%), though not as dramatically as bacteria.</p>
+<p>In my next entry, I’ll look into human-infecting virus reads in the Crits-Christoph data, and the changes I needed to make to the pipeline described above to make this analysis go well.</p>
+
+
+<!-- -->
+
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb12" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Workflow analysis of Crits-Christoph et al. (2021), part 1"</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Preprocessing and composition."</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Will Bradshaw"</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> 2024-01-23</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co">    code-link: true</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="co">    df-print: paged</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span><span class="co"> visual</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="an">title-block-banner:</span><span class="co"> black</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: load-packages</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cowplot)</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fastqcr)</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RColorBrewer)</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"../scripts/aux_plot-theme.R"</span>)</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>theme_base <span class="ot">&lt;-</span> theme_base <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="cn">NULL</span>)</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>theme_kit <span class="ot">&lt;-</span> theme_base <span class="sc">+</span> <span class="fu">theme</span>(</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="dv">1</span>, <span class="at">angle =</span> <span class="dv">45</span>),</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>tnl <span class="ot">&lt;-</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>Since my <span class="co">[</span><span class="ot">last entry</span><span class="co">](https://data.securebio.org/wills-public-notebook/notebooks/2023-12-22_bmc-rna-sequel.html)</span>, I've continued to work on the <span class="co">[</span><span class="ot">new Nextflow MGS pipeline</span><span class="co">](https://github.com/naobservatory/mgs-workflow)</span>. Changes since the last entry include:</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Successful modification of the pipeline to run using working and output directories on S3 rather than locally, and several other QOL improvements (e.g. implementation of a Nextflow config file).</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Various bug fixes.</span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Modification of the human-viral identification sub-pipeline to include <span class="co">[</span><span class="ot">singly or discordantly aligned read pairs</span><span class="co">](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#concordant-pairs-match-pair-expectations-discordant-pairs-dont)</span>.</span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Implementation of a "trial run" mode for the main workflow in which the raw read files are automatically subset prior to analysis to speed up testing.</span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Creation of a separate workflow for generating large index and reference files, so that these don't need to be stored locally or generated during every run of the main workflow.</span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a><span class="al">![](/img/2024-01-23_nextflow.png)</span>{fig-align="center"}</span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>In order to validate pipeline performance on datasets other than our own BMC data, I've begun running it on pre-existing datasets from the <span class="co">[</span><span class="ot">P2RA project</span><span class="co">](https://naobservatory.org/reports/predicting-virus-relative-abundance-in-wastewater/)</span>, starting with <span class="co">[</span><span class="ot">Crits-Christoph et al. (2021)</span><span class="co">](https://doi.org/10.1128%2FmBio.02703-20)</span>:</span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>This was first and foremost a SARS-CoV-2 sequencing project that took place in the San Francisco Bay Area in 2020. Our data consists of 18 samples, all of which were collected as 24-hour composite samples of raw sewage collected from wastewater interceptor lines in four different locations (Berkeley, Oakland, San Francisco, and Marin).</span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Samples were concentrated using three different methods (Amicon ultrafiltration, silica columns, or milk of silica); see paper methods for more details.</span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Six samples (the "unenriched" fraction) underwent bacterial ribodepletion with RiboZero Plus, followed by untargeted metagenomic RNA-sequencing. The rest (the "enriched" fraction) underwent panel enrichment for respiratory viruses using the Illumina Respiratory Virus Oligo Panel, and no ribodepletion.</span>
+<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a><span class="fu"># The raw data</span></span>
+<span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>The raw data obtained from SRA comprised 18 pairs of FASTQ files corresponding to 18 different samples. Unlike for the BMC data, there was no need to concatenate multiple FASTQ files for a given sample. What remained was roughly 298M read pairs of non-RVP-enriched data and 9M read pairs of RVP-enriched data, corresponding to roughly 45 Gb and 1 Gb of sequencing data, respectively. Reads were typically 70-80bp in length. Read qualities were high, adapter levels were relatively low, and FASTQC-measured duplication levels were moderate at 50-70%.</span>
+<span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-63"><a href="#cb12-63" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 5</span></span>
+<span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-66"><a href="#cb12-66" aria-hidden="true" tabindex="-1"></a><span class="co"># Data input paths</span></span>
+<span id="cb12-67"><a href="#cb12-67" aria-hidden="true" tabindex="-1"></a>data_dir <span class="ot">&lt;-</span> <span class="st">"../data/2024-02-04_crits-christoph-1/"</span></span>
+<span id="cb12-68"><a href="#cb12-68" aria-hidden="true" tabindex="-1"></a>libraries_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"cc-libraries.txt"</span>)</span>
+<span id="cb12-69"><a href="#cb12-69" aria-hidden="true" tabindex="-1"></a>basic_stats_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"qc_basic_stats.tsv"</span>)</span>
+<span id="cb12-70"><a href="#cb12-70" aria-hidden="true" tabindex="-1"></a>adapter_stats_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"qc_adapter_stats.tsv"</span>)</span>
+<span id="cb12-71"><a href="#cb12-71" aria-hidden="true" tabindex="-1"></a>quality_base_stats_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"qc_quality_base_stats.tsv"</span>)</span>
+<span id="cb12-72"><a href="#cb12-72" aria-hidden="true" tabindex="-1"></a>quality_seq_stats_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"qc_quality_sequence_stats.tsv"</span>)</span>
+<span id="cb12-73"><a href="#cb12-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-74"><a href="#cb12-74" aria-hidden="true" tabindex="-1"></a><span class="co"># Import data</span></span>
+<span id="cb12-75"><a href="#cb12-75" aria-hidden="true" tabindex="-1"></a>stages <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"raw_concat"</span>, <span class="st">"cleaned"</span>, <span class="st">"dedup"</span>, <span class="st">"ribo_initial"</span>, <span class="st">"remove_human"</span>, <span class="st">"remove_other"</span>, <span class="st">"ribo_secondary"</span>)</span>
+<span id="cb12-76"><a href="#cb12-76" aria-hidden="true" tabindex="-1"></a>libraries <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(libraries_path, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-77"><a href="#cb12-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">enrichment =</span> <span class="fu">str_to_title</span>(enrichment))</span>
+<span id="cb12-78"><a href="#cb12-78" aria-hidden="true" tabindex="-1"></a>basic_stats <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(basic_stats_path, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-79"><a href="#cb12-79" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(libraries, <span class="at">by=</span><span class="st">"sample"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-80"><a href="#cb12-80" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(enrichment, location, collection_date) <span class="sc">%&gt;%</span></span>
+<span id="cb12-81"><a href="#cb12-81" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">stage =</span> <span class="fu">factor</span>(stage, <span class="at">levels =</span> stages),</span>
+<span id="cb12-82"><a href="#cb12-82" aria-hidden="true" tabindex="-1"></a>         <span class="at">sample =</span> <span class="fu">fct_inorder</span>(sample))</span>
+<span id="cb12-83"><a href="#cb12-83" aria-hidden="true" tabindex="-1"></a>adapter_stats <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(adapter_stats_path, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-84"><a href="#cb12-84" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(libraries, <span class="at">by=</span><span class="st">"sample"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-85"><a href="#cb12-85" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">stage =</span> <span class="fu">factor</span>(stage, <span class="at">levels =</span> stages), </span>
+<span id="cb12-86"><a href="#cb12-86" aria-hidden="true" tabindex="-1"></a>         <span class="at">read_pair =</span> <span class="fu">fct_inorder</span>(<span class="fu">as.character</span>(read_pair)))</span>
+<span id="cb12-87"><a href="#cb12-87" aria-hidden="true" tabindex="-1"></a>quality_base_stats <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(quality_base_stats_path, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-88"><a href="#cb12-88" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(libraries, <span class="at">by=</span><span class="st">"sample"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-89"><a href="#cb12-89" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">stage =</span> <span class="fu">factor</span>(stage, <span class="at">levels =</span> stages), </span>
+<span id="cb12-90"><a href="#cb12-90" aria-hidden="true" tabindex="-1"></a>         <span class="at">read_pair =</span> <span class="fu">fct_inorder</span>(<span class="fu">as.character</span>(read_pair)))</span>
+<span id="cb12-91"><a href="#cb12-91" aria-hidden="true" tabindex="-1"></a>quality_seq_stats <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(quality_seq_stats_path, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-92"><a href="#cb12-92" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(libraries, <span class="at">by=</span><span class="st">"sample"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-93"><a href="#cb12-93" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">stage =</span> <span class="fu">factor</span>(stage, <span class="at">levels =</span> stages), </span>
+<span id="cb12-94"><a href="#cb12-94" aria-hidden="true" tabindex="-1"></a>         <span class="at">read_pair =</span> <span class="fu">fct_inorder</span>(<span class="fu">as.character</span>(read_pair)))</span>
+<span id="cb12-95"><a href="#cb12-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-96"><a href="#cb12-96" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter to raw data</span></span>
+<span id="cb12-97"><a href="#cb12-97" aria-hidden="true" tabindex="-1"></a>basic_stats_raw <span class="ot">&lt;-</span> basic_stats <span class="sc">%&gt;%</span> <span class="fu">filter</span>(stage <span class="sc">==</span> <span class="st">"raw_concat"</span>)</span>
+<span id="cb12-98"><a href="#cb12-98" aria-hidden="true" tabindex="-1"></a>adapter_stats_raw <span class="ot">&lt;-</span> adapter_stats <span class="sc">%&gt;%</span> <span class="fu">filter</span>(stage <span class="sc">==</span> <span class="st">"raw_concat"</span>)</span>
+<span id="cb12-99"><a href="#cb12-99" aria-hidden="true" tabindex="-1"></a>quality_base_stats_raw <span class="ot">&lt;-</span> quality_base_stats <span class="sc">%&gt;%</span> <span class="fu">filter</span>(stage <span class="sc">==</span> <span class="st">"raw_concat"</span>)</span>
+<span id="cb12-100"><a href="#cb12-100" aria-hidden="true" tabindex="-1"></a>quality_seq_stats_raw <span class="ot">&lt;-</span> quality_seq_stats <span class="sc">%&gt;%</span> <span class="fu">filter</span>(stage <span class="sc">==</span> <span class="st">"raw_concat"</span>)</span>
+<span id="cb12-101"><a href="#cb12-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-102"><a href="#cb12-102" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize basic stats</span></span>
+<span id="cb12-103"><a href="#cb12-103" aria-hidden="true" tabindex="-1"></a>g_nreads_raw <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(basic_stats_raw, <span class="fu">aes</span>(<span class="at">x=</span>enrichment, <span class="at">y=</span>n_read_pairs, <span class="at">fill=</span>location, <span class="at">group=</span>sample)) <span class="sc">+</span> <span class="fu">geom_col</span>(<span class="at">position=</span><span class="st">"dodge"</span>) <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">name=</span><span class="st">"# Read pairs"</span>, <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span> <span class="fu">scale_fill_brewer</span>(<span class="at">palette=</span><span class="st">"Dark2"</span>, <span class="at">name=</span><span class="st">"Location"</span>) <span class="sc">+</span> theme_kit</span>
+<span id="cb12-104"><a href="#cb12-104" aria-hidden="true" tabindex="-1"></a>legend_location <span class="ot">&lt;-</span> <span class="fu">get_legend</span>(g_nreads_raw)</span>
+<span id="cb12-105"><a href="#cb12-105" aria-hidden="true" tabindex="-1"></a>g_nreads_raw_2 <span class="ot">&lt;-</span> g_nreads_raw <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span>
+<span id="cb12-106"><a href="#cb12-106" aria-hidden="true" tabindex="-1"></a>g_nbases_raw <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(basic_stats_raw, <span class="fu">aes</span>(<span class="at">x=</span>enrichment, <span class="at">y=</span>n_bases_approx, <span class="at">fill=</span>location, <span class="at">group=</span>sample)) <span class="sc">+</span> <span class="fu">geom_col</span>(<span class="at">position=</span><span class="st">"dodge"</span>) <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">name=</span><span class="st">"Total base pairs (approx)"</span>, <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span> <span class="fu">scale_fill_brewer</span>(<span class="at">palette=</span><span class="st">"Dark2"</span>, <span class="at">name=</span><span class="st">"Location"</span>) <span class="sc">+</span> theme_kit <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span>
+<span id="cb12-107"><a href="#cb12-107" aria-hidden="true" tabindex="-1"></a>g_ndup_raw <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(basic_stats_raw, <span class="fu">aes</span>(<span class="at">x=</span>enrichment, <span class="at">y=</span>percent_duplicates, <span class="at">fill=</span>location, <span class="at">group=</span>sample)) <span class="sc">+</span> <span class="fu">geom_col</span>(<span class="at">position=</span><span class="st">"dodge"</span>) <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">name=</span><span class="st">"% Duplicates (FASTQC)"</span>, <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">100</span>), <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">100</span>,<span class="dv">20</span>)) <span class="sc">+</span> <span class="fu">scale_fill_brewer</span>(<span class="at">palette=</span><span class="st">"Dark2"</span>, <span class="at">name=</span><span class="st">"Location"</span>) <span class="sc">+</span> theme_kit <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span>
+<span id="cb12-108"><a href="#cb12-108" aria-hidden="true" tabindex="-1"></a>g_basic_raw <span class="ot">&lt;-</span> <span class="fu">plot_grid</span>(g_nreads_raw_2 <span class="sc">+</span> g_nbases_raw <span class="sc">+</span> g_ndup_raw, legend_location, <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">rel_heights =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="fl">0.1</span>))</span>
+<span id="cb12-109"><a href="#cb12-109" aria-hidden="true" tabindex="-1"></a>g_basic_raw</span>
+<span id="cb12-110"><a href="#cb12-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-111"><a href="#cb12-111" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize adapters</span></span>
+<span id="cb12-112"><a href="#cb12-112" aria-hidden="true" tabindex="-1"></a>g_adapters_raw <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(adapter_stats_raw, <span class="fu">aes</span>(<span class="at">x=</span>position, <span class="at">y=</span>pc_adapters, <span class="at">color=</span>location, <span class="at">linetype =</span> read_pair, <span class="at">group=</span><span class="fu">interaction</span>(sample, read_pair))) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb12-113"><a href="#cb12-113" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>, <span class="at">name =</span> <span class="st">"Location"</span>) <span class="sc">+</span></span>
+<span id="cb12-114"><a href="#cb12-114" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_discrete</span>(<span class="at">name =</span> <span class="st">"Read Pair"</span>) <span class="sc">+</span></span>
+<span id="cb12-115"><a href="#cb12-115" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">name=</span><span class="st">"% Adapters"</span>, <span class="at">limits=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">50</span>),</span>
+<span id="cb12-116"><a href="#cb12-116" aria-hidden="true" tabindex="-1"></a>                     <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">50</span>,<span class="dv">10</span>), <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb12-117"><a href="#cb12-117" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">name=</span><span class="st">"Position"</span>, <span class="at">limits=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">80</span>),</span>
+<span id="cb12-118"><a href="#cb12-118" aria-hidden="true" tabindex="-1"></a>                     <span class="at">breaks=</span><span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">80</span>,<span class="dv">20</span>), <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb12-119"><a href="#cb12-119" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">color=</span><span class="fu">guide_legend</span>(<span class="at">nrow=</span><span class="dv">2</span>,<span class="at">byrow=</span><span class="cn">TRUE</span>),</span>
+<span id="cb12-120"><a href="#cb12-120" aria-hidden="true" tabindex="-1"></a>         <span class="at">linetype =</span> <span class="fu">guide_legend</span>(<span class="at">nrow=</span><span class="dv">2</span>,<span class="at">byrow=</span><span class="cn">TRUE</span>)) <span class="sc">+</span></span>
+<span id="cb12-121"><a href="#cb12-121" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>adapter) <span class="sc">+</span> theme_base</span>
+<span id="cb12-122"><a href="#cb12-122" aria-hidden="true" tabindex="-1"></a>g_adapters_raw</span>
+<span id="cb12-123"><a href="#cb12-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-124"><a href="#cb12-124" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize quality</span></span>
+<span id="cb12-125"><a href="#cb12-125" aria-hidden="true" tabindex="-1"></a>g_quality_base_raw <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(quality_base_stats_raw, <span class="fu">aes</span>(<span class="at">x=</span>position, <span class="at">y=</span>mean_phred_score, <span class="at">color=</span>location, <span class="at">linetype =</span> read_pair, <span class="at">group=</span><span class="fu">interaction</span>(sample,read_pair))) <span class="sc">+</span></span>
+<span id="cb12-126"><a href="#cb12-126" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept=</span><span class="dv">25</span>, <span class="at">linetype=</span><span class="st">"dashed"</span>, <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb12-127"><a href="#cb12-127" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept=</span><span class="dv">30</span>, <span class="at">linetype=</span><span class="st">"dashed"</span>, <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb12-128"><a href="#cb12-128" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> </span>
+<span id="cb12-129"><a href="#cb12-129" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>, <span class="at">name =</span> <span class="st">"Location"</span>) <span class="sc">+</span></span>
+<span id="cb12-130"><a href="#cb12-130" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_discrete</span>(<span class="at">name =</span> <span class="st">"Read Pair"</span>) <span class="sc">+</span></span>
+<span id="cb12-131"><a href="#cb12-131" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">name=</span><span class="st">"Mean Phred score"</span>, <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">limits=</span><span class="fu">c</span>(<span class="dv">20</span>,<span class="dv">45</span>)) <span class="sc">+</span></span>
+<span id="cb12-132"><a href="#cb12-132" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">name=</span><span class="st">"Position"</span>, <span class="at">limits=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">80</span>),</span>
+<span id="cb12-133"><a href="#cb12-133" aria-hidden="true" tabindex="-1"></a>                     <span class="at">breaks=</span><span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">80</span>,<span class="dv">20</span>), <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb12-134"><a href="#cb12-134" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">color=</span><span class="fu">guide_legend</span>(<span class="at">nrow=</span><span class="dv">2</span>,<span class="at">byrow=</span><span class="cn">TRUE</span>),</span>
+<span id="cb12-135"><a href="#cb12-135" aria-hidden="true" tabindex="-1"></a>         <span class="at">linetype =</span> <span class="fu">guide_legend</span>(<span class="at">nrow=</span><span class="dv">2</span>,<span class="at">byrow=</span><span class="cn">TRUE</span>)) <span class="sc">+</span></span>
+<span id="cb12-136"><a href="#cb12-136" aria-hidden="true" tabindex="-1"></a>  theme_base</span>
+<span id="cb12-137"><a href="#cb12-137" aria-hidden="true" tabindex="-1"></a>g_quality_seq_raw <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(quality_seq_stats_raw, <span class="fu">aes</span>(<span class="at">x=</span>mean_phred_score, <span class="at">y=</span>n_sequences, <span class="at">color=</span>location, <span class="at">linetype =</span> read_pair, <span class="at">group=</span><span class="fu">interaction</span>(sample,read_pair))) <span class="sc">+</span></span>
+<span id="cb12-138"><a href="#cb12-138" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept=</span><span class="dv">25</span>, <span class="at">linetype=</span><span class="st">"dashed"</span>, <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb12-139"><a href="#cb12-139" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept=</span><span class="dv">30</span>, <span class="at">linetype=</span><span class="st">"dashed"</span>, <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb12-140"><a href="#cb12-140" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> </span>
+<span id="cb12-141"><a href="#cb12-141" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>, <span class="at">name =</span> <span class="st">"Location"</span>) <span class="sc">+</span></span>
+<span id="cb12-142"><a href="#cb12-142" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_discrete</span>(<span class="at">name =</span> <span class="st">"Read Pair"</span>) <span class="sc">+</span></span>
+<span id="cb12-143"><a href="#cb12-143" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">name=</span><span class="st">"Mean Phred score"</span>, <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb12-144"><a href="#cb12-144" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">name=</span><span class="st">"# Sequences"</span>, <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb12-145"><a href="#cb12-145" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">color=</span><span class="fu">guide_legend</span>(<span class="at">nrow=</span><span class="dv">2</span>,<span class="at">byrow=</span><span class="cn">TRUE</span>),</span>
+<span id="cb12-146"><a href="#cb12-146" aria-hidden="true" tabindex="-1"></a>         <span class="at">linetype =</span> <span class="fu">guide_legend</span>(<span class="at">nrow=</span><span class="dv">2</span>,<span class="at">byrow=</span><span class="cn">TRUE</span>)) <span class="sc">+</span></span>
+<span id="cb12-147"><a href="#cb12-147" aria-hidden="true" tabindex="-1"></a>  theme_base</span>
+<span id="cb12-148"><a href="#cb12-148" aria-hidden="true" tabindex="-1"></a>g_quality_base_raw</span>
+<span id="cb12-149"><a href="#cb12-149" aria-hidden="true" tabindex="-1"></a>g_quality_seq_raw</span>
+<span id="cb12-150"><a href="#cb12-150" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb12-151"><a href="#cb12-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-152"><a href="#cb12-152" aria-hidden="true" tabindex="-1"></a><span class="fu"># Preprocessing</span></span>
+<span id="cb12-153"><a href="#cb12-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-154"><a href="#cb12-154" aria-hidden="true" tabindex="-1"></a>Both RVP-enriched and unenriched samples showed significant, but not overwhelming, reductions in read counts during preprocessing. In the case of unenriched samples, most reads were lost during the deduplication stage, with low losses observed at other stages. In enriched samples, a much larger fraction of reads were lost during the ribodepletion stages; this is consistent with all of the unenriched samples having undergone ribodepletion, while the unenriched samples did not.</span>
+<span id="cb12-155"><a href="#cb12-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-156"><a href="#cb12-156" aria-hidden="true" tabindex="-1"></a>On average, cleaning, deduplication and conservative ribodepletion together removed about 44% and 66% of total reads in unenriched and enriched samples, respectively. Host depletion, livestock depletion and secondary ribodepletion removed a further 2% and 5%, respectively.</span>
+<span id="cb12-157"><a href="#cb12-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-160"><a href="#cb12-160" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb12-161"><a href="#cb12-161" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb12-162"><a href="#cb12-162" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot reads over preprocessing</span></span>
+<span id="cb12-163"><a href="#cb12-163" aria-hidden="true" tabindex="-1"></a>g_reads_stages <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(basic_stats, <span class="fu">aes</span>(<span class="at">x=</span>stage, <span class="at">y=</span>n_read_pairs,<span class="at">fill=</span>location,<span class="at">group=</span>sample)) <span class="sc">+</span></span>
+<span id="cb12-164"><a href="#cb12-164" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position=</span><span class="st">"dodge"</span>) <span class="sc">+</span> <span class="fu">scale_fill_brewer</span>(<span class="at">palette=</span><span class="st">"Dark2"</span>, <span class="at">name=</span><span class="st">"Location"</span>) <span class="sc">+</span></span>
+<span id="cb12-165"><a href="#cb12-165" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">"# Read pairs"</span>, <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb12-166"><a href="#cb12-166" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(.<span class="sc">~</span>enrichment, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb12-167"><a href="#cb12-167" aria-hidden="true" tabindex="-1"></a>  theme_kit</span>
+<span id="cb12-168"><a href="#cb12-168" aria-hidden="true" tabindex="-1"></a>g_reads_stages</span>
+<span id="cb12-169"><a href="#cb12-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-170"><a href="#cb12-170" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot relative read losses during preprocessing</span></span>
+<span id="cb12-171"><a href="#cb12-171" aria-hidden="true" tabindex="-1"></a>n_reads_rel <span class="ot">&lt;-</span> basic_stats <span class="sc">%&gt;%</span> <span class="fu">select</span>(sample, location, stage, enrichment, n_read_pairs) <span class="sc">%&gt;%</span></span>
+<span id="cb12-172"><a href="#cb12-172" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(sample, location, enrichment) <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(sample, location, enrichment, stage) <span class="sc">%&gt;%</span></span>
+<span id="cb12-173"><a href="#cb12-173" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">p_reads_retained =</span> n_read_pairs <span class="sc">/</span> <span class="fu">lag</span>(n_read_pairs),</span>
+<span id="cb12-174"><a href="#cb12-174" aria-hidden="true" tabindex="-1"></a>         <span class="at">p_reads_lost =</span> <span class="dv">1</span> <span class="sc">-</span> p_reads_retained,</span>
+<span id="cb12-175"><a href="#cb12-175" aria-hidden="true" tabindex="-1"></a>         <span class="at">p_reads_retained_abs =</span> n_read_pairs <span class="sc">/</span> n_read_pairs[<span class="dv">1</span>],</span>
+<span id="cb12-176"><a href="#cb12-176" aria-hidden="true" tabindex="-1"></a>         <span class="at">p_reads_lost_abs =</span> <span class="dv">1</span><span class="sc">-</span>p_reads_retained_abs)</span>
+<span id="cb12-177"><a href="#cb12-177" aria-hidden="true" tabindex="-1"></a>g_reads_rel <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(n_reads_rel, <span class="fu">aes</span>(<span class="at">x=</span>stage, <span class="at">y=</span>p_reads_lost,<span class="at">fill=</span>location,<span class="at">group=</span>sample)) <span class="sc">+</span></span>
+<span id="cb12-178"><a href="#cb12-178" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position=</span><span class="st">"dodge"</span>) <span class="sc">+</span> <span class="fu">scale_fill_brewer</span>(<span class="at">palette=</span><span class="st">"Dark2"</span>, <span class="at">name=</span><span class="st">"Location"</span>) <span class="sc">+</span></span>
+<span id="cb12-179"><a href="#cb12-179" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">"% Reads Lost"</span>, <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">labels =</span> <span class="cf">function</span>(x) x<span class="sc">*</span><span class="dv">100</span>) <span class="sc">+</span></span>
+<span id="cb12-180"><a href="#cb12-180" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(.<span class="sc">~</span>enrichment, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb12-181"><a href="#cb12-181" aria-hidden="true" tabindex="-1"></a>  theme_kit</span>
+<span id="cb12-182"><a href="#cb12-182" aria-hidden="true" tabindex="-1"></a>g_reads_rel</span>
+<span id="cb12-183"><a href="#cb12-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-184"><a href="#cb12-184" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot bases over preprocessing</span></span>
+<span id="cb12-185"><a href="#cb12-185" aria-hidden="true" tabindex="-1"></a>g_bases_stages <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(basic_stats, <span class="fu">aes</span>(<span class="at">x=</span>stage, <span class="at">y=</span>n_bases_approx,<span class="at">fill=</span>location,<span class="at">group=</span>sample)) <span class="sc">+</span></span>
+<span id="cb12-186"><a href="#cb12-186" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position=</span><span class="st">"dodge"</span>) <span class="sc">+</span> <span class="fu">scale_fill_brewer</span>(<span class="at">palette=</span><span class="st">"Dark2"</span>, <span class="at">name=</span><span class="st">"Enrichment"</span>) <span class="sc">+</span></span>
+<span id="cb12-187"><a href="#cb12-187" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">"# Bases (approx)"</span>, <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb12-188"><a href="#cb12-188" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(.<span class="sc">~</span>enrichment, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb12-189"><a href="#cb12-189" aria-hidden="true" tabindex="-1"></a>  theme_kit</span>
+<span id="cb12-190"><a href="#cb12-190" aria-hidden="true" tabindex="-1"></a>g_bases_stages</span>
+<span id="cb12-191"><a href="#cb12-191" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb12-192"><a href="#cb12-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-193"><a href="#cb12-193" aria-hidden="true" tabindex="-1"></a>Data cleaning with FASTP was very successful at removing adapters, with no adapter sequences found by FASTQC at any stage after the raw data. Preprocessing had little effect on sequence quality, but this is unsurprising since raw sequence quality was already high.</span>
+<span id="cb12-194"><a href="#cb12-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-195"><a href="#cb12-195" aria-hidden="true" tabindex="-1"></a>Deduplication and ribodepletion were collectively quite effective at reducing measured duplicate levels, with the former and latter respectively having the greatest effect in unenriched vs enriched samples. In both cases, the average detected duplication level after both processes was roughly 15%. **Note that the pipeline still doesn't have a reverse-complement-sensitive deduplication pipeline, so only same-orientation duplicates have been removed.**</span>
+<span id="cb12-196"><a href="#cb12-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-199"><a href="#cb12-199" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb12-200"><a href="#cb12-200" aria-hidden="true" tabindex="-1"></a>g_dup_stages <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(basic_stats, <span class="fu">aes</span>(<span class="at">x=</span>stage, <span class="at">y=</span>percent_duplicates, <span class="at">fill=</span>location, <span class="at">group=</span>sample)) <span class="sc">+</span></span>
+<span id="cb12-201"><a href="#cb12-201" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position=</span><span class="st">"dodge"</span>) <span class="sc">+</span> <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>, <span class="at">name=</span><span class="st">"Location"</span>) <span class="sc">+</span></span>
+<span id="cb12-202"><a href="#cb12-202" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">"% Duplicates"</span>, <span class="at">limits=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">100</span>), <span class="at">breaks=</span><span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">100</span>,<span class="dv">20</span>), <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb12-203"><a href="#cb12-203" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(.<span class="sc">~</span>enrichment, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb12-204"><a href="#cb12-204" aria-hidden="true" tabindex="-1"></a>  theme_kit</span>
+<span id="cb12-205"><a href="#cb12-205" aria-hidden="true" tabindex="-1"></a>g_readlen_stages <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(basic_stats, <span class="fu">aes</span>(<span class="at">x=</span>stage, <span class="at">y=</span>mean_seq_len, <span class="at">fill=</span>location, <span class="at">group=</span>sample)) <span class="sc">+</span></span>
+<span id="cb12-206"><a href="#cb12-206" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position=</span><span class="st">"dodge"</span>) <span class="sc">+</span> <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>, <span class="at">name=</span><span class="st">"Location"</span>) <span class="sc">+</span></span>
+<span id="cb12-207"><a href="#cb12-207" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">"Mean read length (nt)"</span>, <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb12-208"><a href="#cb12-208" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(.<span class="sc">~</span>enrichment, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb12-209"><a href="#cb12-209" aria-hidden="true" tabindex="-1"></a>  theme_kit</span>
+<span id="cb12-210"><a href="#cb12-210" aria-hidden="true" tabindex="-1"></a>legend_loc <span class="ot">&lt;-</span> <span class="fu">get_legend</span>(g_dup_stages)</span>
+<span id="cb12-211"><a href="#cb12-211" aria-hidden="true" tabindex="-1"></a>g_dup_stages</span>
+<span id="cb12-212"><a href="#cb12-212" aria-hidden="true" tabindex="-1"></a>g_readlen_stages</span>
+<span id="cb12-213"><a href="#cb12-213" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb12-214"><a href="#cb12-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-215"><a href="#cb12-215" aria-hidden="true" tabindex="-1"></a><span class="fu"># High-level composition</span></span>
+<span id="cb12-216"><a href="#cb12-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-217"><a href="#cb12-217" aria-hidden="true" tabindex="-1"></a>As before, to assess the high-level composition of the reads, I ran the ribodepleted files through Kraken (using the Standard 16 database) and summarized the results with Bracken. Combining these results with the read counts above gives us a breakdown of the inferred composition of the samples:</span>
+<span id="cb12-218"><a href="#cb12-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-221"><a href="#cb12-221" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb12-222"><a href="#cb12-222" aria-hidden="true" tabindex="-1"></a><span class="co"># Import Bracken data</span></span>
+<span id="cb12-223"><a href="#cb12-223" aria-hidden="true" tabindex="-1"></a>bracken_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(data_dir, <span class="st">"bracken_counts.tsv"</span>)</span>
+<span id="cb12-224"><a href="#cb12-224" aria-hidden="true" tabindex="-1"></a>bracken <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(bracken_path, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb12-225"><a href="#cb12-225" aria-hidden="true" tabindex="-1"></a>total_assigned <span class="ot">&lt;-</span> bracken <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(sample) <span class="sc">%&gt;%</span> <span class="fu">summarize</span>(</span>
+<span id="cb12-226"><a href="#cb12-226" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">"Total"</span>,</span>
+<span id="cb12-227"><a href="#cb12-227" aria-hidden="true" tabindex="-1"></a>  <span class="at">kraken_assigned_reads =</span> <span class="fu">sum</span>(kraken_assigned_reads),</span>
+<span id="cb12-228"><a href="#cb12-228" aria-hidden="true" tabindex="-1"></a>  <span class="at">added_reads =</span> <span class="fu">sum</span>(added_reads),</span>
+<span id="cb12-229"><a href="#cb12-229" aria-hidden="true" tabindex="-1"></a>  <span class="at">new_est_reads =</span> <span class="fu">sum</span>(new_est_reads),</span>
+<span id="cb12-230"><a href="#cb12-230" aria-hidden="true" tabindex="-1"></a>  <span class="at">fraction_total_reads =</span> <span class="fu">sum</span>(fraction_total_reads)</span>
+<span id="cb12-231"><a href="#cb12-231" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-232"><a href="#cb12-232" aria-hidden="true" tabindex="-1"></a>bracken_spread <span class="ot">&lt;-</span> bracken <span class="sc">%&gt;%</span> <span class="fu">select</span>(name, sample, new_est_reads) <span class="sc">%&gt;%</span></span>
+<span id="cb12-233"><a href="#cb12-233" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">name =</span> <span class="fu">tolower</span>(name)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-234"><a href="#cb12-234" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">id_cols =</span> <span class="st">"sample"</span>, <span class="at">names_from =</span> <span class="st">"name"</span>, <span class="at">values_from =</span> <span class="st">"new_est_reads"</span>)</span>
+<span id="cb12-235"><a href="#cb12-235" aria-hidden="true" tabindex="-1"></a><span class="co"># Count reads</span></span>
+<span id="cb12-236"><a href="#cb12-236" aria-hidden="true" tabindex="-1"></a>read_counts_preproc <span class="ot">&lt;-</span> basic_stats <span class="sc">%&gt;%</span> <span class="fu">select</span>(sample, location, method, enrichment, stage, n_read_pairs) <span class="sc">%&gt;%</span></span>
+<span id="cb12-237"><a href="#cb12-237" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">id_cols =</span> <span class="fu">c</span>(<span class="st">"sample"</span>, <span class="st">"location"</span>, <span class="st">"method"</span>, <span class="st">"enrichment"</span>), <span class="at">names_from=</span><span class="st">"stage"</span>, <span class="at">values_from=</span><span class="st">"n_read_pairs"</span>)</span>
+<span id="cb12-238"><a href="#cb12-238" aria-hidden="true" tabindex="-1"></a>read_counts <span class="ot">&lt;-</span> read_counts_preproc <span class="sc">%&gt;%</span></span>
+<span id="cb12-239"><a href="#cb12-239" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(total_assigned <span class="sc">%&gt;%</span> <span class="fu">select</span>(sample, new_est_reads), <span class="at">by =</span> <span class="st">"sample"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-240"><a href="#cb12-240" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">assigned =</span> new_est_reads) <span class="sc">%&gt;%</span></span>
+<span id="cb12-241"><a href="#cb12-241" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(bracken_spread, <span class="at">by=</span><span class="st">"sample"</span>)</span>
+<span id="cb12-242"><a href="#cb12-242" aria-hidden="true" tabindex="-1"></a><span class="co"># Assess composition</span></span>
+<span id="cb12-243"><a href="#cb12-243" aria-hidden="true" tabindex="-1"></a>read_comp <span class="ot">&lt;-</span> <span class="fu">transmute</span>(read_counts, <span class="at">sample=</span>sample, <span class="at">location=</span>location, <span class="at">method=</span>method,</span>
+<span id="cb12-244"><a href="#cb12-244" aria-hidden="true" tabindex="-1"></a>                       <span class="at">enrichment=</span>enrichment,</span>
+<span id="cb12-245"><a href="#cb12-245" aria-hidden="true" tabindex="-1"></a>                       <span class="at">n_filtered =</span> raw_concat<span class="sc">-</span>cleaned,</span>
+<span id="cb12-246"><a href="#cb12-246" aria-hidden="true" tabindex="-1"></a>                       <span class="at">n_duplicate =</span> cleaned<span class="sc">-</span>dedup,</span>
+<span id="cb12-247"><a href="#cb12-247" aria-hidden="true" tabindex="-1"></a>                       <span class="at">n_ribosomal =</span> (dedup<span class="sc">-</span>ribo_initial) <span class="sc">+</span> (remove_other<span class="sc">-</span>ribo_secondary),</span>
+<span id="cb12-248"><a href="#cb12-248" aria-hidden="true" tabindex="-1"></a>                       <span class="at">n_unassigned =</span> ribo_secondary<span class="sc">-</span>assigned,</span>
+<span id="cb12-249"><a href="#cb12-249" aria-hidden="true" tabindex="-1"></a>                       <span class="at">n_bacterial =</span> bacteria,</span>
+<span id="cb12-250"><a href="#cb12-250" aria-hidden="true" tabindex="-1"></a>                       <span class="at">n_archaeal =</span> archaea,</span>
+<span id="cb12-251"><a href="#cb12-251" aria-hidden="true" tabindex="-1"></a>                       <span class="at">n_viral =</span> viruses,</span>
+<span id="cb12-252"><a href="#cb12-252" aria-hidden="true" tabindex="-1"></a>                       <span class="at">n_human =</span> (ribo_initial<span class="sc">-</span>remove_human) <span class="sc">+</span> eukaryota,</span>
+<span id="cb12-253"><a href="#cb12-253" aria-hidden="true" tabindex="-1"></a>                       <span class="at">n_other =</span> remove_human<span class="sc">-</span>remove_other)</span>
+<span id="cb12-254"><a href="#cb12-254" aria-hidden="true" tabindex="-1"></a>read_comp_long <span class="ot">&lt;-</span> <span class="fu">pivot_longer</span>(read_comp, <span class="sc">-</span>(sample<span class="sc">:</span>enrichment), <span class="at">names_to =</span> <span class="st">"classification"</span>,</span>
+<span id="cb12-255"><a href="#cb12-255" aria-hidden="true" tabindex="-1"></a>                               <span class="at">names_prefix =</span> <span class="st">"n_"</span>, <span class="at">values_to =</span> <span class="st">"n_reads"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-256"><a href="#cb12-256" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">classification =</span> <span class="fu">fct_inorder</span>(<span class="fu">str_to_sentence</span>(classification))) <span class="sc">%&gt;%</span></span>
+<span id="cb12-257"><a href="#cb12-257" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(sample) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">p_reads =</span> n_reads<span class="sc">/</span><span class="fu">sum</span>(n_reads)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-258"><a href="#cb12-258" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">loc_met =</span> <span class="fu">paste</span>(location,method,<span class="at">sep=</span><span class="st">"_"</span>))</span>
+<span id="cb12-259"><a href="#cb12-259" aria-hidden="true" tabindex="-1"></a>read_comp_summ <span class="ot">&lt;-</span> read_comp_long <span class="sc">%&gt;%</span> </span>
+<span id="cb12-260"><a href="#cb12-260" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(loc_met, enrichment, classification) <span class="sc">%&gt;%</span></span>
+<span id="cb12-261"><a href="#cb12-261" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">n_reads =</span> <span class="fu">sum</span>(n_reads), <span class="at">.groups =</span> <span class="st">"drop_last"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-262"><a href="#cb12-262" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">n_reads =</span> <span class="fu">replace_na</span>(n_reads,<span class="dv">0</span>),</span>
+<span id="cb12-263"><a href="#cb12-263" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_reads =</span> n_reads<span class="sc">/</span><span class="fu">sum</span>(n_reads),</span>
+<span id="cb12-264"><a href="#cb12-264" aria-hidden="true" tabindex="-1"></a>    <span class="at">pc_reads =</span> p_reads<span class="sc">*</span><span class="dv">100</span>)</span>
+<span id="cb12-265"><a href="#cb12-265" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb12-266"><a href="#cb12-266" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot overall composition</span></span>
+<span id="cb12-267"><a href="#cb12-267" aria-hidden="true" tabindex="-1"></a>g_comp <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(read_comp_summ, <span class="fu">aes</span>(<span class="at">x=</span>loc_met, <span class="at">y=</span>p_reads, <span class="at">fill=</span>classification)) <span class="sc">+</span></span>
+<span id="cb12-268"><a href="#cb12-268" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"stack"</span>) <span class="sc">+</span></span>
+<span id="cb12-269"><a href="#cb12-269" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">"% Reads"</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="fl">1.01</span>), <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="fl">0.2</span>),</span>
+<span id="cb12-270"><a href="#cb12-270" aria-hidden="true" tabindex="-1"></a>                     <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">labels =</span> <span class="cf">function</span>(x) x<span class="sc">*</span><span class="dv">100</span>) <span class="sc">+</span></span>
+<span id="cb12-271"><a href="#cb12-271" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Set1"</span>, <span class="at">name =</span> <span class="st">"Classification"</span>) <span class="sc">+</span></span>
+<span id="cb12-272"><a href="#cb12-272" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(.<span class="sc">~</span>enrichment, <span class="at">scales=</span><span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb12-273"><a href="#cb12-273" aria-hidden="true" tabindex="-1"></a>  theme_kit</span>
+<span id="cb12-274"><a href="#cb12-274" aria-hidden="true" tabindex="-1"></a>g_comp</span>
+<span id="cb12-275"><a href="#cb12-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-276"><a href="#cb12-276" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot composition of minor components</span></span>
+<span id="cb12-277"><a href="#cb12-277" aria-hidden="true" tabindex="-1"></a>read_comp_minor <span class="ot">&lt;-</span> read_comp_summ <span class="sc">%&gt;%</span> <span class="fu">filter</span>(classification <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Archaeal"</span>, <span class="st">"Viral"</span>, <span class="st">"Human"</span>, <span class="st">"Other"</span>))</span>
+<span id="cb12-278"><a href="#cb12-278" aria-hidden="true" tabindex="-1"></a>palette_minor <span class="ot">&lt;-</span> <span class="fu">brewer.pal</span>(<span class="dv">9</span>, <span class="st">"Set1"</span>)[<span class="dv">6</span><span class="sc">:</span><span class="dv">9</span>]</span>
+<span id="cb12-279"><a href="#cb12-279" aria-hidden="true" tabindex="-1"></a>g_comp_minor <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(read_comp_minor, <span class="fu">aes</span>(<span class="at">x=</span>loc_met, <span class="at">y=</span>p_reads, <span class="at">fill=</span>classification)) <span class="sc">+</span></span>
+<span id="cb12-280"><a href="#cb12-280" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"stack"</span>) <span class="sc">+</span></span>
+<span id="cb12-281"><a href="#cb12-281" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">"% Reads"</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="fl">0.1</span>,<span class="fl">0.01</span>),</span>
+<span id="cb12-282"><a href="#cb12-282" aria-hidden="true" tabindex="-1"></a>                     <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">labels =</span> <span class="cf">function</span>(x) x<span class="sc">*</span><span class="dv">100</span>) <span class="sc">+</span></span>
+<span id="cb12-283"><a href="#cb12-283" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values=</span>palette_minor, <span class="at">name =</span> <span class="st">"Classification"</span>) <span class="sc">+</span></span>
+<span id="cb12-284"><a href="#cb12-284" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(.<span class="sc">~</span>enrichment, <span class="at">scales=</span><span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb12-285"><a href="#cb12-285" aria-hidden="true" tabindex="-1"></a>  theme_kit</span>
+<span id="cb12-286"><a href="#cb12-286" aria-hidden="true" tabindex="-1"></a>g_comp_minor</span>
+<span id="cb12-287"><a href="#cb12-287" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb12-288"><a href="#cb12-288" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-289"><a href="#cb12-289" aria-hidden="true" tabindex="-1"></a>In the unenriched samples, about 80% of reads are low-quality, duplicates, ribosomal, or unassigned, leaving about 20% of other assignable reads. Of these, most (16-20%) were bacterial. The fraction of human reads ranged from 0.6 to 1.5%; that of livestock reads from 0.04 to 0.1%; and that of viral reads from 0.2 to 0.5% – about 2 orders of magnitude higher than observed in our BMC data.</span>
+<span id="cb12-290"><a href="#cb12-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-291"><a href="#cb12-291" aria-hidden="true" tabindex="-1"></a>As expected, the panel-enriched samples show significantly higher levels of viral reads than the unenriched samples, between 0.5 and 6.4% of all reads. Conversely, with the exception of one sample with 33% bacterial reads, most enriched samples showed much lower bacterial read abundance (0.8 to 4.4%). Human reads are also moderately reduced (0 to 1%), though not as dramatically as bacteria.</span>
+<span id="cb12-292"><a href="#cb12-292" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-293"><a href="#cb12-293" aria-hidden="true" tabindex="-1"></a>In my next entry, I'll look into human-infecting virus reads in the Crits-Christoph data, and the changes I needed to make to the pipeline described above to make this analysis go well.</span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+</body></html>
