@@ -2,7 +2,7 @@
 title: "Workflow analysis of Crits-Christoph et al. (2021), part 2"
 subtitle: "Abundance and composition of human-infecting viruses."
 author: "Will Bradshaw"
-date: 2024-01-23
+date: 2024-02-08
 format:
   html:
     code-fold: true
@@ -137,7 +137,6 @@ expand_taxids <- function(taxids_in, nodes){
 v_taxids <- expand_taxids(c(10239, hv_taxids$taxid), tax_nodes)
 
 # Import BLAST results
-#blast_results_path <- file.path(data_dir, "cc-unenriched-out.blast.gz")
 blast_results_path <- file.path(data_dir, "cat-cc-unenriched.blast.gz")
 blast_cols <- c("qseqid", "sseqid", "sgi", "staxid", "qlen", "evalue", "bitscore", "qcovs", "length", "pident", "mismatch", "gapopen", "sstrand", "qstart", "qend", "sstart", "send")
 blast_results <- read_tsv(blast_results_path, show_col_types = FALSE, col_names = blast_cols,
