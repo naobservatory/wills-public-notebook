@@ -1,0 +1,57 @@
+genome_id	genome_name	n_FALSE	p_FALSE	cause
+AB186897.1	"Human picobirnavirus RNA segment 1 genomic RNA, complete sequence"	1	0.25	No match
+AB186898.1	"Human picobirnavirus RNA segment 2 genomic RNA, complete sequence"	1	0.33	No match
+AB618031.1	"Herpes simplex virus (type 1 /strain RH2) DNA, nearly complete genome"	23	0.92	E. coli chromosomal sequence
+AC090446.27	"Baboon cytomegalovirus OCOM4-37 clone bacmv, WORKING DRAFT SEQUENCE, 22 unordered pieces"	20	0.91	Human genome / eukaryotic synthetic construct
+D00835.1	"Human immunodeficiency virus 2 proviral DNA, complete genome"	4	1.00	Human genome / eukaryotic synthetic construct
+EU410348.1	"Human papillomavirus type 110, complete genome"	1	0.00	No match
+FJ804072.1	"Human papillomavirus type 116 strain HPV116, complete sequence"	2	1.00	Appears real
+FJ947080.1	"Human papillomavirus type 115 isolate GC02, complete genome"	1	0.06	No match
+FM955841.1	"Human papillomavirus type 105, complete genome"	2	0.10	No match
+HM011556.1	"Merkel cell polyomavirus isolate R17b, complete genome"	5	0.02	Appears real
+HM133903.1	"Orf virus strain D1701, complete genome"	11	1.00	Cow genome
+HQ540592.1	"Porcine endogenous retrovirus A clone 1347C1, complete genome"	11	0.79	Pig genome
+JF909601.1	Senegalvirus SSV-A contig6 genomic sequence	1	0.33	Arabidopsis genome
+JQ410350.1	"Ectromelia virus ERPV culture-collection ATCC:VR-1431, complete genome"	1	1.00	Other bacterial genome
+JQ898342.1	"Kobuvirus sewage Kathmandu isolate KoV-SewKTM, complete genome"	2	0.11	Appears real
+JX514942.1	"Human enterovirus C116 polyprotein gene, complete cds"	1	0.50	Appears real
+KC443598.1	"Rotavirus A strain RVA/Human-wt/AUS/CK20039/2008/G1P[8] segment 1 RNA-dependent RNA polymerase VP1 (VP1) gene, complete cds"	1	1.00	Appears real
+KF035107.1	"Human rotavirus A isolate RVA/Human-wt/BRB/2012821133/2012/G4P[14] VP1 gene, complete cds"	1	1.00	Appears real
+KF371874.1	"Human rotavirus A strain RVA/Human-wt/CHN/E2835/2011/G3P[8] segment 2, complete sequence"	1	0.50	Appears real
+KF371999.1	"Human rotavirus A strain RVA/Human-wt/CHN/Z1557/2011/G3P[8] segment 8, complete sequence"	1	1.00	Appears real
+KJ412577.1	"Rotavirus A strain RVA/Human-wt/PRY/1471SR/2006/G12P[9] segment 3 RNA capping protein VP3 (VP3) gene, complete cds"	1	1.00	No match
+KM023140.1	"Salivirus FHB, complete genome"	1	0.10	No match
+KP641339.1	"Human mastadenovirus D isolate human/DEU/Leipzig/2014/70[P70H70F29], complete genome"	1	0.50	Appears real
+KP882299.1	"Rotavirus A strain RVA/Human-wt/GHA/Ghan-002/2008/G2P[4] segment 1 VP1 (VP1) gene, partial cds"	1	0.50	Appears real
+KR052736.1	"Rotavirus A strain RVA/Pig-hhp/USA/LS00009_RV0084/2011/G9P[13] segment 2 core capsid protein VP2 (VP2) gene, complete cds"	1	1.00	Appears real
+KT600065.1	"Human feces pecovirus strain PeCV-PE, complete genome"	1	0.04	No match
+KT600066.1	"Human feces pecovirus strain PeCV-NI, complete genome"	1	0.02	Appears real
+KU059788.1	"Rotavirus A strain RVA/Human-wt/AUS/WAPC2016/2014/G3P[8] segment 1 RNA-dependent RNA polymerase VP1 gene, complete cds"	1	1.00	No match
+KU343137.1	"Gemycircularvirus HV-GcV2, complete genome"	2	0.33	Appears real
+KU356575.1	"Human rotavirus A strain RVA/Human-wt/BGN/J253/2010/G2P[4] VP2 gene, complete cds"	1	1.00	No match
+KX079488.1	"Norovirus GII.21 strain NoV/Kor/JW, complete genome"	1	1.00	Appears real
+KX673221.1	"Husavirus sp. isolate 16370_59, complete genome"	2	0.01	Appears real
+KX814961.1	"Rotavirus A isolate RVA/Bat-wt/CHN/YSSK5/2015/G3P[3] NSP3 gene, complete cds"	1	1.00	No match
+KY766069.1	"Zika virus isolate Pf13/251013-18, complete genome"	86	0.98	Human genome / eukaryotic synthetic construct
+LC066150.1	"Human rotavirus A VP1 gene for VP1 protein, partial cds, strain: RVA/Human-wt/VNM/SP026/2012/G1P[8]"	1	1.00	No match
+LC328210.1	"Rotavirus A RVA/Cat-tc/JPN/FRV303/1993/G3P[3] VP4 gene for viral protein 4, complete cds"	1	1.00	Appears real
+LC708010.1	"Hudisavirus sp. CRESSV19-84-AMS-06 DNA, complete genome"	1	0.20	No match
+LC708012.1	"Hudisavirus sp. CRESSV19-84-AMS-08 DNA, complete genome"	1	0.17	No match
+LC708013.1	"Hudisavirus sp. CRESSV19-84-AMS-09 DNA, complete genome"	1	0.03	Appears real
+LT960370.1	"Human polyomavirus 1 isolate CAMB-1055 genome assembly, chromosome: I"	1	0.06	No match
+M81861.1	"Cardiovirus A1 strain Ruckert polyprotein gene, complete cds"	1	0.33	Cloning/expression vector
+MF118167.1	"Human fecal virus Jorvi2, complete genome"	6	0.12	Appears real
+MF351515.1	"Hudisavirus sp. isolate P22, complete genome"	2	0.33	Appears real
+MF351517.1	"Hudisavirus sp. isolate P29, complete genome"	1	0.06	Appears real
+MF351520.1	"Hudisavirus sp. isolate P13_2, complete genome"	1	0.17	No match
+MG522853.1	"Hudisavirus sp. isolate ETH_P4_2016, complete genome"	3	0.10	No match
+MG522854.1	"Hudisavirus sp. isolate ETH_P7_2016, complete genome"	1	0.17	Appears real
+MH121071.1	"UNVERIFIED_CONTAM: Human mastadenovirus C strain 3C2, partial genome"	1	0.14	Other bacterial genome
+MH341447.1	"Vaccinia virus strain L-IVP_oncoQ, complete genome"	1	1.00	Other eukaryotic genome
+MK059950.1	"Human astrovirus 2 strain Oxford, complete genome"	1	0.25	Appears real
+MN369532.1	"Vaccinia virus isolate VK01, complete genome"	20	1.00	Human genome / eukaryotic synthetic construct
+MT135283.1	"UNVERIFIED: Hudisavirus sp. isolate VIRES_AH01_2265035, complete genome"	4	0.80	No match
+OR453678.1	"UNVERIFIED: Orf virus, complete sequence"	1	1.00	Cow genome
+U31780.1	"Human papillomavirus type 22, complete genome"	2	0.06	No match
+X70829.1	Human papillomavirus type 65 complete genome	1	0.17	No match
+X74468.1	Human papillomavirus type 15 genomic DNA	1	0.03	Appears real
