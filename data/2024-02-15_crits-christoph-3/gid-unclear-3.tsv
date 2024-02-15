@@ -1,0 +1,35 @@
+genome_id	genome_name	n_UNCLEAR	n_FALSE	n_TRUE	p_UNCLEAR	cause
+MG522853.1	"Hudisavirus sp. isolate ETH_P4_2016, complete genome"	4	0	28	0.13	Appears real
+FM955841.1	"Human papillomavirus type 105, complete genome"	3	0	18	0.142857143	Appears real
+U31780.1	"Human papillomavirus type 22, complete genome"	3	0	28	0.10	Appears real
+AF246939.1	"Human picobirnavirus strain 1-CHN-97 segment 2 RNA-dependent RNA polymerase gene, complete cds"	2	0	4	0.333333333	Appears real
+GQ179640.3	"Salivirus NG-J1, complete genome"	2	0	8	0.20	Appears real
+KM192300.1	"Human herpesvirus 5 strain Merlin isolate RCMV1528, complete genome"	2	6	0	0.25	Cloning/expression vector
+AB186897.1	"Human picobirnavirus RNA segment 1 genomic RNA, complete sequence"	1	0	3	0.25	Appears real
+AB186898.1	"Human picobirnavirus RNA segment 2 genomic RNA, complete sequence"	1	0	2	0.333333333	Appears real
+AB618031.1	"Herpes simplex virus (type 1 /strain RH2) DNA, nearly complete genome"	1	7	0	0.13	Other bacterial genome
+AB747255.1	"Saffold virus gene for polyprotein, partial cds, isolate: Pak-3486"	1	0	0	1.00	Appears real
+DQ358078.1	"Human coxsackievirus A20 serotype CAV20a, complete genome"	1	0	1	0.50	Appears real
+EF165067.2	"Cardiovirus D1, complete genome"	1	0	0	1.00	Appears real
+EU410348.1	"Human papillomavirus type 110, complete genome"	1	0	349	0.00	Appears real
+EU708909.1	"Human rotavirus HCR3A NSP3 protein (NSP3) gene, complete cds"	1	0	3	0.25	Appears real
+FJ947080.1	"Human papillomavirus type 115 isolate GC02, complete genome"	1	0	17	0.06	Appears real
+KJ412577.1	"Rotavirus A strain RVA/Human-wt/PRY/1471SR/2006/G12P[9] segment 3 RNA capping protein VP3 (VP3) gene, complete cds"	1	0	0	1.00	Appears real
+KM023140.1	"Salivirus FHB, complete genome"	1	0	9	0.10	Appears real
+KT600065.1	"Human feces pecovirus strain PeCV-PE, complete genome"	1	0	27	0.04	Appears real
+KT600069.1	"Human feces smacovirus 3 strain SmaCV3, complete genome"	1	0	0	1.00	Appears real
+KU059788.1	"Rotavirus A strain RVA/Human-wt/AUS/WAPC2016/2014/G3P[8] segment 1 RNA-dependent RNA polymerase VP1 gene, complete cds"	1	0	0	1.00	Appears real
+KU356575.1	"Human rotavirus A strain RVA/Human-wt/BGN/J253/2010/G2P[4] VP2 gene, complete cds"	1	0	0	1.00	Appears real
+KX814961.1	"Rotavirus A isolate RVA/Bat-wt/CHN/YSSK5/2015/G3P[3] NSP3 gene, complete cds"	1	0	0	1.00	Appears real
+LC066150.1	"Human rotavirus A VP1 gene for VP1 protein, partial cds, strain: RVA/Human-wt/VNM/SP026/2012/G1P[8]"	1	0	0	1.00	Appears real
+LC169887.1	"Rotavirus A RVA/Human-wt/THA/PCB-103/2013/G8P[8] VP3 gene for structural protein VP3, complete cds, strain: RVA/Human-wt/THA/PCB-103/2013/G8P[8]"	1	0	0	1.00	Appears real
+LC708010.1	"Hudisavirus sp. CRESSV19-84-AMS-06 DNA, complete genome"	1	0	4	0.20	Appears real
+LC708012.1	"Hudisavirus sp. CRESSV19-84-AMS-08 DNA, complete genome"	1	0	5	0.166666667	Other eukaryotic genome
+LC708014.1	"Hudisavirus sp. CRESSV19-84-AMS-10 DNA, complete genome"	1	0	1	0.50	Appears real
+LT960370.1	"Human polyomavirus 1 isolate CAMB-1055 genome assembly, chromosome: I"	1	0	16	0.058823529	Appears real
+MF351520.1	"Hudisavirus sp. isolate P13_2, complete genome"	1	0	4	0.20	Appears real
+MH341445.1	"Vaccinia virus strain L-IVP_oncoB, complete genome"	1	0	0	1.00	Other eukaryotic genome
+MH341446.1	"Vaccinia virus strain L-IVP_oncoM, complete genome"	1	0	0	1.00	Other eukaryotic genome
+S45208.1	"polyprotein [echovirus 22 EV22, Harris, Genomic RNA Complete, 7339 nt]"	1	0	0	1.00	Appears real
+U31786.1	"Human papillomavirus type 37, complete genome"	1	0	3	0.25	Appears real
+X70829.1	Human papillomavirus type 65 complete genome	1	0	5	0.166666667	Appears real
