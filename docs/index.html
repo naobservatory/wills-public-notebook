@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.450">
+<meta name="generator" content="quarto-1.4.552">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -47,7 +47,13 @@ ul.task-list li input[type="checkbox"] {
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -56,6 +62,7 @@ ul.task-list li input[type="checkbox"] {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -94,20 +101,47 @@ ul.task-list li input[type="checkbox"] {
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
 </head>
 
 <body class="nav-fixed fullcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark ">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container">
+      <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">Will’s Public NAO Notebook</span>
     </a>
   </div>
-        <div class="quarto-navbar-tools ms-auto">
+        <div class="quarto-navbar-tools tools-end">
 </div>
           <div id="quarto-search" class="" title="Search"></div>
       </div> <!-- /container-fluid -->
@@ -127,420 +161,443 @@ ul.task-list li input[type="checkbox"] {
 
 
 
+
 <div class="quarto-listing quarto-listing-container-default" id="listing-listing">
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-listing-date-sort="1710820800000" data-listing-file-modified-sort="1710855113922" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8">
+<div class="quarto-post image-right" data-index="0" data-listing-date-sort="1711944000000" data-listing-file-modified-sort="1712010795272" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="48" data-listing-word-count-sort="9483">
 <div class="thumbnail">
-<p><a href="./notebooks/2024-03-19_yang-2.html"> <p class="card-img-top"><img src="notebooks/2024-03-19_yang-2_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2024-04-01_spurbeck.html" class="no-external"></a></p><a href="./notebooks/2024-04-01_spurbeck.html" class="no-external">
+<p class="card-img-top"><img src="notebooks/2024-04-01_spurbeck_files/figure-html/plot-basic-stats-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2024-04-01_spurbeck.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2024-03-19_yang-2.html">
 <h3 class="no-anchor listing-title">
-Followup analysis of Yang et al.&nbsp;(2020)
+<a href="./notebooks/2024-04-01_spurbeck.html" class="no-external">Workflow analysis of Spurbeck et al.&nbsp;(2023)</a>
 </h3>
 <div class="listing-subtitle">
-Digging into deduplication.
+<a href="./notebooks/2024-04-01_spurbeck.html" class="no-external">Cave carpa.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./notebooks/2024-04-01_spurbeck.html" class="no-external">
+<div class="listing-date">
+Apr 1, 2024
 </div>
 </a>
 </div>
+</div>
+<div class="quarto-post image-right" data-index="1" data-listing-date-sort="1710820800000" data-listing-file-modified-sort="1710855113922" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1427">
+<div class="thumbnail">
+<p><a href="./notebooks/2024-03-19_yang-2.html" class="no-external"></a></p><a href="./notebooks/2024-03-19_yang-2.html" class="no-external">
+<p class="card-img-top"><img src="notebooks/2024-03-19_yang-2_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2024-03-19_yang-2.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./notebooks/2024-03-19_yang-2.html" class="no-external">Followup analysis of Yang et al.&nbsp;(2020)</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./notebooks/2024-03-19_yang-2.html" class="no-external">Digging into deduplication.</a>
+</div>
+</div>
 <div class="metadata">
-<a href="./notebooks/2024-03-19_yang-2.html">
+<a href="./notebooks/2024-03-19_yang-2.html" class="no-external">
 <div class="listing-date">
 Mar 19, 2024
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-listing-date-sort="1710561600000" data-listing-file-modified-sort="1710615491487" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="27">
+<div class="quarto-post image-right" data-index="2" data-listing-date-sort="1710561600000" data-listing-file-modified-sort="1710615491487" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="27" data-listing-word-count-sort="5320">
 <div class="thumbnail">
-<p><a href="./notebooks/2024-03-16_yang.html"> <p class="card-img-top"><img src="notebooks/2024-03-16_yang_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2024-03-16_yang.html" class="no-external"></a></p><a href="./notebooks/2024-03-16_yang.html" class="no-external">
+<p class="card-img-top"><img src="notebooks/2024-03-16_yang_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2024-03-16_yang.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2024-03-16_yang.html">
 <h3 class="no-anchor listing-title">
-Workflow analysis of Yang et al.&nbsp;(2020)
+<a href="./notebooks/2024-03-16_yang.html" class="no-external">Workflow analysis of Yang et al.&nbsp;(2020)</a>
 </h3>
 <div class="listing-subtitle">
-Wastewater from Xinjiang.
+<a href="./notebooks/2024-03-16_yang.html" class="no-external">Wastewater from Xinjiang.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2024-03-16_yang.html">
+<a href="./notebooks/2024-03-16_yang.html" class="no-external">
 <div class="listing-date">
 Mar 16, 2024
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="2" data-listing-date-sort="1709269200000" data-listing-file-modified-sort="1709305045593" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10">
+<div class="quarto-post image-right" data-index="3" data-listing-date-sort="1709269200000" data-listing-file-modified-sort="1709305045593" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1813">
 <div class="thumbnail">
-<p><a href="./notebooks/2024-03-01_dedup.html"> <p class="card-img-top"><img src="notebooks/2024-03-01_dedup_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2024-03-01_dedup.html" class="no-external"></a></p><a href="./notebooks/2024-03-01_dedup.html" class="no-external">
+<p class="card-img-top"><img src="notebooks/2024-03-01_dedup_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2024-03-01_dedup.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2024-03-01_dedup.html">
 <h3 class="no-anchor listing-title">
-Improving read deduplication in the MGS workflow
+<a href="./notebooks/2024-03-01_dedup.html" class="no-external">Improving read deduplication in the MGS workflow</a>
 </h3>
 <div class="listing-subtitle">
-Removing reverse-complement duplicates of human-viral reads.
+<a href="./notebooks/2024-03-01_dedup.html" class="no-external">Removing reverse-complement duplicates of human-viral reads.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2024-03-01_dedup.html">
+<a href="./notebooks/2024-03-01_dedup.html" class="no-external">
 <div class="listing-date">
 Mar 1, 2024
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-listing-date-sort="1709182800000" data-listing-file-modified-sort="1709227197090" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="24">
+<div class="quarto-post image-right" data-index="4" data-listing-date-sort="1709182800000" data-listing-file-modified-sort="1709227197090" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="24" data-listing-word-count-sort="4649">
 <div class="thumbnail">
-<p><a href="./notebooks/2024-02-29_rothman-2.html"> <p class="card-img-top"><img src="notebooks/2024-02-29_rothman-2_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2024-02-29_rothman-2.html" class="no-external"></a></p><a href="./notebooks/2024-02-29_rothman-2.html" class="no-external">
+<p class="card-img-top"><img src="notebooks/2024-02-29_rothman-2_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2024-02-29_rothman-2.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2024-02-29_rothman-2.html">
 <h3 class="no-anchor listing-title">
-Workflow analysis of Rothman et al.&nbsp;(2021), part 2
+<a href="./notebooks/2024-02-29_rothman-2.html" class="no-external">Workflow analysis of Rothman et al.&nbsp;(2021), part 2</a>
 </h3>
 <div class="listing-subtitle">
-Panel-enriched samples.
+<a href="./notebooks/2024-02-29_rothman-2.html" class="no-external">Panel-enriched samples.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2024-02-29_rothman-2.html">
+<a href="./notebooks/2024-02-29_rothman-2.html" class="no-external">
 <div class="listing-date">
 Feb 29, 2024
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="4" data-listing-date-sort="1709010000000" data-listing-file-modified-sort="1709061727761" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="28">
+<div class="quarto-post image-right" data-index="5" data-listing-date-sort="1709010000000" data-listing-file-modified-sort="1709061727761" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="28" data-listing-word-count-sort="5587">
 <div class="thumbnail">
-<p><a href="./notebooks/2024-02-27_rothman-1.html"> <p class="card-img-top"><img src="notebooks/2024-02-27_rothman-1_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2024-02-27_rothman-1.html" class="no-external"></a></p><a href="./notebooks/2024-02-27_rothman-1.html" class="no-external">
+<p class="card-img-top"><img src="notebooks/2024-02-27_rothman-1_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2024-02-27_rothman-1.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2024-02-27_rothman-1.html">
 <h3 class="no-anchor listing-title">
-Workflow analysis of Rothman et al.&nbsp;(2021), part 1
+<a href="./notebooks/2024-02-27_rothman-1.html" class="no-external">Workflow analysis of Rothman et al.&nbsp;(2021), part 1</a>
 </h3>
 <div class="listing-subtitle">
-Unenriched samples.
+<a href="./notebooks/2024-02-27_rothman-1.html" class="no-external">Unenriched samples.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2024-02-27_rothman-1.html">
+<a href="./notebooks/2024-02-27_rothman-1.html" class="no-external">
 <div class="listing-date">
 Feb 27, 2024
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="5" data-listing-date-sort="1707973200000" data-listing-file-modified-sort="1709059724859" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="26">
+<div class="quarto-post image-right" data-index="6" data-listing-date-sort="1707973200000" data-listing-file-modified-sort="1709059724859" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="26" data-listing-word-count-sort="5168">
 <div class="thumbnail">
-<p><a href="./notebooks/2024-02-15_crits-christoph-3.html"> <p class="card-img-top"><img src="notebooks/2024-02-15_crits-christoph-3_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2024-02-15_crits-christoph-3.html" class="no-external"></a></p><a href="./notebooks/2024-02-15_crits-christoph-3.html" class="no-external">
+<p class="card-img-top"><img src="notebooks/2024-02-15_crits-christoph-3_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2024-02-15_crits-christoph-3.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2024-02-15_crits-christoph-3.html">
 <h3 class="no-anchor listing-title">
-Workflow analysis of Crits-Christoph et al.&nbsp;(2021), part 3
+<a href="./notebooks/2024-02-15_crits-christoph-3.html" class="no-external">Workflow analysis of Crits-Christoph et al.&nbsp;(2021), part 3</a>
 </h3>
 <div class="listing-subtitle">
-Fixing the virus pipeline.
+<a href="./notebooks/2024-02-15_crits-christoph-3.html" class="no-external">Fixing the virus pipeline.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2024-02-15_crits-christoph-3.html">
+<a href="./notebooks/2024-02-15_crits-christoph-3.html" class="no-external">
 <div class="listing-date">
 Feb 15, 2024
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="6" data-listing-date-sort="1707368400000" data-listing-file-modified-sort="1707418839515" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12">
+<div class="quarto-post image-right" data-index="7" data-listing-date-sort="1707368400000" data-listing-file-modified-sort="1707418839515" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2347">
 <div class="thumbnail">
-<p><a href="./notebooks/2024-02-08_crits-christoph-2.html"> <p class="card-img-top"><img src="notebooks/2024-02-08_crits-christoph-2_files/figure-html/unnamed-chunk-3-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2024-02-08_crits-christoph-2.html" class="no-external"></a></p><a href="./notebooks/2024-02-08_crits-christoph-2.html" class="no-external">
+<p class="card-img-top"><img src="notebooks/2024-02-08_crits-christoph-2_files/figure-html/unnamed-chunk-3-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2024-02-08_crits-christoph-2.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2024-02-08_crits-christoph-2.html">
 <h3 class="no-anchor listing-title">
-Workflow analysis of Crits-Christoph et al.&nbsp;(2021), part 2
+<a href="./notebooks/2024-02-08_crits-christoph-2.html" class="no-external">Workflow analysis of Crits-Christoph et al.&nbsp;(2021), part 2</a>
 </h3>
 <div class="listing-subtitle">
-Abundance and composition of human-infecting viruses.
+<a href="./notebooks/2024-02-08_crits-christoph-2.html" class="no-external">Abundance and composition of human-infecting viruses.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2024-02-08_crits-christoph-2.html">
+<a href="./notebooks/2024-02-08_crits-christoph-2.html" class="no-external">
 <div class="listing-date">
 Feb 8, 2024
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="7" data-listing-date-sort="1707022800000" data-listing-file-modified-sort="1707060932221" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11">
+<div class="quarto-post image-right" data-index="8" data-listing-date-sort="1707022800000" data-listing-file-modified-sort="1707060932221" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2167">
 <div class="thumbnail">
-<p><a href="./notebooks/2024-02-04_crits-christoph-1.html"> <p class="card-img-top"><img src="img/2024-01-23_nextflow.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2024-02-04_crits-christoph-1.html" class="no-external"></a></p><a href="./notebooks/2024-02-04_crits-christoph-1.html" class="no-external">
+<p class="card-img-top"><img src="img/2024-01-23_nextflow.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2024-02-04_crits-christoph-1.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2024-02-04_crits-christoph-1.html">
 <h3 class="no-anchor listing-title">
-Workflow analysis of Crits-Christoph et al.&nbsp;(2021), part 1
+<a href="./notebooks/2024-02-04_crits-christoph-1.html" class="no-external">Workflow analysis of Crits-Christoph et al.&nbsp;(2021), part 1</a>
 </h3>
 <div class="listing-subtitle">
-Preprocessing and composition.
+<a href="./notebooks/2024-02-04_crits-christoph-1.html" class="no-external">Preprocessing and composition.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2024-02-04_crits-christoph-1.html">
+<a href="./notebooks/2024-02-04_crits-christoph-1.html" class="no-external">
 <div class="listing-date">
 Feb 4, 2024
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="8" data-listing-date-sort="1706590800000" data-listing-file-modified-sort="1706626948426" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12">
+<div class="quarto-post image-right" data-index="9" data-listing-date-sort="1706590800000" data-listing-file-modified-sort="1706626948426" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2264">
 <div class="thumbnail">
-<p><a href="./notebooks/2024-01-30_blast-validation.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./notebooks/2024-01-30_blast-validation.html" class="no-external"></a></p><a href="./notebooks/2024-01-30_blast-validation.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./notebooks/2024-01-30_blast-validation.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2024-01-30_blast-validation.html">
 <h3 class="no-anchor listing-title">
-Automating BLAST validation of human viral read assignment
+<a href="./notebooks/2024-01-30_blast-validation.html" class="no-external">Automating BLAST validation of human viral read assignment</a>
 </h3>
 <div class="listing-subtitle">
-Experiments with BLASTN remote mode
+<a href="./notebooks/2024-01-30_blast-validation.html" class="no-external">Experiments with BLASTN remote mode</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2024-01-30_blast-validation.html">
+<a href="./notebooks/2024-01-30_blast-validation.html" class="no-external">
 <div class="listing-date">
 Jan 30, 2024
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="9" data-listing-date-sort="1703221200000" data-listing-file-modified-sort="1706626471698" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11">
+<div class="quarto-post image-right" data-index="10" data-listing-date-sort="1703221200000" data-listing-file-modified-sort="1706626471698" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2058">
 <div class="thumbnail">
-<p><a href="./notebooks/2023-12-22_bmc-rna-sequel.html"> <p class="card-img-top"><img src="notebooks/2023-12-22_bmc-rna-sequel_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2023-12-22_bmc-rna-sequel.html" class="no-external"></a></p><a href="./notebooks/2023-12-22_bmc-rna-sequel.html" class="no-external">
+<p class="card-img-top"><img src="notebooks/2023-12-22_bmc-rna-sequel_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2023-12-22_bmc-rna-sequel.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2023-12-22_bmc-rna-sequel.html">
 <h3 class="no-anchor listing-title">
-Project Runway RNA-seq testing data: removing livestock reads
+<a href="./notebooks/2023-12-22_bmc-rna-sequel.html" class="no-external">Project Runway RNA-seq testing data: removing livestock reads</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./notebooks/2023-12-22_bmc-rna-sequel.html" class="no-external"></a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2023-12-22_bmc-rna-sequel.html">
+<a href="./notebooks/2023-12-22_bmc-rna-sequel.html" class="no-external">
 <div class="listing-date">
 Dec 22, 2023
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="10" data-listing-date-sort="1702962000000" data-listing-file-modified-sort="1703082760549" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="27">
+<div class="quarto-post image-right" data-index="11" data-listing-date-sort="1702962000000" data-listing-file-modified-sort="1703082760549" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="27" data-listing-word-count-sort="5304">
 <div class="thumbnail">
-<p><a href="./notebooks/2023-12-19_project-runway-bmc-rna.html"> <p class="card-img-top"><img src="notebooks/2023-12-19_project-runway-bmc-rna_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2023-12-19_project-runway-bmc-rna.html" class="no-external"></a></p><a href="./notebooks/2023-12-19_project-runway-bmc-rna.html" class="no-external">
+<p class="card-img-top"><img src="notebooks/2023-12-19_project-runway-bmc-rna_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2023-12-19_project-runway-bmc-rna.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2023-12-19_project-runway-bmc-rna.html">
 <h3 class="no-anchor listing-title">
-Workflow analysis of Project Runway RNA-seq testing data
+<a href="./notebooks/2023-12-19_project-runway-bmc-rna.html" class="no-external">Workflow analysis of Project Runway RNA-seq testing data</a>
 </h3>
 <div class="listing-subtitle">
-Applying a new workflow to some oldish data.
+<a href="./notebooks/2023-12-19_project-runway-bmc-rna.html" class="no-external">Applying a new workflow to some oldish data.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2023-12-19_project-runway-bmc-rna.html">
+<a href="./notebooks/2023-12-19_project-runway-bmc-rna.html" class="no-external">
 <div class="listing-date">
 Dec 19, 2023
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="11" data-listing-date-sort="1699419600000" data-listing-file-modified-sort="1699450659122" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13">
+<div class="quarto-post image-right" data-index="12" data-listing-date-sort="1699419600000" data-listing-file-modified-sort="1699450659122" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2479">
 <div class="thumbnail">
-<p><a href="./notebooks/2023-11-02_project-runway-dna-deduplication.html"> <p class="card-img-top"><img src="notebooks/2023-11-02_project-runway-dna-deduplication_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2023-11-02_project-runway-dna-deduplication.html" class="no-external"></a></p><a href="./notebooks/2023-11-02_project-runway-dna-deduplication.html" class="no-external">
+<p class="card-img-top"><img src="notebooks/2023-11-02_project-runway-dna-deduplication_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2023-11-02_project-runway-dna-deduplication.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2023-11-02_project-runway-dna-deduplication.html">
 <h3 class="no-anchor listing-title">
-Estimating the effect of read depth on duplication rate for Project Runway DNA data
+<a href="./notebooks/2023-11-02_project-runway-dna-deduplication.html" class="no-external">Estimating the effect of read depth on duplication rate for Project Runway DNA data</a>
 </h3>
 <div class="listing-subtitle">
-How deep can we go?
+<a href="./notebooks/2023-11-02_project-runway-dna-deduplication.html" class="no-external">How deep can we go?</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2023-11-02_project-runway-dna-deduplication.html">
+<a href="./notebooks/2023-11-02_project-runway-dna-deduplication.html" class="no-external">
 <div class="listing-date">
 Nov 8, 2023
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="12" data-listing-date-sort="1698897600000" data-listing-file-modified-sort="1698943032000" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14">
+<div class="quarto-post image-right" data-index="13" data-listing-date-sort="1698897600000" data-listing-file-modified-sort="1698943032000" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2641">
 <div class="thumbnail">
-<p><a href="./notebooks/2023-11-02_project-runway-comparison.html"> <p class="card-img-top"><img src="notebooks/2023-11-02_project-runway-comparison_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2023-11-02_project-runway-comparison.html" class="no-external"></a></p><a href="./notebooks/2023-11-02_project-runway-comparison.html" class="no-external">
+<p class="card-img-top"><img src="notebooks/2023-11-02_project-runway-comparison_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2023-11-02_project-runway-comparison.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2023-11-02_project-runway-comparison.html">
 <h3 class="no-anchor listing-title">
-Comparing viral read assignments between pipelines on Project Runway data
+<a href="./notebooks/2023-11-02_project-runway-comparison.html" class="no-external">Comparing viral read assignments between pipelines on Project Runway data</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./notebooks/2023-11-02_project-runway-comparison.html" class="no-external"></a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2023-11-02_project-runway-comparison.html">
+<a href="./notebooks/2023-11-02_project-runway-comparison.html" class="no-external">
 <div class="listing-date">
 Nov 2, 2023
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="13" data-listing-date-sort="1698724800000" data-listing-file-modified-sort="1698941598593" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="17">
+<div class="quarto-post image-right" data-index="14" data-listing-date-sort="1698724800000" data-listing-file-modified-sort="1698941598593" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="17" data-listing-word-count-sort="3340">
 <div class="thumbnail">
-<p><a href="./notebooks/2023-10-31_project-runway-initial.html"> <p class="card-img-top"><img src="notebooks/2023-10-31_project-runway-initial_files/figure-html/unnamed-chunk-3-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2023-10-31_project-runway-initial.html" class="no-external"></a></p><a href="./notebooks/2023-10-31_project-runway-initial.html" class="no-external">
+<p class="card-img-top"><img src="notebooks/2023-10-31_project-runway-initial_files/figure-html/unnamed-chunk-3-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2023-10-31_project-runway-initial.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2023-10-31_project-runway-initial.html">
 <h3 class="no-anchor listing-title">
-Initial analysis of Project Runway protocol testing data
+<a href="./notebooks/2023-10-31_project-runway-initial.html" class="no-external">Initial analysis of Project Runway protocol testing data</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./notebooks/2023-10-31_project-runway-initial.html" class="no-external"></a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2023-10-31_project-runway-initial.html">
+<a href="./notebooks/2023-10-31_project-runway-initial.html" class="no-external">
 <div class="listing-date">
 Oct 31, 2023
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="14" data-listing-date-sort="1697688000000" data-listing-file-modified-sort="1697766328595" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11">
+<div class="quarto-post image-right" data-index="15" data-listing-date-sort="1697688000000" data-listing-file-modified-sort="1697766328595" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2178">
 <div class="thumbnail">
-<p><a href="./notebooks/2023-10-19_deduplication.html"> <p class="card-img-top"><img src="notebooks/2023-10-19_deduplication_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2023-10-19_deduplication.html" class="no-external"></a></p><a href="./notebooks/2023-10-19_deduplication.html" class="no-external">
+<p class="card-img-top"><img src="notebooks/2023-10-19_deduplication_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2023-10-19_deduplication.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2023-10-19_deduplication.html">
 <h3 class="no-anchor listing-title">
-Comparing options for read deduplication
+<a href="./notebooks/2023-10-19_deduplication.html" class="no-external">Comparing options for read deduplication</a>
 </h3>
 <div class="listing-subtitle">
-Clumpify vs fastp
+<a href="./notebooks/2023-10-19_deduplication.html" class="no-external">Clumpify vs fastp</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2023-10-19_deduplication.html">
+<a href="./notebooks/2023-10-19_deduplication.html" class="no-external">
 <div class="listing-date">
 Oct 19, 2023
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="15" data-listing-date-sort="1697428800000" data-listing-file-modified-sort="1697493211896" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15">
+<div class="quarto-post image-right" data-index="16" data-listing-date-sort="1697428800000" data-listing-file-modified-sort="1697493211896" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2863">
 <div class="thumbnail">
-<p><a href="./notebooks/2023-10-13_rrna-removal.html"> <p class="card-img-top"><img src="notebooks/2023-10-13_rrna-removal_files/figure-html/rrna-overlap-venn-johnson-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2023-10-13_rrna-removal.html" class="no-external"></a></p><a href="./notebooks/2023-10-13_rrna-removal.html" class="no-external">
+<p class="card-img-top"><img src="notebooks/2023-10-13_rrna-removal_files/figure-html/rrna-overlap-venn-johnson-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2023-10-13_rrna-removal.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2023-10-13_rrna-removal.html">
 <h3 class="no-anchor listing-title">
-Comparing Ribodetector and bbduk for rRNA detection
+<a href="./notebooks/2023-10-13_rrna-removal.html" class="no-external">Comparing Ribodetector and bbduk for rRNA detection</a>
 </h3>
 <div class="listing-subtitle">
-In search of quick rRNA filtering.
+<a href="./notebooks/2023-10-13_rrna-removal.html" class="no-external">In search of quick rRNA filtering.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2023-10-13_rrna-removal.html">
+<a href="./notebooks/2023-10-13_rrna-removal.html" class="no-external">
 <div class="listing-date">
 Oct 16, 2023
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="16" data-listing-date-sort="1697083200000" data-listing-file-modified-sort="1697319460554" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12">
+<div class="quarto-post image-right" data-index="17" data-listing-date-sort="1697083200000" data-listing-file-modified-sort="1697319460554" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2250">
 <div class="thumbnail">
-<p><a href="./notebooks/2023-10-12_fastp-vs-adapterremoval.html"> <p class="card-img-top"><img src="notebooks/2023-10-12_fastp-vs-adapterremoval_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2023-10-12_fastp-vs-adapterremoval.html" class="no-external"></a></p><a href="./notebooks/2023-10-12_fastp-vs-adapterremoval.html" class="no-external">
+<p class="card-img-top"><img src="notebooks/2023-10-12_fastp-vs-adapterremoval_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2023-10-12_fastp-vs-adapterremoval.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2023-10-12_fastp-vs-adapterremoval.html">
 <h3 class="no-anchor listing-title">
-Comparing FASTP and AdapterRemoval for MGS pre-processing
+<a href="./notebooks/2023-10-12_fastp-vs-adapterremoval.html" class="no-external">Comparing FASTP and AdapterRemoval for MGS pre-processing</a>
 </h3>
 <div class="listing-subtitle">
-Two tools – how do they perform?
+<a href="./notebooks/2023-10-12_fastp-vs-adapterremoval.html" class="no-external">Two tools – how do they perform?</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2023-10-12_fastp-vs-adapterremoval.html">
+<a href="./notebooks/2023-10-12_fastp-vs-adapterremoval.html" class="no-external">
 <div class="listing-date">
 Oct 12, 2023
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="17" data-listing-date-sort="1696996800000" data-listing-file-modified-sort="1697148020355" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10">
+<div class="quarto-post image-right" data-index="18" data-listing-date-sort="1696996800000" data-listing-file-modified-sort="1697148020355" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1888">
 <div class="thumbnail">
-<p><a href="./notebooks/2023-10-12_how-does-element-sequencing-work.html"> <p class="card-img-top"><img src="img/2023-10-11_rolling-circle-amplification.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2023-10-12_how-does-element-sequencing-work.html" class="no-external"></a></p><a href="./notebooks/2023-10-12_how-does-element-sequencing-work.html" class="no-external">
+<p class="card-img-top"><img src="img/2023-10-11_rolling-circle-amplification.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2023-10-12_how-does-element-sequencing-work.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2023-10-12_how-does-element-sequencing-work.html">
 <h3 class="no-anchor listing-title">
-How does Element AVITI sequencing work?
+<a href="./notebooks/2023-10-12_how-does-element-sequencing-work.html" class="no-external">How does Element AVITI sequencing work?</a>
 </h3>
 <div class="listing-subtitle">
-Findings of a shallow investigation
+<a href="./notebooks/2023-10-12_how-does-element-sequencing-work.html" class="no-external">Findings of a shallow investigation</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2023-10-12_how-does-element-sequencing-work.html">
+<a href="./notebooks/2023-10-12_how-does-element-sequencing-work.html" class="no-external">
 <div class="listing-date">
 Oct 11, 2023
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="18" data-listing-date-sort="1695268800000" data-listing-file-modified-sort="1695331351195" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11">
+<div class="quarto-post image-right" data-index="19" data-listing-date-sort="1695268800000" data-listing-file-modified-sort="1695331351195" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2167">
 <div class="thumbnail">
-<p><a href="./notebooks/2023-09-12_settled-solids-extraction-test.html"> <p class="card-img-top"><img src="notebooks/2023-09-12_settled-solids-extraction-test_files/figure-html/plot-concentrations-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./notebooks/2023-09-12_settled-solids-extraction-test.html" class="no-external"></a></p><a href="./notebooks/2023-09-12_settled-solids-extraction-test.html" class="no-external">
+<p class="card-img-top"><img src="notebooks/2023-09-12_settled-solids-extraction-test_files/figure-html/plot-concentrations-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./notebooks/2023-09-12_settled-solids-extraction-test.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./notebooks/2023-09-12_settled-solids-extraction-test.html">
 <h3 class="no-anchor listing-title">
-Extraction experiment 2: high-level results &amp; interpretation
+<a href="./notebooks/2023-09-12_settled-solids-extraction-test.html" class="no-external">Extraction experiment 2: high-level results &amp; interpretation</a>
 </h3>
 <div class="listing-subtitle">
-Comparing RNA yields and quality across extraction kits for settled solids
+<a href="./notebooks/2023-09-12_settled-solids-extraction-test.html" class="no-external">Comparing RNA yields and quality across extraction kits for settled solids</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./notebooks/2023-09-12_settled-solids-extraction-test.html">
+<a href="./notebooks/2023-09-12_settled-solids-extraction-test.html" class="no-external">
 <div class="listing-date">
 Sep 21, 2023
 </div>
@@ -631,10 +688,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-  function tippyHover(el, contentFn) {
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -644,8 +718,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -657,7 +740,130 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -701,6 +907,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -726,6 +933,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -786,6 +1019,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
+
 
 
 
