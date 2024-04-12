@@ -1197,3 +1197,109 @@ This is the first air-sampling dataset I've analyzed using this pipeline, and it
 Conversely, one thing that was not notably different, at least in RNA viruses, was the total relative abundance of human-infecting viruses as a whole. Given the lower fraction of reads made up of all viruses, this means that the fraction of total viruses arising from human-infecting viruses is much higher here than we've historically seen with wastewater data. In particular, HCMV represents a nontrivial fraction of total viruses for many DNA libraries, the first time I've seen a human pathogen show up significantly in the total virus composition data.
 
 Going forward, I have two more air sampling datasets to analyze, [Rosario et al. 2018](https://doi.org/10.1186/s40168-021-01044-7) and [Leung et al. 2021](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-021-01044-7). It will be interesting to see whether the findings from this dataset generalize to other air sampling contexts.
+
+# Addendum: Checking HIV
+
+Jeff from my team asks:
+
+> Do you think the HIV reads are real? The v1 pipeline shows 39 HIV reads in that dataset
+
+My pipeline finds 62 *Lentivirus* reads for this dataset, 34 from HIV-1 and 28 from HIV-2. Oddly, and perhaps suspiciously, these nearly all come from DNA libraries:
+
+```{r}
+#| label: hiv-check-0
+
+lenti_read_ids <- hv_reads_genus %>% filter(name == "Lentivirus") %>% pull(seq_id)
+lenti_reads <- hv_reads_species %>% filter(seq_id %in% lenti_read_ids)
+lenti_read_count <- lenti_reads %>% group_by(name, na_type) %>% count(name="n_reads")
+lenti_read_count
+```
+
+Here's what I get when I look at the subject taxa that BLASTN maps these reads to:
+
+```{r}
+#| label: hiv-check-1
+#| fig-height: 5
+
+# Configure
+ref_taxid <- 11646
+
+# Get taxon names
+tax_names_path <- file.path(data_dir, "taxid-names.tsv.gz")
+tax_names <- read_tsv(tax_names_path, show_col_types = FALSE)
+
+# Add missing names
+tax_names_new <- tribble(~staxid, ~name,
+                         3050295, "Cytomegalovirus humanbeta5",
+                         459231, "FLAG-tagging vector pFLAG97-TSR",
+                         257877, "Macaca thibetana thibetana",
+                         256321, "Lentiviral transfer vector pHsCXW",
+                         419242, "Shuttle vector pLvCmvMYOCDHA",
+                         419243, "Shuttle vector pLvCmvLacZ",
+                         421868, "Cloning vector pLvCmvLacZ.Gfp",
+                         421869, "Cloning vector pLvCmvMyocardin.Gfp",
+                         426303, "Lentiviral vector pNL-GFP-RRE(SA)",
+                         436015, "Lentiviral transfer vector pFTMGW",
+                         454257, "Shuttle vector pLvCmvMYOCD2aHA",
+                         476184, "Shuttle vector pLV.mMyoD::ERT2.eGFP",
+                         476185, "Shuttle vector pLV.hMyoD.eGFP",
+                         591936, "Piliocolobus tephrosceles",
+                         627481, "Lentiviral transfer vector pFTM3GW",
+                         680261, "Self-inactivating lentivirus vector pLV.C-EF1a.cyt-bGal.dCpG",
+                         2952778, "Expression vector pLV[Exp]-EGFP:T2A:Puro-EF1A",
+                         3022699, "Vector PAS_122122",
+                         3025913, "Vector pSIN-WP-mPGK-GDNF",
+                         3105863, "Vector pLKO.1-ZsGreen1",
+                         3105864, "Vector pLKO.1-ZsGreen1 mouse Wfs1 shRNA",
+                         3108001, "Cloning vector pLVSIN-CMV_Neo_v4.0",
+                         3109234, "Vector pTwist+Kan+High",
+                         3117662, "Cloning vector pLV[Exp]-CBA>P301L",
+                         3117663, "Cloning vector pLV[Exp]-CBA>P301L:T2A:mRuby3",
+                         3117664, "Cloning vector pLV[Exp]-CBA>hMAPT[NM_005910.6](ns):T2A:mRuby3",
+                         3117665, "Cloning vector pLV[Exp]-CBA>mRuby3",
+                         3117666, "Cloning vector pLV[Exp]-CBA>mRuby3/NFAT3 fusion protein",
+                         3117667, "Cloning vector pLV[Exp]-Neo-mPGK>{EGFP-hSEPT6}"
+
+)
+tax_names <- bind_rows(tax_names, tax_names_new)
+ref_name <- tax_names %>% filter(staxid == ref_taxid) %>% pull(name)
+
+# Get major matches
+fp_staxid <- hv_reads_genus %>% filter(taxid == ref_taxid) %>%
+  group_by(na_type, highscore = adj_score_max >= 20) %>% mutate(n_seq = n()) %>%
+  select(-name) %>%
+  left_join(blast_results_paired, by="seq_id") %>%
+  mutate(staxid = as.integer(staxid)) %>%
+  left_join(tax_names, by="staxid") %>% rename(sname=name) %>%
+  left_join(tax_names %>% rename(taxid=staxid), by="taxid")
+fp_staxid_count <- fp_staxid %>%
+  group_by(na_type, taxid, name, staxid, sname, n_seq) %>%
+  count %>%
+  group_by(na_type, taxid, name) %>%
+  mutate(p=n/n_seq)
+fp_staxid_count_major <- fp_staxid_count %>%
+  filter(n>1, p>0.1, !is.na(staxid)) %>%
+  arrange(desc(p)) %>%
+  mutate(sname = fct_inorder(sname)) %>%
+  group_by(na_type) %>% filter(row_number() <= 20)
+
+# Plot
+g <- ggplot(fp_staxid_count_major, aes(x=p, y=sname)) + 
+  geom_col() + 
+  facet_grid(na_type~., scales="free",
+             labeller = label_wrap_gen(multi_line = FALSE)) +
+  scale_x_continuous(name="% mapped reads", limits=c(0,1), breaks=seq(0,1,0.2),
+                     expand=c(0,0)) +
+  labs(title=paste0(ref_name, " (taxid ", ref_taxid, ")")) +
+  theme_base + theme(
+    axis.title.y = element_blank(),
+    plot.title = element_text(size=rel(1.5), hjust=0, face="plain"))
+g
+
+```
+
+The four RNA reads seem very likely not to be true HIV reads, since they map primarily to humans and other primates. The 58 DNA reads are more ambiguous; they do map to HIV, but also to a range of synthetic cloning vectors. On the other hand, I just now took a random slice from the HIV-1 genome and BLASTed it online, and it also mapped to cloning vectors; it's just the case that a lot of people use lentiviruses as the backbones for their cloning vectors.
+
+This makes disambiguating whether or not these reads are "real" a bit tricky. The fact that they're DNA rather than RNA makes me suspicious, as does the fact that so few of the reads apparently come from regions of the HIV genome not included in cloning vectors. On balance, I think these are probably not real HIV reads! But it's hard to be highly confident one way or the other.
+
+If we decide to treat these reads as artifacts arising from contamination with cloning vectors, what do we do about it? Just removing any read that matches a lentiviral cloning vector seems like a risky strategy when these vectors share so much sequence with real viruses. For now, I'll leave my contamination database as it is and continue checking HIV reads manually. But I'll need to develop a better solution to this sooner or later.
