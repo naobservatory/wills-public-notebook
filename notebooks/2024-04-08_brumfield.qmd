@@ -480,7 +480,6 @@ Having made these changes, the workflow identified a total of 14,073 RNA read pa
 
 ```{r}
 #| label: hv-read-counts
-
 hv_reads_filtered_path <- file.path(data_dir, "hv_hits_putative_filtered.tsv.gz")
 hv_reads_filtered <- read_tsv(hv_reads_filtered_path, show_col_types = FALSE) %>%
   inner_join(libraries, by="sample") %>% 
