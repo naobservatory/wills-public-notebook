@@ -1,6 +1,6 @@
 ---
-title: "Workflow analysis of Prussin et al. (2019)"
-subtitle: "Air filters from a daycare in Virginia."
+title: "Workflow analysis of Rosario et al. (2018)"
+subtitle: "Air sampling from a student dorm in Colorado."
 author: "Will Bradshaw"
 date: 2024-04-12
 format:
@@ -32,20 +32,18 @@ theme_kit <- theme_rotate + theme(
 tnl <- theme(legend.position = "none")
 ```
 
-Taking a break from working on [P2RA datasets](https://doi.org/10.1101/2023.12.22.23300450), we're also working on a review of air sampling for viral pathogen detection. For that study, we're collecting and analyzing air MGS data that could give us a high-level idea of the likely viral composition of such samples.
-
-The first dataset I'm looking at for this work is [Prussin et al. (2019)](https://doi.org/10.1186/s40168-019-0672-z), a study of HVAC filter samples in a Virginia daycare center between 2014 and 2015. Samples were eluted from MERV-14 air filters collected every two weeks, with pairs of successive samples combined into four-week sampling periods. Like Brumfield et al, this study conducted both RNA and DNA sequencing; all samples were sequenced on an Illumina NextSeq500 with 2x150bp reads.
+Continuing our look at air sampling datasets, we turn to Rosario et al. (2018), another study of air filters, this time from HVAC filters from an undergraduate dorm building at the University of Colorado campus in Boulder. As in [Prussin](https://data.securebio.org/wills-public-notebook/notebooks/2024-04-12_prussin.html), samples were eluted from filters (in this case MERV-8, so less stringent than Prussin's MERV-14 filters) and underwent both RNA and DNA sequencing – this time on an Illumina MiSeq with 2x250bp reads.
 
 # The raw data
 
-The Prussin dataset comprised sequencing data from 14 timepoints spread across the year, from 20th January 2014 to 2nd February 2015. Each sample represents a four-week sampling period. In addition to the 14 on-site samples, there were also two control samples, a negative control (NC) and an "unexposed filter" control (UFC), which were collected on December 23rd 2014.
+The Rosario dataset comprised sequencing data from 12 individual dormitory rooms at the sampling site, as well as a pooled sample of eight additional rooms and a negative control.
 
 ```{r}
 #| warning: false
 #| label: read-qc-data
 
 # Data input paths
-data_dir <- "../data/2024-04-11_prussin/"
+data_dir <- "../data/2024-04-12_rosario/"
 libraries_path <- file.path(data_dir, "sample-metadata.csv")
 basic_stats_path <- file.path(data_dir, "qc_basic_stats.tsv")
 adapter_stats_path <- file.path(data_dir, "qc_adapter_stats.tsv")
@@ -56,16 +54,10 @@ quality_seq_stats_path <- file.path(data_dir, "qc_quality_sequence_stats.tsv")
 libraries_raw <- read_csv(libraries_path, show_col_types = FALSE)
 libraries <- libraries_raw %>%
   arrange(desc(na_type)) %>% mutate(na_type = fct_inorder(na_type)) %>%
-  arrange(date) %>% rename(start_date = date) %>%
-  mutate(end_date = start_date + 28) %>%
-  mutate(date = fct_inorder(as.character(end_date)),
-         ctrl = ifelse(grepl("Negative_Control", sample_alias), "NC",
-                       ifelse(grepl("Unexposed_Filter", sample_alias),
-                              "UFC", "Non-Control")),
-         ctrl = factor(ctrl, levels = c("Non-Control",
-                                        "NC",
-                                        "UFC")),
-         open = (season != "Closed") & (ctrl == "On-Site"))
+  mutate(sample_type = ifelse(grepl("Control", room), "NC",
+                              ifelse(grepl("Pool", room), "Pool", "Single-Room")),
+         sample_type = factor(sample_type, levels=c("Single-Room", "Pool", "NC")),
+         room = ifelse(grepl("Control", room), "Negative Control", room))
 
 # Import QC data
 stages <- c("raw_concat", "cleaned", "dedup", "ribo_initial", "ribo_secondary")
@@ -94,21 +86,21 @@ quality_base_stats_raw <- quality_base_stats %>% filter(stage == "raw_concat")
 quality_seq_stats_raw <- quality_seq_stats %>% filter(stage == "raw_concat")
 
 # Get key values for readout
-raw_read_counts <- basic_stats_raw %>% group_by(na_type, ctrl) %>% 
+raw_read_counts <- basic_stats_raw %>% group_by(na_type, sample_type) %>% 
   summarize(rmin = min(n_read_pairs), rmax=max(n_read_pairs),
             rmean=mean(n_read_pairs), .groups = "drop")
-raw_read_totals <- basic_stats_raw %>% group_by(na_type, ctrl) %>% 
+raw_read_totals <- basic_stats_raw %>% group_by(na_type, sample_type) %>% 
   summarize(n_read_pairs = sum(n_read_pairs), 
             n_bases_approx = sum(n_bases_approx), .groups = "drop")
-raw_dup <- basic_stats_raw %>% group_by(na_type, ctrl) %>% 
+raw_dup <- basic_stats_raw %>% group_by(na_type, sample_type) %>% 
   summarize(dmin = min(percent_duplicates), dmax=max(percent_duplicates),
             dmean=mean(percent_duplicates), .groups = "drop")
 
 ```
 
-The 14 positive samples from the dataset yielded 5M-20M (mean 11.3M) RNA-sequencing reads and 10M-42M (mean 21.0M) DNA-sequencing reads per sample, for a total of 159M RNA read pairs and 294M DNA read pairs (46.3 and 87.0 gigabases of sequence, respectively). Controls contributed an additional 1M RNA read pairs and 17.5M DNA read pairs.
+The 12 single-room samples yielded 0.57-0.74M (mean 0.67M) RNA-sequencing reads and 0.48M-0.84M (mean 0.67M) DNA-sequencing reads; the pooled and control samples had similar depth. In total, non-control samples yielded 8.0M RNA read pairs and 8.0M DNA read pairs (4 gigabases of sequence each).
 
-In positive samples, read qualities were mostly high but tailed off slightly at the 3' end in some samples, suggesting the need for trimming. Adapter levels were high. Inferred duplication levels were low (2-4%) in DNA reads and moderate (21-44%) in RNA reads. Control sample reads were more problematic, with higher duplication and adapter levels and lower quality.
+Read qualities were so-so, in need of cleaning. Adapter levels were high. Inferred duplication levels were low (4.6-8.2%) in DNA reads but highly variable (3-83%) in RNA reads.
 
 ```{r}
 #| fig-width: 9
@@ -117,24 +109,24 @@ In positive samples, read qualities were mostly high but tailed off slightly at 
 
 # Prepare data
 basic_stats_raw_metrics <- basic_stats_raw %>%
-  select(date, na_type, ctrl,
+  select(room, na_type, sample_type,
          `# Read pairs` = n_read_pairs,
          `Total base pairs\n(approx)` = n_bases_approx,
          `% Duplicates\n(FASTQC)` = percent_duplicates) %>%
-  pivot_longer(-(date:ctrl), names_to = "metric", values_to = "value") %>%
+  pivot_longer(-(room:sample_type), names_to = "metric", values_to = "value") %>%
   mutate(metric = fct_inorder(metric))
 
 # Set up plot templates
 scale_fill_na <- purrr::partial(scale_fill_brewer, palette="Set1", 
                                 name="Nucleic acid type")
 g_basic <- ggplot(basic_stats_raw_metrics, 
-                  aes(x=date, y=value, fill=na_type)) +
+                  aes(x=room, y=value, fill=na_type)) +
   geom_col(position = "dodge") +
   scale_x_discrete(name="Collection Date") +
   scale_y_continuous(expand=c(0,0)) +
   expand_limits(y=c(0,100)) +
   scale_fill_na() + 
-  facet_grid(metric~ctrl, scales = "free", space="free_x", switch="y") +
+  facet_grid(metric~sample_type, scales = "free", space="free_x", switch="y") +
   theme_rotate + theme(
     axis.title.y = element_blank(),
     strip.text.y = element_text(face="plain")
@@ -162,7 +154,7 @@ g_adapters_raw <- g_qual_raw +
                      breaks = seq(0,100,10), expand=c(0,0)) +
   scale_x_continuous(name="Position", limits=c(0,NA),
                      breaks=seq(0,140,20), expand=c(0,0)) +
-  facet_grid(ctrl~adapter)
+  facet_grid(sample_type~adapter)
 g_adapters_raw
 
 # Visualize quality
@@ -173,7 +165,7 @@ g_quality_base_raw <- g_qual_raw +
   scale_y_continuous(name="Mean Phred score", expand=c(0,0), limits=c(10,45)) +
   scale_x_continuous(name="Position", limits=c(0,NA),
                      breaks=seq(0,140,20), expand=c(0,0)) +
-  facet_grid(ctrl~.)
+  facet_grid(sample_type~.)
 g_quality_base_raw
 
 g_quality_seq_raw <- g_qual_raw +
@@ -182,20 +174,18 @@ g_quality_seq_raw <- g_qual_raw +
   geom_line(aes(x=mean_phred_score, y=n_sequences), data=quality_seq_stats_raw) +
   scale_x_continuous(name="Mean Phred score", expand=c(0,0)) +
   scale_y_continuous(name="# Sequences", expand=c(0,0)) +
-  facet_grid(ctrl~., scales = "free_y")
+  facet_grid(sample_type~., scales = "free_y")
 g_quality_seq_raw
 ```
 
 # Preprocessing
 
-The average fraction of reads lost at each stage in the preprocessing pipeline is shown in the following table. For positive samples, on average, cleaning and deduplication removed about 19% of total read pairs from RNA libraries and about 7% from DNA libraries. Subsequent ribodepletion removed a further \~32% of total read pairs on average from RNA libraries but \<0.5% of total read pairs from DNA libraries.
-
-Control samples, meanwhile, lost an average of 63% of RNA read pairs and 21% of DNA read pairs during cleaning and deduplication, consistent with the lower qualities observed above. Subsequent ribodepletion removed an additional 9% of total RNA read pairs and 0.3% of total DNA read pairs.
+The average fraction of reads lost at each stage in the preprocessing pipeline is shown in the following table. Single-room samples lost an average of 52%/14% (RNA/DNA) of total read pairs during cleaning and deduplication, with a further loss of 4.3%/0.1% during ribodepletion. However, the fraction of reads lost, especially during cleaning and deduplication, was highly variable between samples.
 
 ```{r}
 #| label: preproc-table
 n_reads_rel <- basic_stats %>% 
-  select(sample, date, na_type, ctrl, stage, 
+  select(sample, na_type, sample_type, stage, 
          percent_duplicates, n_read_pairs) %>%
   group_by(sample, na_type) %>% arrange(sample, na_type, stage) %>%
   mutate(p_reads_retained = replace_na(n_read_pairs / lag(n_read_pairs), 0),
@@ -204,8 +194,8 @@ n_reads_rel <- basic_stats %>%
          p_reads_lost_abs = 1-p_reads_retained_abs,
          p_reads_lost_abs_marginal = replace_na(p_reads_lost_abs - lag(p_reads_lost_abs), 0))
 n_reads_rel_display <- n_reads_rel %>% 
-  rename(Stage=stage, `NA Type`=na_type, `Control?`=ctrl) %>% 
-  group_by(`Control?`, `NA Type`, Stage) %>% 
+  rename(Stage=stage, `NA Type`=na_type, `Sample Type`=sample_type) %>% 
+  group_by(`Sample Type`, `NA Type`, Stage) %>% 
   summarize(`% Total Reads Lost (Cumulative)` = paste0(round(min(p_reads_lost_abs*100),1), "-", round(max(p_reads_lost_abs*100),1), " (mean ", round(mean(p_reads_lost_abs*100),1), ")"),
             `% Total Reads Lost (Marginal)` = paste0(round(min(p_reads_lost_abs_marginal*100),1), "-", round(max(p_reads_lost_abs_marginal*100),1), " (mean ", round(mean(p_reads_lost_abs_marginal*100),1), ")"), .groups="drop") %>% 
   filter(Stage != "raw_concat") %>%
@@ -221,7 +211,7 @@ n_reads_rel_display
 
 g_stage_trace <- ggplot(basic_stats, aes(x=stage, color=na_type, group=sample)) +
   scale_color_na() +
-  facet_wrap(ctrl~na_type, scales="free", ncol=2,
+  facet_wrap(sample_type~na_type, scales="free", ncol=2,
              labeller = label_wrap_gen(multi_line=FALSE)) +
   theme_kit
 
@@ -237,13 +227,13 @@ g_reads_rel <- ggplot(n_reads_rel, aes(x=stage, color=na_type, group=sample)) +
   scale_y_continuous("% Total Reads Lost", expand=c(0,0), 
                      labels = function(x) x*100) +
   scale_color_na() +
-  facet_wrap(ctrl~na_type, scales="free", ncol=2,
+  facet_wrap(sample_type~na_type, scales="free", ncol=2,
              labeller = label_wrap_gen(multi_line=FALSE)) +
   theme_kit
 g_reads_rel
 ```
 
-In both positive and control samples, data cleaning with FASTP was very successful at removing adapters, with very few adapter sequences found by FASTQC at any stage after the raw data. FASTP was also successful at improving read quality.
+Data cleaning was very successful at improving read qualities, as well as removing most adapter sequences. The exception to the latter was terminal poly-A sequences, which remained at a substantial (though reduced) prevalence throughout the pipeline. (This doesn't seem to have caused downstream problems that I can see.)
 
 ```{r}
 #| warning: false
@@ -288,14 +278,14 @@ g_quality_seq <- g_qual +
 g_quality_seq
 ```
 
-According to FASTQC, deduplication was moderately effective at reducing measured duplicate levels in on-site samples, with FASTQC-measured levels falling from an average of 34% to 23% for RNA reads and from 2.7% to 2.2% for DNA reads.
+According to FASTQC, deduplication was very effective at reducing measured duplicate levels, which for single-room samples fell from an average of 40% to 7.8% for RNA reads and from 5.5% to 0.3% for DNA reads.
 
 ```{r}
 #| label: preproc-dedup
 #| fig-height: 8
 #| fig-width: 6
 
-stage_dup <- basic_stats %>% group_by(na_type, ctrl, stage) %>% 
+stage_dup <- basic_stats %>% group_by(na_type, sample_type, stage) %>% 
   summarize(dmin = min(percent_duplicates), dmax=max(percent_duplicates),
             dmean=mean(percent_duplicates), .groups = "drop")
 
@@ -333,8 +323,8 @@ bracken_spread <- bracken %>% select(name, sample, new_est_reads) %>%
 
 # Count reads
 read_counts_preproc <- basic_stats %>% 
-  select(sample, na_type, ctrl, date, stage, n_read_pairs) %>%
-  pivot_wider(id_cols = c("sample", "na_type", "ctrl", "date"),
+  select(sample, room, na_type, sample_type, stage, n_read_pairs) %>%
+  pivot_wider(id_cols = c("sample", "room", "na_type", "sample_type"),
               names_from="stage", values_from="n_read_pairs")
 read_counts <- read_counts_preproc %>%
   inner_join(total_assigned %>% select(sample, new_est_reads), by = "sample") %>%
@@ -343,7 +333,7 @@ read_counts <- read_counts_preproc %>%
 
 # Assess composition
 read_comp <- transmute(read_counts, sample=sample, na_type=na_type,
-                       ctrl = ctrl, date = date,
+                       room=room, sample_type=sample_type,
                        n_filtered = raw_concat-cleaned,
                        n_duplicate = cleaned-dedup,
                        n_ribosomal = (dedup-ribo_initial) + (ribo_initial-ribo_secondary),
@@ -352,7 +342,7 @@ read_comp <- transmute(read_counts, sample=sample, na_type=na_type,
                        n_archaeal = archaea,
                        n_viral = viruses,
                        n_human = eukaryota)
-read_comp_long <- pivot_longer(read_comp, -(sample:date), 
+read_comp_long <- pivot_longer(read_comp, -(sample:sample_type), 
                                names_to = "classification",
                                names_prefix = "n_", values_to = "n_reads") %>%
   mutate(classification = fct_inorder(str_to_sentence(classification))) %>%
@@ -360,7 +350,7 @@ read_comp_long <- pivot_longer(read_comp, -(sample:date),
 
 # Summarize composition
 read_comp_summ <- read_comp_long %>% 
-  group_by(na_type, ctrl, classification) %>%
+  group_by(na_type, sample_type, classification) %>%
   summarize(n_reads = sum(n_reads), .groups = "drop_last") %>%
   mutate(n_reads = replace_na(n_reads,0),
     p_reads = n_reads/sum(n_reads),
@@ -371,9 +361,9 @@ read_comp_summ <- read_comp_long %>%
 #| label: plot-composition-all
 
 # Prepare plotting templates
-g_comp_base <- ggplot(mapping=aes(x=date, y=p_reads, fill=classification)) +
+g_comp_base <- ggplot(mapping=aes(x=room, y=p_reads, fill=classification)) +
   scale_x_discrete(name="Collection Date") +
-  facet_grid(na_type~ctrl, scales = "free", space = "free_x") +
+  facet_grid(na_type~sample_type, scales = "free", space = "free_x") +
   theme_rotate
 scale_y_pc_reads <- purrr::partial(scale_y_continuous, name = "% Reads",
                                    expand = c(0,0), labels = function(y) y*100)
@@ -401,9 +391,9 @@ g_comp_minor
 p_reads_summ_group <- read_comp_long %>%
   mutate(classification = ifelse(classification %in% c("Filtered", "Duplicate", "Unassigned"), "Excluded", as.character(classification)),
          classification = fct_inorder(classification)) %>%
-  group_by(classification, sample, na_type, ctrl) %>%
+  group_by(classification, sample, na_type, sample_type) %>%
   summarize(p_reads = sum(p_reads), .groups = "drop") %>%
-  group_by(classification, na_type, ctrl) %>%
+  group_by(classification, na_type, sample_type) %>%
   summarize(pc_min = min(p_reads)*100, pc_max = max(p_reads)*100, 
             pc_mean = mean(p_reads)*100, .groups = "drop")
 p_reads_summ_prep <- p_reads_summ_group %>%
@@ -413,17 +403,17 @@ p_reads_summ_prep <- p_reads_summ_group %>%
          pc_mean = pc_mean %>% signif(digits=2) %>% sapply(format, scientific=FALSE, trim=TRUE, digits=2),
          display = paste0(pc_min, "-", pc_max, "% (mean ", pc_mean, "%)"))
 p_reads_summ <- p_reads_summ_prep %>%
-  select(ctrl, classification, na_type, display) %>%
+  select(sample_type, classification, na_type, display) %>%
   pivot_wider(names_from=na_type, values_from = display) %>% 
-  arrange(ctrl, classification)
+  arrange(sample_type, classification)
 p_reads_summ
 ```
 
-What we see is a very different picture from the wastewater samples I've been analyzing so far. Most notably, the fraction of (non-ribosomal) human reads is *much* higher. Even the 2015-01-20 samples, which were taken when the daycare center was closed for the winter holidays, showed human read fractions (for both nucleic-acid types) of \>12%; non-control samples as a whole averaged 27% for RNA reads and 34% for DNA reads. Compare [Brumfield](https://data.securebio.org/wills-public-notebook/notebooks/2024-04-08_brumfield.html) (average 0.08% for RNA and 0.02% for DNA), [Yang](https://data.securebio.org/wills-public-notebook/notebooks/2024-03-16_yang.html) (mean 0.05% for RNA) or even [Rothman](https://data.securebio.org/wills-public-notebook/notebooks/2024-02-27_rothman-1.html) (mean 1.8% for non-panel-enriched RNA samples).
+As with the Prussin data, human reads are very elevated compared to wastewater, making up an average of 21% of read pairs in RNA libraries and 4% for DNA libraries for single-room samples (in both cases, the maximum abundance of human reads across samples is much higher). Viral read abundances are higher than Prussin, averaging 0.08% for single-room RNA libraries and 0.04% for DNA libraries; for some reason, the pooled RNA library shows much higher viral prevalence, at 0.33%. The most obvious difference from the Prussin data is that DNA libraries in Rosario show a much higher fraction of non-ribosomal unassigned reads, with an average of 78% of all reads for single-room libraries.
 
-Conversely, total viral reads are very low: mean 0.033% for RNA reads and 0.019% for DNA reads. Wastewater RNA datasets have typically had much higher total viruses: mean 0.5% for Brumfield, about the same for Crits-Christoph, 5.5% for Yang, 4.5% for Rothman. Brumfield's DNA data contained substantially fewer viruses than their RNA data, but still more than Prussin: about 0.08% on average.
+As in Prussin, viral DNA reads were dominated by *Caudoviricetes* phages, with many unclassifiable below the class level. Other prominent viral classes in DNA reads included *Papovaviricetes* (which includes *Polyomaviridae* and *Papillomaviridae*), *Megaviridae* (giant viruses) and *Repensiviricetes* (plant and fungal viruses). Pooled samples also showed a significant level of *Quintoviricetes* (parvoviruses).
 
-Looking at viral families...was less informative than usual, especially for DNA reads. It turns out that these samples contain a lot of viral reads that Kraken2 was only able to classify to the class level. In DNA reads, samples were dominated by *Caudoviricetes* phages, though *Herviviricetes* (which includes herpesviruses) and *Naldaviricetes* (a class of arthropod-infecting viruses) also put in a respectable showing. In RNA reads, *Caudoviricetes* was again a major presence, but *Alsuviricetes* (a family of primarily plant pathogens) was often as or more prevalent, and *Revtraviricetes* (a class that includes Hepatitis B virus and retroviruses) was also significant.
+RNA libraries, meanwhile, were dominated by *Alsuviricetes* (mainly plant viruses) and, notably, *Pisoniviricetes* (which includes coronaviruses, picornaviruses including *Enterovirus*, and caliciviruses including *Norovirus*). *Caudoviricetes*, *Herviviricetes* (herpesviruses) and *Revtraviricetes* (retroviruses + Hep B) were also prominent in some samples.
 
 ```{r}
 #| label: extract-viral-taxa
@@ -464,18 +454,19 @@ viral_classes_major_tab <- viral_classes %>%
 viral_classes_major_list <- viral_classes_major_tab %>% pull(name)
 viral_classes_major <- viral_classes %>% 
   filter(name %in% viral_classes_major_list) %>%
-  select(name, taxid, sample, na_type, ctrl, date, p_reads_viral)
+  select(name, taxid, sample, room, na_type, sample_type, p_reads_viral)
 viral_classes_minor <- viral_classes_major %>% 
-  group_by(sample, na_type, ctrl, date) %>%
+  group_by(sample, room, na_type, sample_type) %>%
   summarize(p_reads_viral_major = sum(p_reads_viral), .groups = "drop") %>%
   mutate(name = "Other", taxid=NA, p_reads_viral = 1-p_reads_viral_major) %>%
-  select(name, taxid, sample, na_type, ctrl, date, p_reads_viral)
+  select(name, taxid, sample, room, na_type, sample_type, p_reads_viral)
 viral_classes_display <- bind_rows(viral_classes_major, viral_classes_minor) %>%
   arrange(desc(p_reads_viral)) %>% 
-  mutate(name = factor(name, levels=c(viral_classes_major_list, "Other"))) %>%
+  mutate(name = factor(name, levels=c(viral_classes_major_list, "Other")),
+         p_reads_viral = pmax(p_reads_viral, 0)) %>%
   rename(p_reads = p_reads_viral, classification=name)
 
-palette_viral <- c(brewer.pal(12, "Set3"), brewer.pal(8, "Set2"))
+palette_viral <- c(brewer.pal(12, "Set3"), brewer.pal(8, "Dark2"))
 g_classes <- g_comp_base + 
   geom_col(data=viral_classes_display, position = "stack") +
   scale_y_continuous(name="% Viral Reads", limits=c(0,1.01), breaks = seq(0,1,0.2),
@@ -485,116 +476,125 @@ g_classes
 
 ```
 
-Of these, the most interesting are the strong presence of *Herviviricetes* in the DNA reads and *Revtraviricetes* in the RNA reads, as both of these are families that contain important human pathogens.
+Of these, the strong presence of *Papovaviricetes* and *Pisoniviricetes* across multiple samples is the most interesting, as both contain important human pathogens. The presence of *Quintoviricetes*, *Herviviricetes* and *Revtraviricetes* in a smaller number of samples is also notable.
 
-Digging into the former, it turns out these reads are composed almost exclusively of *Herpesviridae* at the family level. Within non-control samples, these arise overwhelmingly from *Cytomegalovirus.* Digging in at the species level, these in turn are primarily attributed to a single CMV, Human betaherpesvirus 5, a.k.a. human cytomegalovirus (HCMV). I was excited to see this: this is the first time a single human pathogen, or even all human pathogens combined, have constituted a significant fraction of all viral reads in a sample I've analyzed with this pipeline.
+In DNA reads, *Papovaviricetes* are quite heterogeneous across samples, while mostly being dominated by one or two genera within samples. The three rooms with the largest *Papovaviricetes* fraction (Female room 1 & 3 and Male room 4) are each dominated by a single genus, specifically *Dyothetapapillomavirus* (of which the sole member is *Dyothetapapillomavirus 1*, a cat pathogen), *Betapapillomavirus* (a genus of human wart-causing viruses), and *Alphapolyomavirus* (specifically Merkel cell polyomavirus).
 
 ```{r}
-#| label: herviviricetes
+#| label: papovaviricetes
 
 # Get all read counts in class
-hervi_taxid <- 2731363
-hervi_desc_taxids_old <- hervi_taxid
-hervi_desc_taxids_new <- unique(c(hervi_desc_taxids_old, viral_taxa %>% filter(parent_taxid %in% hervi_desc_taxids_old) %>% pull(taxid)))
-while (length(hervi_desc_taxids_new) > length(hervi_desc_taxids_old)){
-  hervi_desc_taxids_old <- hervi_desc_taxids_new
-  hervi_desc_taxids_new <- unique(c(hervi_desc_taxids_old, viral_taxa %>% filter(parent_taxid %in% hervi_desc_taxids_old) %>% pull(taxid)))
+papova_taxid <- 2732421
+papova_desc_taxids_old <- papova_taxid
+papova_desc_taxids_new <- unique(c(papova_desc_taxids_old, viral_taxa %>% filter(parent_taxid %in% papova_desc_taxids_old) %>% pull(taxid)))
+while (length(papova_desc_taxids_new) > length(papova_desc_taxids_old)){
+  papova_desc_taxids_old <- papova_desc_taxids_new
+  papova_desc_taxids_new <- unique(c(papova_desc_taxids_old, viral_taxa %>% filter(parent_taxid %in% papova_desc_taxids_old) %>% pull(taxid)))
 }
-hervi_counts <- kraken_reports_viral_cleaned %>%
-  filter(taxid %in% hervi_desc_taxids_new) %>%
-  mutate(p_reads_hervi = n_reads_clade/n_reads_clade[1])
+papova_counts <- kraken_reports_viral_cleaned %>%
+  filter(taxid %in% papova_desc_taxids_new) %>%
+  mutate(p_reads_papova = n_reads_clade/n_reads_clade[1])
 
 # Get genus composition
-hervi_genera <- hervi_counts %>% filter(rank == "S", na_type == "DNA")
-hervi_genera_major_tab <- hervi_genera %>% 
+papova_genera <- papova_counts %>% filter(rank == "G", na_type == "DNA")
+papova_genera_major_tab <- papova_genera %>% 
   group_by(name, taxid) %>%
-  summarize(p_reads_hervi_max = max(p_reads_hervi), .groups="drop") %>%
-  filter(p_reads_hervi_max >= 0.04)
-hervi_genera_major_list <- hervi_genera_major_tab %>% pull(name)
-hervi_genera_major <- hervi_genera %>% 
-  filter(name %in% hervi_genera_major_list) %>%
-  select(name, taxid, sample, na_type, ctrl, date, p_reads_hervi)
-hervi_genera_minor <- hervi_genera_major %>% 
-  group_by(sample, na_type, ctrl, date) %>%
-  summarize(p_reads_hervi_major = sum(p_reads_hervi), .groups = "drop") %>%
-  mutate(name = "Other", taxid=NA, p_reads_hervi = 1-p_reads_hervi_major) %>%
-  select(name, taxid, sample, na_type, ctrl, date, p_reads_hervi)
-hervi_genera_display <- bind_rows(hervi_genera_major, hervi_genera_minor) %>%
-  arrange(desc(p_reads_hervi)) %>% 
-  mutate(name = factor(name, levels=c(hervi_genera_major_list, "Other"))) %>%
-  rename(p_reads = p_reads_hervi, classification=name)
+  summarize(p_reads_papova_max = max(p_reads_papova), .groups="drop") %>%
+  filter(p_reads_papova_max >= 0.04)
+papova_genera_major_list <- papova_genera_major_tab %>% pull(name)
+papova_genera_major <- papova_genera %>% 
+  filter(name %in% papova_genera_major_list) %>%
+  select(name, taxid, sample, room, na_type, sample_type, p_reads_papova)
+papova_genera_minor <- papova_genera_major %>% 
+  group_by(sample, room, na_type, sample_type) %>%
+  summarize(p_reads_papova_major = sum(p_reads_papova), .groups = "drop") %>%
+  mutate(name = "Other", taxid=NA, p_reads_papova = 1-p_reads_papova_major) %>%
+  select(name, taxid, sample, room, na_type, sample_type, p_reads_papova)
+papova_genera_display <- bind_rows(papova_genera_major, papova_genera_minor) %>%
+  arrange(desc(p_reads_papova)) %>% 
+  mutate(name = factor(name, levels=c(papova_genera_major_list, "Other"))) %>%
+  rename(p_reads = p_reads_papova, classification=name)
 
 # Plot
-g_hervi_genera <- g_comp_base + 
-  geom_col(data=hervi_genera_display, position = "stack") +
-  scale_y_continuous(name="% Herviviricetes Reads", limits=c(0,1.01), 
+g_papova_genera <- g_comp_base + 
+  geom_col(data=papova_genera_display, position = "stack") +
+  scale_y_continuous(name="% Papovaviricetes Reads", limits=c(0,1.01), 
                      breaks = seq(0,1,0.2),
                      expand=c(0,0), labels = function(y) y*100) +
-  scale_fill_manual(values=palette_viral, name = "Viral species")
-g_hervi_genera
+  scale_fill_manual(values=palette_viral, name = "Viral genus") +
+  guides(fill=guide_legend(ncol=3))
+g_papova_genera
 
 ```
 
-*Revtraviricetes* reads are similarly dominated by a single viral genus, *Alpharetrovirus.* Digging in at the species level, we see contributions from a variety of avian oncoviruses. To my (admittedly non-expert) knowledge, none of these infect humans, and I think they are probably primarily arising from local birds (or possibly rats).
+In RNA reads, *Pisoniviricetes* are conversely dominated by a single genus, *Sobemovirus*, across all samples, and specifically a single species. Disappointingly, this is Ryegrass mottle virus, a plant pathogen.
 
 ```{r}
-#| label: revtraviricetes
+#| label: pisoniviricetes
 
 # Get all read counts in class
-revtra_taxid <- 2732514
-revtra_desc_taxids_old <- revtra_taxid
-revtra_desc_taxids_new <- unique(c(revtra_desc_taxids_old, viral_taxa %>% filter(parent_taxid %in% revtra_desc_taxids_old) %>% pull(taxid)))
-while (length(revtra_desc_taxids_new) > length(revtra_desc_taxids_old)){
-  revtra_desc_taxids_old <- revtra_desc_taxids_new
-  revtra_desc_taxids_new <- unique(c(revtra_desc_taxids_old, viral_taxa %>% filter(parent_taxid %in% revtra_desc_taxids_old) %>% pull(taxid)))
+pisoni_taxid <- 2732506
+pisoni_desc_taxids_old <- pisoni_taxid
+pisoni_desc_taxids_new <- unique(c(pisoni_desc_taxids_old, viral_taxa %>% filter(parent_taxid %in% pisoni_desc_taxids_old) %>% pull(taxid)))
+while (length(pisoni_desc_taxids_new) > length(pisoni_desc_taxids_old)){
+  pisoni_desc_taxids_old <- pisoni_desc_taxids_new
+  pisoni_desc_taxids_new <- unique(c(pisoni_desc_taxids_old, viral_taxa %>% filter(parent_taxid %in% pisoni_desc_taxids_old) %>% pull(taxid)))
 }
-revtra_counts <- kraken_reports_viral_cleaned %>%
-  filter(taxid %in% revtra_desc_taxids_new) %>%
-  mutate(p_reads_revtra = n_reads_clade/n_reads_clade[1])
+pisoni_counts <- kraken_reports_viral_cleaned %>%
+  filter(taxid %in% pisoni_desc_taxids_new) %>%
+  mutate(p_reads_pisoni = n_reads_clade/n_reads_clade[1])
 
 # Get genus composition
-revtra_species <- revtra_counts %>% filter(rank == "S", na_type == "RNA")
-revtra_species_major_tab <- revtra_species %>% 
+pisoni_genera <- pisoni_counts %>% filter(rank == "S", na_type == "RNA")
+pisoni_genera_major_tab <- pisoni_genera %>% 
   group_by(name, taxid) %>%
-  summarize(p_reads_revtra_max = max(p_reads_revtra), .groups="drop") %>%
-  filter(p_reads_revtra_max >= 0.04)
-revtra_species_major_list <- revtra_species_major_tab %>% pull(name)
-revtra_species_major <- revtra_species %>% 
-  filter(name %in% revtra_species_major_list) %>%
-  select(name, taxid, sample, na_type, ctrl, date, p_reads_revtra)
-revtra_species_minor <- revtra_species_major %>% 
-  group_by(sample, na_type, ctrl, date) %>%
-  summarize(p_reads_revtra_major = sum(p_reads_revtra), .groups = "drop") %>%
-  mutate(name = "Other", taxid=NA, p_reads_revtra = 1-p_reads_revtra_major) %>%
-  select(name, taxid, sample, na_type, ctrl, date, p_reads_revtra)
-revtra_species_display <- bind_rows(revtra_species_major, revtra_species_minor) %>%
-  arrange(desc(p_reads_revtra)) %>% 
-  mutate(name = factor(name, levels=c(revtra_species_major_list, "Other"))) %>%
-  rename(p_reads = p_reads_revtra, classification=name)
+  summarize(p_reads_pisoni_max = max(p_reads_pisoni), .groups="drop") %>%
+  filter(p_reads_pisoni_max >= 0.04)
+pisoni_genera_major_list <- pisoni_genera_major_tab %>% pull(name)
+pisoni_genera_major <- pisoni_genera %>% 
+  filter(name %in% pisoni_genera_major_list) %>%
+  select(name, taxid, sample, room, na_type, sample_type, p_reads_pisoni)
+pisoni_genera_minor <- pisoni_genera_major %>% 
+  group_by(sample, room, na_type, sample_type) %>%
+  summarize(p_reads_pisoni_major = sum(p_reads_pisoni), .groups = "drop") %>%
+  mutate(name = "Other", taxid=NA, p_reads_pisoni = 1-p_reads_pisoni_major) %>%
+  select(name, taxid, sample, room, na_type, sample_type, p_reads_pisoni)
+pisoni_genera_display <- bind_rows(pisoni_genera_major, pisoni_genera_minor) %>%
+  arrange(desc(p_reads_pisoni)) %>% 
+  mutate(name = factor(name, levels=c(pisoni_genera_major_list, "Other"))) %>%
+  rename(p_reads = p_reads_pisoni, classification=name)
 
 # Plot
-g_revtra_species <- g_comp_base + 
-  geom_col(data=revtra_species_display, position = "stack") +
-  scale_y_continuous(name="% Revtraviricetes Reads", limits=c(0,1.01), 
+g_pisoni_genera <- g_comp_base + 
+  geom_col(data=pisoni_genera_display, position = "stack") +
+  scale_y_continuous(name="% Pisoniviricetes Reads", limits=c(0,1.01), 
                      breaks = seq(0,1,0.2),
                      expand=c(0,0), labels = function(y) y*100) +
-  scale_fill_manual(values=palette_viral, name = "Viral species")
-g_revtra_species
-
+  scale_fill_manual(values=palette_viral, name = "Viral genus") +
+  guides(fill=guide_legend(ncol=3))
+g_pisoni_genera
 ```
 
 # Human-infecting virus reads: validation
 
-Next, I investigated the human-infecting virus read content of these unenriched samples. Using the same workflow I used for Brumfield et al, I identified 2811 RNA read pairs and 12792 DNA read pairs as putatively human viral: 0.003% and 0.005% of surviving reads, respectively.
+Next, I investigated the human-infecting virus read content of these unenriched samples. Using the same workflow I used for Prussin et al, I identified 118 RNA read pairs and 1269 DNA read pairs as putatively human viral: 0.004% and 0.017% of surviving reads, respectively.
 
 ```{r}
 #| label: hv-read-counts
 hv_reads_filtered_path <- file.path(data_dir, "hv_hits_putative_filtered.tsv.gz")
 hv_reads_filtered <- read_tsv(hv_reads_filtered_path, show_col_types = FALSE) %>%
   inner_join(libraries, by="sample") %>% 
-  arrange(date, na_type)
-n_hv_filtered <- hv_reads_filtered %>% group_by(sample, date, na_type, ctrl) %>% count %>% inner_join(basic_stats %>% filter(stage == "ribo_initial") %>% select(sample, n_read_pairs), by="sample") %>% rename(n_putative = n, n_total = n_read_pairs) %>% mutate(p_reads = n_putative/n_total, pc_reads = p_reads * 100)
-n_hv_filtered_summ <- n_hv_filtered %>% group_by(na_type, ctrl) %>% summarize(n_putative = sum(n_putative), n_total = sum(n_total), .groups="drop") %>% mutate(p_reads = n_putative/n_total, pc_reads = p_reads*100)
+  arrange(na_type, sample_type)
+n_hv_filtered <- hv_reads_filtered %>% 
+  group_by(sample, room, na_type, sample_type) %>% count %>% 
+  inner_join(basic_stats %>% filter(stage == "ribo_initial") %>% 
+               select(sample, n_read_pairs), by="sample") %>% 
+  rename(n_putative = n, n_total = n_read_pairs) %>% 
+  mutate(p_reads = n_putative/n_total, pc_reads = p_reads * 100)
+n_hv_filtered_summ <- n_hv_filtered %>% group_by(na_type) %>% 
+  summarize(n_putative = sum(n_putative), n_total = sum(n_total), 
+            .groups="drop") %>% 
+  mutate(p_reads = n_putative/n_total, pc_reads = p_reads*100)
 ```
 
 ```{r}
@@ -641,13 +641,12 @@ write(mrg_fasta_out, file.path(data_dir, "blast/putative-viral.fasta"))
 #| warning: false
 
 # Import BLAST results
-# Pre-filtering BLAST results to save space
-# blast_results_path <- file.path(data_dir, "blast/putative-viral.blast.gz")
-# blast_cols <- c("qseqid", "sseqid", "sgi", "staxid", "qlen", "evalue", "bitscore", "qcovs", "length", "pident", "mismatch", "gapopen", "sstrand", "qstart", "qend", "sstart", "send")
-# blast_results <- read_tsv(blast_results_path, show_col_types = FALSE,
-#                           col_names = blast_cols, col_types = cols(.default="c"))
-blast_results_path <- file.path(data_dir, "blast/putative-viral-best.blast.gz")
-blast_results <- read_tsv(blast_results_path, show_col_types = FALSE)
+blast_results_path <- file.path(data_dir, "blast/putative-viral.blast.gz")
+blast_cols <- c("qseqid", "sseqid", "sgi", "staxid", "qlen", "evalue", "bitscore", "qcovs", "length", "pident", "mismatch", "gapopen", "sstrand", "qstart", "qend", "sstart", "send")
+blast_results <- read_tsv(blast_results_path, show_col_types = FALSE,
+                          col_names = blast_cols, col_types = cols(.default="c"))
+# blast_results_path <- file.path(data_dir, "blast/putative-viral-best.blast.gz")
+# blast_results <- read_tsv(blast_results_path, show_col_types = FALSE)
 
 # Filter for best hit for each query/subject combination
 blast_results_best <- blast_results %>% group_by(qseqid, staxid) %>% 
@@ -729,7 +728,7 @@ g_hist_1 <- ggplot(mrg_blast, aes(x=adj_score_max)) + geom_histogram(binwidth=5,
 g_hist_1
 ```
 
-These results look good on visual inspection, and indeed precision and sensitivity are both very high. For a disjunctive score threshold of 20, my updated workflow achieves an F1 score of 96.7% for RNA sequences and 98.2% for DNA sequences.
+These results look good on visual inspection, and indeed precision and sensitivity are both very high. For a disjunctive score threshold of 20, my updated workflow achieves an F1 score of 98.2% for RNA sequences and 97.9% for DNA sequences.
 
 ```{r}
 #| label: plot-f1
@@ -783,7 +782,7 @@ g_stats_0 <- ggplot(stats_0, aes(x=threshold, y=value, color=metric)) +
 g_stats_0
 ```
 
-Looking into the composition of different read groups, nothing stands out except the predominance of HCMV (human betaherpesvirus 5), which is consistent with the Kraken results above and borne out by the BLASTN alignments:
+Looking into the composition of different read groups, the most notable observations for me are the predominance of (1) HIV reads among low-scoring RNA "true-positives", and (2) human mastadenovirus C among RNA true-positives in general:
 
 ```{r}
 #| label: fp
@@ -791,8 +790,10 @@ Looking into the composition of different read groups, nothing stands out except
 
 viral_taxa$name[viral_taxa$taxid == 211787] <- "Human papillomavirus type 92"
 viral_taxa$name[viral_taxa$taxid == 509154] <- "Porcine endogenous retrovirus C"
+viral_taxa$name[viral_taxa$taxid == 493803] <- "Merkel cell polyomavirus"
+viral_taxa$name[viral_taxa$taxid == 427343] <- "Human papillomavirus 107"
 
-major_threshold <- 0.05
+major_threshold <- 0.1
 fp <- mrg_blast %>% 
   group_by(na_type, viral_status_out, 
            highscore = adj_score_max >= 20, taxid) %>% count %>% 
@@ -822,11 +823,14 @@ g_fp
 
 ```
 
+There are only eight low-scoring true-positive RNA reads, three of which are HIV. These do seem to be real; at least, they don't BLAST to anything else. Ironically the eight high-scoring "true-positive" HIV reads seem more likely to be fake; they also map to a range of cloning vectors:
+
 ```{r}
-#| label: hcmv-blast-hits
+#| label: hiv-blast-hits
 
 # Configure
-ref_taxid <- 10359
+ref_taxid_hiv <- 11676
+p_threshold <- 0.3
 
 # Get taxon names
 tax_names_path <- file.path(data_dir, "taxid-names.tsv.gz")
@@ -837,10 +841,10 @@ tax_names_new <- tribble(~staxid, ~name,
                          3050295, "Cytomegalovirus humanbeta5",
                          459231, "FLAG-tagging vector pFLAG97-TSR")
 tax_names <- bind_rows(tax_names, tax_names_new)
-ref_name <- tax_names %>% filter(staxid == ref_taxid) %>% pull(name)
+ref_name_hiv <- tax_names %>% filter(staxid == ref_taxid_hiv) %>% pull(name)
 
 # Get major matches
-fp_staxid <- mrg_blast %>% filter(taxid == ref_taxid) %>%
+fp_staxid <- mrg_blast %>% filter(taxid == ref_taxid_hiv) %>%
   group_by(na_type, highscore = adj_score_max >= 20) %>% mutate(n_seq = n()) %>%
   left_join(blast_results_paired, by="seq_id") %>%
   mutate(staxid = as.integer(staxid)) %>%
@@ -853,7 +857,7 @@ fp_staxid_count <- fp_staxid %>%
   group_by(viral_status_out, highscore, na_type, taxid, name) %>%
   mutate(p=n/n_seq)
 fp_staxid_count_major <- fp_staxid_count %>%
-  filter(n>1, p>0.1, !is.na(staxid)) %>%
+  filter(n>1, p>p_threshold, !is.na(staxid)) %>%
   mutate(score_display = ifelse(highscore, "S >= 20", "S < 20"),
          status_display = ifelse(viral_status_out, 
                                  "True positive", "False positive"))
@@ -865,12 +869,136 @@ g <- ggplot(fp_staxid_count_major, aes(x=p, y=sname)) +
              labeller = label_wrap_gen(multi_line = FALSE)) +
   scale_x_continuous(name="% mapped reads", limits=c(0,1), breaks=seq(0,1,0.2),
                      expand=c(0,0)) +
-  labs(title=paste0(ref_name, " (taxid ", ref_taxid, ")")) +
+  labs(title=paste0(ref_name_hiv, " (taxid ", ref_taxid_hiv, ")")) +
+  theme_base + theme(
+    axis.title.y = element_blank(),
+    plot.title = element_text(size=rel(1.4), hjust=0, face="plain"))
+g
+```
+
+A similar pattern is seen for the Human mastadenovirus C hits: low-scoring true-positives only map to adenoviruses, but high-scoring ones also map to a range of cloning vectors.
+
+```{r}
+#| label: masta-blast-hits
+
+# Configure
+ref_taxid_masta <- 129951
+p_threshold <- 0.1
+
+# Add missing names
+tax_names_new <- tribble(~staxid, ~name,
+                         3050295, "Cytomegalovirus humanbeta5",
+                         459231, "FLAG-tagging vector pFLAG97-TSR",
+                         3033760, "Human adenovirus 89",
+                         3043599, "Human adenovirus 108",
+                         3088344, "Human adenovirus C108",
+                         3102992, "Cloning vector pBWH-C5",
+                         3102994, "Cloning vector pBWH-C5-pIX-Kan",
+                         3102995, "Cloning vector pBWH-C5-pIXZG"
+                         )
+tax_names <- bind_rows(tax_names, tax_names_new)
+ref_name_masta <- tax_names %>% filter(staxid == ref_taxid_masta) %>% pull(name)
+
+# Get major matches
+fp_staxid <- mrg_blast %>% filter(taxid == ref_taxid_masta) %>%
+  group_by(na_type, highscore = adj_score_max >= 20) %>% mutate(n_seq = n()) %>%
+  left_join(blast_results_paired, by="seq_id") %>%
+  mutate(staxid = as.integer(staxid)) %>%
+  left_join(tax_names, by="staxid") %>% rename(sname=name) %>%
+  left_join(tax_names %>% rename(taxid=staxid), by="taxid")
+fp_staxid_count <- fp_staxid %>%
+  group_by(viral_status_out, highscore, na_type, 
+           taxid, name, staxid, sname, n_seq) %>%
+  count %>%
+  group_by(viral_status_out, highscore, na_type, taxid, name) %>%
+  mutate(p=n/n_seq)
+fp_staxid_count_major <- fp_staxid_count %>%
+  filter(p>p_threshold, !is.na(staxid)) %>%
+  mutate(score_display = ifelse(highscore, "S >= 20", "S < 20"),
+         status_display = ifelse(viral_status_out, 
+                                 "True positive", "False positive"))
+
+# Plot
+g <- ggplot(fp_staxid_count_major, aes(x=p, y=sname)) + 
+  geom_col() + 
+  facet_grid(na_type~status_display+score_display, scales="free",
+             labeller = label_wrap_gen(multi_line = FALSE)) +
+  scale_x_continuous(name="% mapped reads", limits=c(0,1), breaks=seq(0,1,0.2),
+                     expand=c(0,0)) +
+  labs(title=paste0(ref_name_masta, " (taxid ", ref_taxid_masta, ")")) +
   theme_base + theme(
     axis.title.y = element_blank(),
     plot.title = element_text(size=rel(1.5), hjust=0, face="plain"))
 g
 ```
+
+The plots above only tell us the total number of reads that BLAST to each cloning vector; they don't tell us how many reads map to any vector. In particular, they can't distinguish between a situation where many reads map to a few cloning vectors, and one where a few reads map to many. This turns out to be about 35% of high-scoring HIV RNA reads and 55% of high-scoring mastadenovirus RNA reads:
+
+```{r}
+#| label: hiv-vector-hits
+fp_hiv_vec <- mrg_blast %>% filter(taxid == ref_taxid_hiv) %>%
+  left_join(blast_results_paired, by="seq_id")  %>%
+  mutate(staxid = as.integer(staxid)) %>%
+  left_join(tax_names, by="staxid") %>% rename(sname=name) %>%
+  left_join(tax_names %>% rename(taxid=staxid), by="taxid") %>%
+  group_by(vector = grepl("vector", sname))
+fp_hiv_vec_match <- fp_hiv_vec %>%
+  group_by(viral_status_out, seq_id, na_type, highscore = adj_score_max >= 20) %>%
+  summarize(vector_match = any(vector), .groups = "drop")
+fp_hiv_vec_count <- fp_hiv_vec_match %>%
+  group_by(viral_status_out, na_type, highscore, vector_match) %>% count %>%
+  group_by(viral_status_out, na_type, highscore) %>% mutate(p=n/sum(n)) %>%
+  mutate(score_display = ifelse(highscore, "S >= 20", "S < 20"),
+         status_display = ifelse(viral_status_out,
+                                 "True positive", "False positive"))
+
+
+g_hiv_vec_count <- ggplot(fp_hiv_vec_count, aes(y=score_display, x=p, fill=vector_match)) +
+  geom_col() +
+  scale_x_continuous(name="% Mapped Reads", limits=c(0,1), breaks=seq(0,1,0.2),
+                     expand=c(0,0)) +
+  scale_fill_brewer(name="Maps to vector?", palette = "Dark2") +
+  facet_grid(na_type~status_display, scales="free") +
+  labs(title=paste0(ref_name_hiv, " (taxid ", ref_taxid_hiv, ")")) +
+  theme_base + theme(
+    axis.title.y = element_blank(),
+    plot.title = element_text(size=rel(1.4), hjust=0, face="plain"))
+g_hiv_vec_count
+```
+
+```{r}
+#| label: masta-vector-hits
+fp_masta_vec <- mrg_blast %>% filter(taxid == ref_taxid_masta) %>%
+  left_join(blast_results_paired, by="seq_id")  %>%
+  mutate(staxid = as.integer(staxid)) %>%
+  left_join(tax_names, by="staxid") %>% rename(sname=name) %>%
+  left_join(tax_names %>% rename(taxid=staxid), by="taxid") %>%
+  group_by(vector = grepl("vector", sname))
+fp_masta_vec_match <- fp_masta_vec %>%
+  group_by(viral_status_out, seq_id, na_type, highscore = adj_score_max >= 20) %>%
+  summarize(vector_match = any(vector), .groups = "drop")
+fp_masta_vec_count <- fp_masta_vec_match %>%
+  group_by(viral_status_out, na_type, highscore, vector_match) %>% count %>%
+  group_by(viral_status_out, na_type, highscore) %>% mutate(p=n/sum(n)) %>%
+  mutate(score_display = ifelse(highscore, "S >= 20", "S < 20"),
+         status_display = ifelse(viral_status_out,
+                                 "True positive", "False positive"))
+
+
+g_masta_vec_count <- ggplot(fp_masta_vec_count, aes(y=score_display, x=p, fill=vector_match)) +
+  geom_col() +
+  scale_x_continuous(name="% Mapped Reads", limits=c(0,1), breaks=seq(0,1,0.2),
+                     expand=c(0,0)) +
+  scale_fill_brewer(name="Maps to vector?", palette = "Dark2") +
+  facet_grid(na_type~status_display, scales="free") +
+  labs(title=paste0(ref_name_masta, " (taxid ", ref_taxid_masta, ")")) +
+  theme_base + theme(
+    axis.title.y = element_blank(),
+    plot.title = element_text(size=rel(1.4), hjust=0, face="plain"))
+g_masta_vec_count
+```
+
+This is more concerning for the mastadenovirus reads, which make up a nontrivial fraction of all high-scoring RNA "true-positives". As in my last post, though, it's hard to know what to take from this; many vectors are based on lentiviral or adenoviral backbones, and it's not always easy to distinguish between true virus and virus-based vector. I'm going to stick with my pipeline as it is for now, but it's worth keeping this in mind in interpreting the results.
 
 # Human-infecting viruses: overall relative abundance
 
@@ -879,7 +1007,7 @@ g
 
 # Get raw read counts
 read_counts_raw <- basic_stats_raw %>%
-  select(sample, date, na_type, ctrl, n_reads_raw = n_read_pairs)
+  select(sample, room, na_type, sample_type, n_reads_raw = n_read_pairs)
 
 # Get HV read counts
 mrg_hv <- mrg %>% mutate(hv_status = assigned_hv | hit_hv | adj_score_max >= 20)
@@ -889,33 +1017,31 @@ read_counts <- read_counts_raw %>% left_join(read_counts_hv, by="sample") %>%
   mutate(n_reads_hv = replace_na(n_reads_hv, 0))
 
 # Aggregate
-read_counts_total <- read_counts %>% group_by(na_type, ctrl) %>%
+read_counts_total <- read_counts %>% group_by(na_type, sample_type) %>%
+  filter(n() > 1) %>%
   summarize(n_reads_raw = sum(n_reads_raw),
             n_reads_hv = sum(n_reads_hv), .groups="drop") %>%
-  mutate(sample= "All samples", date = "All dates")
-read_counts_agg <- read_counts %>% arrange(date) %>%
-  arrange(sample) %>%
+  mutate(sample= "All samples", room = "All rooms")
+read_counts_agg <- read_counts %>% arrange(sample) %>%
   bind_rows(read_counts_total) %>% 
   mutate(sample = fct_inorder(sample),
          p_reads_hv = n_reads_hv/n_reads_raw)
 ```
 
-In non-control samples, applying a disjunctive cutoff at S=20 identifies 2591 RNA reads and 12236 DNA reads as human-viral. This gives an overall relative HV abundance of $1.63 \times 10^{-5}$ for RNA reads and $4.16 \times 10^{-5}$ for DNA reads. Reassuringly, relative abundances in control samples are at least 10x lower. We also see a sharp drop in relative abundance for both nucleic-acid types for the period when the daycare was closed (2015-01-20):
+In non-control samples, applying a disjunctive cutoff at S=20 identifies 97 RNA reads and 1204 DNA reads as human-viral. This gives an overall relative HV abundance of $1.21 \times 10^{-5}$ for RNA reads and $1.50 \times 10^{-4}$ for DNA reads. For DNA reads, HV RA in the negative controls is about 10x lower than the non-control samples; however, for RNA reads, the HV RA in the negative controls is actually higher than in the non-controls. This, combined with the very low absolute read count, suggests that we shouldn't take the HV results for RNA reads too seriously.
 
 ```{r}
 #| label: plot-hv-ra
 #| warning: false
 # Visualize
-g_phv_agg <- ggplot(read_counts_agg, aes(x=date, color=na_type)) +
+g_phv_agg <- ggplot(read_counts_agg, aes(x=room, color=na_type)) +
   geom_point(aes(y=p_reads_hv)) +
   scale_y_log10("Relative abundance of human virus reads") +
   scale_x_discrete(name="Collection Date") +
-  facet_grid(.~ctrl, scales = "free", space = "free_x") +
+  facet_grid(.~sample_type, scales = "free", space = "free_x") +
   scale_color_na() + theme_rotate
 g_phv_agg
 ```
-
-These overall RA values are similar to those we've seen previously for non-panel-enriched wastewater RNA data. That said, it's notable that the DNA read RA seen here is much higher than that seen in the only DNA wastewater dataset I've analyzed so far (Brumfield):
 
 ```{r}
 #| label: ra-hv-past
@@ -929,12 +1055,16 @@ ra_past <- tribble(~dataset, ~ra, ~na_type, ~panel_enriched,
                    "Rothman (unenriched)", 1.87e-5, "RNA", FALSE,
                    "Rothman (panel-enriched)", 3.3e-5, "RNA", TRUE,
                    "Crits-Christoph (unenriched)", 1.37e-5, "RNA", FALSE,
-                   "Crits-Christoph (panel-enriched)", 1.26e-2, "RNA", TRUE)
+                   "Crits-Christoph (panel-enriched)", 1.26e-2, "RNA", TRUE,
+                   "Prussin (non-control)", 1.63e-5, "RNA", FALSE,
+                   "Prussin (non-control)", 4.16e-5, "DNA", FALSE
+)
 
 # Collate new RA values
 ra_new <- tribble(~dataset, ~ra, ~na_type, ~panel_enriched,
-                   "Prussin (non-control)", 1.63e-5, "RNA", FALSE,
-                   "Prussin (non-control)", 4.16e-5, "DNA", FALSE)
+                  "Rosario (non-control)", 1.21e-5, "RNA", FALSE,
+                  "Rosario (non-control)", 1.50e-4, "DNA", FALSE)
+
 
 # Plot
 ra_comp <- bind_rows(ra_past, ra_new) %>% mutate(dataset = fct_inorder(dataset))
@@ -948,7 +1078,11 @@ g_ra_comp
 
 # Human-infecting viruses: taxonomy and composition
 
-At the family level, we see that *Papillomaviridae*, *Herpesviridae*, and *Polyomaviridae* are the most abundant families in both DNA and RNA reads, with *Adenoviridae* and (in RNA reads) *Picornaviridae* also making a respectable showing. The *Herpesviridae* reads are, predictably, overwhelmingly from HCMV, while the *Papillomaviridae* and *Polyomaviridae* reads are split up among a larger number of related viruses:
+I'm going to focus on the DNA reads here, since as discussed above I expect the RNA reads to be noisy and not very informative – which seems to in fact be the case.
+
+At the family level, as in Prussin, we see that *Papillomaviridae*, and *Polyomaviridae* dominate DNA reads in most samples, with *Poxviridae* and *Genomoviridae* showing significant presence in several samples. The first of these is primarily *Betapapillomavirus* and *Gammapapillomavirus*, with some *Alphapapillomavirus*; the second is primarily *Alphapolyomavirus* and *Deltapolyomavirus*. All of these are made up of several different viruses at the species level. *Genomoviridae* is represented primarily by *Gemykibivirus*, while *Poxviridae* is represented by small numbers of reads from several species, including vaccinia, cowpox and tanapox. (There's also one variola read, which would be alarming, but BLASTN thinks it isn't real.)
+
+Compared to Prussin, the most striking difference is the absence of herpesvirus reads; whereas HCMV was dominant in the Prussin data, it barely shows up here except in the controls.
 
 ```{r}
 #| label: raise-hv-taxa
@@ -975,10 +1109,8 @@ viral_taxa$name[viral_taxa$taxid == 337043] <- "Alphapapillomavirus 4"
 viral_taxa$name[viral_taxa$taxid == 694003] <- "Betacoronavirus 1"
 viral_taxa$name[viral_taxa$taxid == 334204] <- "Mupapillomavirus 2"
 viral_taxa$name[viral_taxa$taxid == 334208] <- "Betapapillomavirus 4"
-
-viral_taxa$name[viral_taxa$taxid == 334208] <- "Betapapillomavirus 4"
-viral_taxa$name[viral_taxa$taxid == 334208] <- "Betapapillomavirus 4"
-viral_taxa$name[viral_taxa$taxid == 334208] <- "Betapapillomavirus 4"
+viral_taxa$name[viral_taxa$taxid == 333928] <- "Gammapapillomavirus 2"
+viral_taxa$name[viral_taxa$taxid == 337039] <- "Alphapapillomavirus 2"
 
 
 mrg_hv_named <- mrg_hv %>% left_join(viral_taxa, by="taxid")
@@ -1026,9 +1158,9 @@ threshold_major_family <- 0.06
 
 # Count reads for each human-viral family
 hv_family_counts <- hv_reads_family %>% 
-  group_by(sample, date, ctrl, na_type, name, taxid) %>%
+  group_by(sample, room, sample_type, na_type, name, taxid) %>%
   count(name = "n_reads_hv") %>%
-  group_by(sample, date, ctrl, na_type) %>%
+  group_by(sample, room, sample_type, na_type) %>%
   mutate(p_reads_hv = n_reads_hv/sum(n_reads_hv))
 
 # Identify high-ranking families and group others
@@ -1037,7 +1169,7 @@ hv_family_major_tab <- hv_family_counts %>% group_by(name) %>%
   arrange(desc(p_reads_hv)) %>% filter(p_reads_hv > threshold_major_family)
 hv_family_counts_major <- hv_family_counts %>%
   mutate(name_display = ifelse(name %in% hv_family_major_tab$name, name, "Other")) %>%
-  group_by(sample, date, ctrl, na_type, name_display) %>%
+  group_by(sample, room, sample_type, na_type, name_display) %>%
   summarize(n_reads_hv = sum(n_reads_hv), p_reads_hv = sum(p_reads_hv), 
             .groups="drop") %>%
   mutate(name_display = factor(name_display, 
@@ -1059,13 +1191,13 @@ g_hv_family
 #| label: hv-genus
 #| fig-height: 6
 
-threshold_major_genus <- 0.06
+threshold_major_genus <- 0.05
 
 # Count reads for each human-viral genus
-hv_genus_counts <- hv_reads_genus %>% 
-  group_by(sample, date, ctrl, na_type, name, taxid) %>%
+hv_genus_counts <- hv_reads_genus %>% filter(na_type == "DNA") %>%
+  group_by(sample, room, sample_type, na_type, name, taxid) %>%
   count(name = "n_reads_hv") %>%
-  group_by(sample, date, ctrl, na_type) %>%
+  group_by(sample, room, sample_type, na_type) %>%
   mutate(p_reads_hv = n_reads_hv/sum(n_reads_hv))
 
 # Identify high-ranking families and group others
@@ -1074,7 +1206,7 @@ hv_genus_major_tab <- hv_genus_counts %>% group_by(name) %>%
   arrange(desc(p_reads_hv)) %>% filter(p_reads_hv > threshold_major_genus)
 hv_genus_counts_major <- hv_genus_counts %>%
   mutate(name_display = ifelse(name %in% hv_genus_major_tab$name, name, "Other")) %>%
-  group_by(sample, date, ctrl, na_type, name_display) %>%
+  group_by(sample, room, sample_type, na_type, name_display) %>%
   summarize(n_reads_hv = sum(n_reads_hv), p_reads_hv = sum(p_reads_hv), 
             .groups="drop") %>%
   mutate(name_display = factor(name_display, 
@@ -1096,13 +1228,13 @@ g_hv_genus
 #| label: hv-species
 #| fig-height: 6
 
-threshold_major_species <- 0.10
+threshold_major_species <- 0.1
 
 # Count reads for each human-viral species
-hv_species_counts <- hv_reads_species %>% 
-  group_by(sample, date, ctrl, na_type, name, taxid) %>%
+hv_species_counts <- hv_reads_species %>% filter(na_type == "DNA") %>%
+  group_by(sample, room, sample_type, na_type, name, taxid) %>%
   count(name = "n_reads_hv") %>%
-  group_by(sample, date, ctrl, na_type) %>%
+  group_by(sample, room, sample_type, na_type) %>%
   mutate(p_reads_hv = n_reads_hv/sum(n_reads_hv))
 
 # Identify high-ranking families and group others
@@ -1111,7 +1243,7 @@ hv_species_major_tab <- hv_species_counts %>% group_by(name) %>%
   arrange(desc(p_reads_hv)) %>% filter(p_reads_hv > threshold_major_species)
 hv_species_counts_major <- hv_species_counts %>%
   mutate(name_display = ifelse(name %in% hv_species_major_tab$name, name, "Other")) %>%
-  group_by(sample, date, ctrl, na_type, name_display) %>%
+  group_by(sample, room, sample_type, na_type, name_display) %>%
   summarize(n_reads_hv = sum(n_reads_hv), p_reads_hv = sum(p_reads_hv), 
             .groups="drop") %>%
   mutate(name_display = factor(name_display, 
@@ -1125,22 +1257,20 @@ g_hv_species <- g_comp_base +
   scale_y_continuous(name="% HV Reads", limits=c(0,1.01), 
                      breaks = seq(0,1,0.2),
                      expand=c(0,0), labels = function(y) y*100) +
-  scale_fill_manual(values=palette_viral, name = "Viral species")
+  scale_fill_manual(values=palette_viral, name = "Viral species") +
+  guides(fill=guide_legend(ncol=3))
 g_hv_species
 ```
 
-Compared to the previous datasets I've analyzed, the most notable difference is the absence of enteric viruses: *Norovirus*, *Rotavirus*, and *Enterovirus* are all absent from the list of abundant human-viral taxa, as are \~all other gastrointestinal pathogens.
-
-Finally, here are the overall relative abundances of a set of specific viral genera picked out manually on the basis of scientific or medical interest. In the future, I'll quantify the RA of these genera across all datasets analyzed with this pipeline to date, which should give us a better sense of how these data compare to others' under this pipeline.
+Finally, here again are the overall relative abundances of the specific viral genera I picked out manually in my last entry:
 
 ```{r}
 #| fig-height: 5
 #| label: ra-genera
 
 # Define reference genera
-path_genera_rna <- c("Mamastrovirus", "Enterovirus", "Salivirus", "Kobuvirus", "Norovirus", "Sapovirus", "Rotavirus", "Alphacoronavirus", "Betacoronavirus",
-                 "Alphainfluenzavirus", "Betainfluenzavirus", "Lentivirus")
-path_genera_dna <- c("Mastadenovirus", "Alphapolyomavirus", "Betapolyomavirus", "Alphapapillomavirus", "Betapapillomavirus", "Orthopoxvirus", "Simplexvirus",
+path_genera_rna <- c("Mamastrovirus", "Enterovirus", "Salivirus", "Kobuvirus", "Norovirus", "Sapovirus", "Rotavirus", "Alphacoronavirus", "Betacoronavirus", "Alphainfluenzavirus", "Betainfluenzavirus", "Lentivirus")
+path_genera_dna <- c("Mastadenovirus", "Alphapolyomavirus", "Betapolyomavirus", "Alphapapillomavirus", "Betapapillomavirus", "Gammapapillomavirus", "Orthopoxvirus", "Simplexvirus",
                      "Lymphocryptovirus", "Cytomegalovirus", "Dependoparvovirus")
 path_genera <- bind_rows(tibble(name=path_genera_rna, genome_type="RNA genome"),
                          tibble(name=path_genera_dna, genome_type="DNA genome")) %>%
@@ -1148,10 +1278,10 @@ path_genera <- bind_rows(tibble(name=path_genera_rna, genome_type="RNA genome"),
 
 # Count in each sample
 n_path_genera <- hv_reads_genus %>% 
-  group_by(sample, date, na_type, ctrl, name, taxid) %>% 
+  group_by(sample, room, na_type, sample_type, name, taxid) %>% 
   count(name="n_reads_viral") %>% 
   inner_join(path_genera, by=c("name", "taxid")) %>%
-  left_join(read_counts_raw, by=c("sample", "date", "na_type", "ctrl")) %>%
+  left_join(read_counts_raw, by=c("sample", "room", "na_type", "sample_type")) %>%
   mutate(p_reads_viral = n_reads_viral/n_reads_raw)
 
 # Pivot out and back to add zero lines
@@ -1164,7 +1294,7 @@ n_path_genera_out <- n_path_genera %>% ungroup %>% select(sample, name, n_reads_
 
 ## Aggregate across dates
 n_path_genera_stype <- n_path_genera_out %>% 
-  group_by(na_type, ctrl,
+  group_by(na_type, sample_type,
            name, taxid, genome_type) %>%
   summarize(n_reads_raw = sum(n_reads_raw),
             n_reads_viral = sum(n_reads_viral), .groups = "drop") %>%
@@ -1177,129 +1307,15 @@ g_path_genera <- ggplot(n_path_genera_stype,
   geom_point() +
   scale_x_log10(name="Relative abundance") +
   scale_color_na() +
-  facet_grid(genome_type~ctrl, scales="free_y") +
+  facet_grid(genome_type~sample_type, scales="free_y") +
   theme_base + theme(axis.title.y = element_blank())
 g_path_genera
 ```
 
+One immediate observation, which I think helps demonstrate the unreliability of the RNA data here, is the almost complete absence of RNA-virus genera of interest. It's very suspicious for putative HIV reads to be almost as abundant as *Enterovirus* reads (which, remember, includes rhinovirus), while coronaviruses and influenza are totally absent. The DNA reads seem much more similar to Prussin, though I'm still surprised HCMV and *Mastadenovirus* are so rare.
+
 # Conclusion
 
-This is the first air-sampling dataset I've analyzed using this pipeline, and it was interesting to see the differences from the wastewater datasets I've been analyzing so far. Among the more striking differences were:
+This is the second, and by far the smaller, of the air-sampling datasets I've analyzed with this pipeline so far. Many of the high-level findings were similar to Prussin, including high relative abundance of human reads, low total viral reads, an absence of enteric viruses, and high abundance of papillomaviruses among human-infecting viruses. The biggest difference in the DNA data was the almost complete lack of cytomegalovirus, compared to its very high abundance in the Prussin data.
 
--   A much higher total fraction of human reads;
-
--   A lower total fraction of viral reads;
-
--   Near-total absence of enteric viruses and *Tobamovirus*;
-
--   Much higher relative abundance of herpesviruses, particularly HCMV, and papillomaviruses among human-infecting virus reads.
-
-Conversely, one thing that was not notably different, at least in RNA viruses, was the total relative abundance of human-infecting viruses as a whole. Given the lower fraction of reads made up of all viruses, this means that the fraction of total viruses arising from human-infecting viruses is much higher here than we've historically seen with wastewater data. In particular, HCMV represents a nontrivial fraction of total viruses for many DNA libraries, the first time I've seen a human pathogen show up significantly in the total virus composition data.
-
-Going forward, I have two more air sampling datasets to analyze, [Rosario et al. 2018](https://doi.org/10.1186/s40168-021-01044-7) and [Leung et al. 2021](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-021-01044-7). It will be interesting to see whether the findings from this dataset generalize to other air sampling contexts.
-
-# Addendum: Checking HIV
-
-Jeff from my team asks:
-
-> Do you think the HIV reads are real? The v1 pipeline shows 39 HIV reads in that dataset
-
-My pipeline finds 62 *Lentivirus* reads for this dataset, 34 from HIV-1 and 28 from HIV-2. Oddly, and perhaps suspiciously, these nearly all come from DNA libraries:
-
-```{r}
-#| label: hiv-check-0
-
-lenti_read_ids <- hv_reads_genus %>% filter(name == "Lentivirus") %>% pull(seq_id)
-lenti_reads <- hv_reads_species %>% filter(seq_id %in% lenti_read_ids)
-lenti_read_count <- lenti_reads %>% group_by(name, na_type) %>% count(name="n_reads")
-lenti_read_count
-```
-
-Here's what I get when I look at the subject taxa that BLASTN maps these reads to:
-
-```{r}
-#| label: hiv-check-1
-#| fig-height: 5
-
-# Configure
-ref_taxid <- 11646
-
-# Get taxon names
-tax_names_path <- file.path(data_dir, "taxid-names.tsv.gz")
-tax_names <- read_tsv(tax_names_path, show_col_types = FALSE)
-
-# Add missing names
-tax_names_new <- tribble(~staxid, ~name,
-                         3050295, "Cytomegalovirus humanbeta5",
-                         459231, "FLAG-tagging vector pFLAG97-TSR",
-                         257877, "Macaca thibetana thibetana",
-                         256321, "Lentiviral transfer vector pHsCXW",
-                         419242, "Shuttle vector pLvCmvMYOCDHA",
-                         419243, "Shuttle vector pLvCmvLacZ",
-                         421868, "Cloning vector pLvCmvLacZ.Gfp",
-                         421869, "Cloning vector pLvCmvMyocardin.Gfp",
-                         426303, "Lentiviral vector pNL-GFP-RRE(SA)",
-                         436015, "Lentiviral transfer vector pFTMGW",
-                         454257, "Shuttle vector pLvCmvMYOCD2aHA",
-                         476184, "Shuttle vector pLV.mMyoD::ERT2.eGFP",
-                         476185, "Shuttle vector pLV.hMyoD.eGFP",
-                         591936, "Piliocolobus tephrosceles",
-                         627481, "Lentiviral transfer vector pFTM3GW",
-                         680261, "Self-inactivating lentivirus vector pLV.C-EF1a.cyt-bGal.dCpG",
-                         2952778, "Expression vector pLV[Exp]-EGFP:T2A:Puro-EF1A",
-                         3022699, "Vector PAS_122122",
-                         3025913, "Vector pSIN-WP-mPGK-GDNF",
-                         3105863, "Vector pLKO.1-ZsGreen1",
-                         3105864, "Vector pLKO.1-ZsGreen1 mouse Wfs1 shRNA",
-                         3108001, "Cloning vector pLVSIN-CMV_Neo_v4.0",
-                         3109234, "Vector pTwist+Kan+High",
-                         3117662, "Cloning vector pLV[Exp]-CBA>P301L",
-                         3117663, "Cloning vector pLV[Exp]-CBA>P301L:T2A:mRuby3",
-                         3117664, "Cloning vector pLV[Exp]-CBA>hMAPT[NM_005910.6](ns):T2A:mRuby3",
-                         3117665, "Cloning vector pLV[Exp]-CBA>mRuby3",
-                         3117666, "Cloning vector pLV[Exp]-CBA>mRuby3/NFAT3 fusion protein",
-                         3117667, "Cloning vector pLV[Exp]-Neo-mPGK>{EGFP-hSEPT6}"
-
-)
-tax_names <- bind_rows(tax_names, tax_names_new)
-ref_name <- tax_names %>% filter(staxid == ref_taxid) %>% pull(name)
-
-# Get major matches
-fp_staxid <- hv_reads_genus %>% filter(taxid == ref_taxid) %>%
-  group_by(na_type, highscore = adj_score_max >= 20) %>% mutate(n_seq = n()) %>%
-  select(-name) %>%
-  left_join(blast_results_paired, by="seq_id") %>%
-  mutate(staxid = as.integer(staxid)) %>%
-  left_join(tax_names, by="staxid") %>% rename(sname=name) %>%
-  left_join(tax_names %>% rename(taxid=staxid), by="taxid")
-fp_staxid_count <- fp_staxid %>%
-  group_by(na_type, taxid, name, staxid, sname, n_seq) %>%
-  count %>%
-  group_by(na_type, taxid, name) %>%
-  mutate(p=n/n_seq)
-fp_staxid_count_major <- fp_staxid_count %>%
-  filter(n>1, p>0.1, !is.na(staxid)) %>%
-  arrange(desc(p)) %>%
-  mutate(sname = fct_inorder(sname)) %>%
-  group_by(na_type) %>% filter(row_number() <= 20)
-
-# Plot
-g <- ggplot(fp_staxid_count_major, aes(x=p, y=sname)) + 
-  geom_col() + 
-  facet_grid(na_type~., scales="free",
-             labeller = label_wrap_gen(multi_line = FALSE)) +
-  scale_x_continuous(name="% mapped reads", limits=c(0,1), breaks=seq(0,1,0.2),
-                     expand=c(0,0)) +
-  labs(title=paste0(ref_name, " (taxid ", ref_taxid, ")")) +
-  theme_base + theme(
-    axis.title.y = element_blank(),
-    plot.title = element_text(size=rel(1.5), hjust=0, face="plain"))
-g
-
-```
-
-The four RNA reads seem very likely not to be true HIV reads, since they map primarily to humans and other primates. The 58 DNA reads are more ambiguous; they do map to HIV, but also to a range of synthetic cloning vectors. On the other hand, I just now took a random slice from the HIV-1 genome and BLASTed it online, and it also mapped to cloning vectors; it's just the case that a lot of people use lentiviruses as the backbones for their cloning vectors.
-
-This makes disambiguating whether or not these reads are "real" a bit tricky. The fact that they're DNA rather than RNA makes me suspicious, as does the fact that so few of the reads apparently come from regions of the HIV genome not included in cloning vectors. On balance, I think these are probably not real HIV reads! But it's hard to be highly confident one way or the other.
-
-If we decide to treat these reads as artifacts arising from contamination with cloning vectors, what do we do about it? Just removing any read that matches a lentiviral cloning vector seems like a risky strategy when these vectors share so much sequence with real viruses. For now, I'll leave my contamination database as it is and continue checking HIV reads manually. But I'll need to develop a better solution to this sooner or later.
+Given how small this dataset is (16M reads on a MiSeq, compared to \~450M for Prussin and 1.3B for the upcoming [Leung et al.](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-021-01044-7) dataset), I don't think too much weight should be placed on these findings, but given how rare air-MGS datasets are it's nice to have another one.
