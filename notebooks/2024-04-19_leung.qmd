@@ -1,8 +1,8 @@
 ---
 title: "Workflow analysis of Leung et al. (2021)"
-subtitle: "Air sampling from a student dorm in Colorado."
+subtitle: "Air sampling from urban public transit systems."
 author: "Will Bradshaw"
-date: 2024-04-12
+date: 2024-04-19
 format:
   html:
     code-fold: true
