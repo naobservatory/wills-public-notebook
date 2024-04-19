@@ -1,0 +1,101 @@
+﻿sample,library,country,region,city,location,instrument,date
+SRR10002675,SRR10002675,Sweden,Europe,Stockholm,"Stockholm, T-centralen",SASS 3100 electret filter air sampler,2017-06-21
+SRR10002676,SRR10002676,Sweden,Europe,Stockholm,"Stockholm, Slussen",SASS 3100 electret filter air sampler,2017-06-21
+SRR10002677,SRR10002677,Sweden,Europe,Stockholm,"Stockholm, Medborgarplatsen",SASS 3100 electret filter air sampler,2017-06-21
+SRR10002678,SRR10002678,Hong Kong,Asia,Hong Kong,"Hong Kong, Admiralty",SASS 3100 electret filter air sampler,2017-07-14
+SRR10002679,SRR10002679,Hong Kong,Asia,Hong Kong,"Hong Kong, Ocean Park",SASS 3100 electret filter air sampler,2017-07-14
+SRR10002680,SRR10002680,Hong Kong,Asia,Hong Kong,"Hong Kong, Fortress Hill",SASS 3100 electret filter air sampler,2017-07-14
+SRR10002681,SRR10002681,Hong Kong,Asia,Hong Kong,"Hong Kong, North Point",SASS 3100 electret filter air sampler,2017-07-14
+SRR10002682,SRR10002682,Hong Kong,Asia,Hong Kong,"Hong Kong, Quarry Bay",SASS 3100 electret filter air sampler,2017-07-14
+SRR10002683,SRR10002683,Hong Kong,Asia,Hong Kong,"Hong Kong, Yau Tong",SASS 3100 electret filter air sampler,2017-07-14
+SRR10002684,SRR10002684,Hong Kong,Asia,Hong Kong,"Hong Kong, Tsing Yi",SASS 3100 electret filter air sampler,2017-07-13
+SRR10002685,SRR10002685,Hong Kong,Asia,Hong Kong,"Hong Kong, Lai King",SASS 3100 electret filter air sampler,2017-07-13
+SRR10002686,SRR10002686,Hong Kong,Asia,Hong Kong,"Hong Kong, Cheung Sha Wan",SASS 3100 electret filter air sampler,2017-07-13
+SRR10002687,SRR10002687,Hong Kong,Asia,Hong Kong,"Hong Kong, Sham Shui Po",SASS 3100 electret filter air sampler,2017-07-13
+SRR10002688,SRR10002688,uncalculated,uncalculated,,"Hong Kong, Sham Shui Po",SASS 3100 electret filter air sampler,2017-06-21
+SRR10002689,SRR10002689,USA,North America,Denver,"Denver, Denver Airport",SASS 3100 electret filter air sampler,2017-06-23
+SRR10002690,SRR10002690,USA,North America,Denver,"Denver, Train Cabin - Back wagon",SASS 3100 electret filter air sampler,2017-06-23
+SRR10002691,SRR10002691,USA,North America,Denver,"Denver, Boulder Junction",SASS 3100 electret filter air sampler,2017-06-22
+SRR10002692,SRR10002692,USA,North America,Denver,"Denver, Boulder Junction",SASS 3100 electret filter air sampler,2017-06-22
+SRR10002693,SRR10002693,USA,North America,Denver,"Denver, Boulder Junction",SASS 3100 electret filter air sampler,2017-06-22
+SRR10002694,SRR10002694,USA,North America,Denver,"Denver, Denver Airport",SASS 3100 electret filter air sampler,2017-06-23
+SRR10002695,SRR10002695,Norway,Europe,Oslo,"Oslo, Nydalen",Bobcat ACD-200 electret filter air sampler,2017-06-21
+SRR10002696,SRR10002696,Norway,Europe,Oslo,"Oslo, Loeren",Bobcat ACD-200 electret filter air sampler,2017-06-21
+SRR10002697,SRR10002697,USA,North America,Denver,"Denver, Boulder Junction",SASS 3100 electret filter air sampler,2017-06-22
+SRR10002698,SRR10002698,USA,North America,Denver,"Denver, Boulder Junction",SASS 3100 electret filter air sampler,2017-06-22
+SRR10002699,SRR10002699,United Kingdom,Europe,London,"London, Warren Street",SASS 3100 electret filter air sampler,2017-07-23
+SRR10002700,SRR10002700,United Kingdom,Europe,London,"London, Warren Street",SASS 3100 electret filter air sampler,2017-08-21
+SRR10002701,SRR10002701,United Kingdom,Europe,London,"London, Green Park",SASS 3100 electret filter air sampler,2017-08-18
+SRR10002702,SRR10002702,Norway,Europe,Oslo,"Oslo, Forskningsparken",SASS 3100 electret filter air sampler,2017-06-23
+SRR10002703,SRR10002703,United Kingdom,Europe,London,"London, Green Park",SASS 3100 electret filter air sampler,2017-06-21
+SRR10002704,SRR10002704,Norway,Europe,Oslo,"Oslo, Majorstua",SASS 3100 electret filter air sampler,2017-06-23
+SRR10002705,SRR10002705,Norway,Europe,Oslo,"Oslo, Toeyen",SASS 3100 electret filter air sampler,2017-06-23
+SRR10002706,SRR10002706,Norway,Europe,Oslo,"Oslo, Helsfyr",SASS 3100 electret filter air sampler,2017-06-23
+SRR10002707,SRR10002707,Norway,Europe,Oslo,"Oslo, Lindeberg",SASS 3100 electret filter air sampler,2017-06-23
+SRR10002708,SRR10002708,Norway,Europe,Oslo,"Oslo, Ellingsrudaasen",SASS 3100 electret filter air sampler,2017-06-23
+SRR10002709,SRR10002709,Norway,Europe,Oslo,"Oslo, Montebello",SASS 3100 electret filter air sampler,2017-06-23
+SRR10002710,SRR10002710,Norway,Europe,Oslo,"Oslo, Nationaltheateret",SASS 3100 electret filter air sampler,2017-06-23
+SRR10002711,SRR10002711,Norway,Europe,Oslo,"Oslo, Stortinget",SASS 3100 electret filter air sampler,2017-06-23
+SRR10002712,SRR10002712,Norway,Europe,Oslo,"Oslo, Jernbanetorget",SASS 3100 electret filter air sampler,2017-06-23
+SRR10002713,SRR10002713,United Kingdom,Europe,London,"London, Finsbury Park",SASS 3100 electret filter air sampler,2017-06-21
+SRR10002714,SRR10002714,United Kingdom,Europe,London,"London, Highbury & Islington",SASS 3100 electret filter air sampler,2017-08-18
+SRR10002715,SRR10002715,United Kingdom,Europe,London,"London, Kings Cross St Pancras",SASS 3100 electret filter air sampler,2017-08-21
+SRR10002716,SRR10002716,United Kingdom,Europe,London,"London, Kings Cross St Pancras",SASS 3100 electret filter air sampler,2017-07-23
+SRR10002717,SRR10002717,United Kingdom,Europe,London,"London, Warren Street",SASS 3100 electret filter air sampler,2017-06-21
+SRR10002718,SRR10002718,United Kingdom,Europe,London,"London, Finsbury Park",SASS 3100 electret filter air sampler,2017-08-18
+SRR10002719,SRR10002719,United Kingdom,Europe,London,"London, Pimlico",SASS 3100 electret filter air sampler,2017-08-21
+SRR10002720,SRR10002720,United Kingdom,Europe,London,"London, Pimlico",SASS 3100 electret filter air sampler,2017-07-23
+SRR10002721,SRR10002721,United Kingdom,Europe,London,"London, Vauxhall",SASS 3100 electret filter air sampler,2017-08-21
+SRR10002722,SRR10002722,United Kingdom,Europe,London,"London, Vauxhall",SASS 3100 electret filter air sampler,2017-07-23
+SRR10002723,SRR10002723,Norway,Europe,Oslo,"Oslo, Lindeberg",SASS 3100 electret filter air sampler,2017-06-27
+SRR10002724,SRR10002724,Hong Kong,Asia,Hong Kong,"Hong Kong, Admiralty",SASS 3100 electret filter air sampler,2017-07-12
+SRR10002725,SRR10002725,Hong Kong,Asia,Hong Kong,"Hong Kong, Ocean Park",SASS 3100 electret filter air sampler,2017-07-12
+SRR10002726,SRR10002726,Norway,Europe,Oslo,"Oslo, Stortinget",SASS 3100 electret filter air sampler,2017-06-21
+SRR10002727,SRR10002727,Hong Kong,Asia,Hong Kong,"Hong Kong, Cheung Sha Wan",SASS 3100 electret filter air sampler,2017-07-11
+SRR10002728,SRR10002728,Hong Kong,Asia,Hong Kong,"Hong Kong, Sham Shui Po",SASS 3100 electret filter air sampler,2017-07-11
+SRR10002729,SRR10002729,Hong Kong,Asia,Hong Kong,"Hong Kong, Tsing Yi",SASS 3100 electret filter air sampler,2017-07-11
+SRR10002730,SRR10002730,Hong Kong,Asia,Hong Kong,"Hong Kong, Lai King",SASS 3100 electret filter air sampler,2017-07-11
+SRR10002731,SRR10002731,Norway,Europe,Oslo,"Oslo, Carl Berners plass",SASS 3100 electret filter air sampler,2017-06-21
+SRR10002732,SRR10002732,Hong Kong,Asia,Hong Kong,"Hong Kong, Yau Tong",SASS 3100 electret filter air sampler,2017-07-12
+SRR10002733,SRR10002733,Hong Kong,Asia,Hong Kong,"Hong Kong, Fortress Hill",SASS 3100 electret filter air sampler,2017-07-12
+SRR10002734,SRR10002734,Hong Kong,Asia,Hong Kong,"Hong Kong, North Point",SASS 3100 electret filter air sampler,2017-07-12
+SRR10002735,SRR10002735,Hong Kong,Asia,Hong Kong,"Hong Kong, Tsim Sha Tsui",SASS 3100 electret filter air sampler,2017-07-12
+SRR10002736,SRR10002736,Norway,Europe,Oslo,"Oslo, Toeyen",SASS 3100 electret filter air sampler,2017-06-27
+SRR10002737,SRR10002737,USA,North America,New York City,"New York City, 63rd St.",SASS 3100 electret filter air sampler,2017-06-21
+SRR10002738,SRR10002738,Norway,Europe,Oslo,"Oslo, Stortinget",SASS 3100 electret filter air sampler,2017-06-27
+SRR10002739,SRR10002739,Norway,Europe,Oslo,"Oslo, Carl Berners plass",SASS 3100 electret filter air sampler,2017-06-27
+SRR10002740,SRR10002740,Norway,Europe,Oslo,"Oslo, Groenland",SASS 3100 electret filter air sampler,2017-06-27
+SRR10002741,SRR10002741,Norway,Europe,Oslo,"Oslo, Ellingsrudaasen",SASS 3100 electret filter air sampler,2017-06-27
+SRR10002742,SRR10002742,Norway,Europe,Oslo,"Oslo, Nationaltheateret",SASS 3100 electret filter air sampler,2017-06-27
+SRR10002743,SRR10002743,USA,North America,New York City,"New York City, 72nd St.",SASS 3100 electret filter air sampler,2017-06-21
+SRR10002744,SRR10002744,Norway,Europe,Oslo,"Oslo, Montebello",SASS 3100 electret filter air sampler,2017-06-27
+SRR10002745,SRR10002745,Norway,Europe,Oslo,"Oslo, Nationaltheateret",SASS 3100 electret filter air sampler,2017-06-26
+SRR10002746,SRR10002746,Norway,Europe,Oslo,"Oslo, Montebello",SASS 3100 electret filter air sampler,2017-06-26
+SRR10002747,SRR10002747,Norway,Europe,Oslo,"Oslo, Nydalen",SASS 3100 electret filter air sampler,2017-06-23
+SRR10002748,SRR10002748,Norway,Europe,Oslo,"Oslo, Loeren",SASS 3100 electret filter air sampler,2017-06-23
+SRR10002749,SRR10002749,Norway,Europe,Oslo,"Oslo, Vestli",SASS 3100 electret filter air sampler,2017-06-26
+SRR10002750,SRR10002750,Norway,Europe,Oslo,"Oslo, Romsaas",SASS 3100 electret filter air sampler,2017-06-26
+SRR10002751,SRR10002751,Norway,Europe,Oslo,"Oslo, Carl Berners plass",SASS 3100 electret filter air sampler,2017-06-26
+SRR10002752,SRR10002752,Norway,Europe,Oslo,"Oslo, Groenland",SASS 3100 electret filter air sampler,2017-06-26
+SRR10002753,SRR10002753,Norway,Europe,Oslo,"Oslo, Jernbanetorget",SASS 3100 electret filter air sampler,2017-06-26
+SRR10002754,SRR10002754,Norway,Europe,Oslo,"Oslo, Stortinget",SASS 3100 electret filter air sampler,2017-06-26
+SRR10002755,SRR10002755,United Kingdom,Europe,London,"London, Warren Street",SASS 3100 electret filter air sampler,2017-06-21
+SRR10002756,SRR10002756,United Kingdom,Europe,London,"London, Oxford Circus",SASS 3100 electret filter air sampler,2017-07-23
+SRR10002757,SRR10002757,United Kingdom,Europe,London,"London, Finsbury Park",SASS 3100 electret filter air sampler,2017-08-21
+SRR10002758,SRR10002758,United Kingdom,Europe,London,"London, Warren Street",SASS 3100 electret filter air sampler,2017-08-18
+SRR10002759,SRR10002759,United Kingdom,Europe,London,"London, Brixton",SASS 3100 electret filter air sampler,2017-08-18
+SRR10002760,SRR10002760,United Kingdom,Europe,London,"London, Finsbury Park",SASS 3100 electret filter air sampler,2017-07-23
+SRR10002761,SRR10002761,United Kingdom,Europe,London,"London, Highbury & Islington",SASS 3100 electret filter air sampler,2017-07-23
+SRR10002762,SRR10002762,United Kingdom,Europe,London,"London, Highbury & Islington",SASS 3100 electret filter air sampler,2017-08-21
+SRR10002763,SRR10002763,United Kingdom,Europe,London,"London, Vauxhall",SASS 3100 electret filter air sampler,2017-08-18
+SRR10002764,SRR10002764,United Kingdom,Europe,London,"London, Highbury & Islington",SASS 3100 electret filter air sampler,2017-06-21
+SRR10002765,SRR10002765,Hong Kong,Asia,Hong Kong,"Hong Kong, Shek Kip Mei",SASS 3100 electret filter air sampler,2017-07-06
+SRR10002766,SRR10002766,Hong Kong,Asia,Hong Kong,"Hong Kong, Prince Edward",SASS 3100 electret filter air sampler,2017-07-06
+SRR10002767,SRR10002767,Hong Kong,Asia,Hong Kong,"Hong Kong, Kowloon Tong",SASS 3100 electret filter air sampler,2017-07-06
+SRR10002768,SRR10002768,Hong Kong,Asia,Hong Kong,"Hong Kong, Tai Wai",SASS 3100 electret filter air sampler,2017-07-06
+SRR10002769,SRR10002769,Hong Kong,Asia,Hong Kong,"Hong Kong, Che Kung Temple",SASS 3100 electret filter air sampler,2017-07-06
+SRR10002770,SRR10002770,Hong Kong,Asia,Hong Kong,"Hong Kong, Sha Tin Wai",SASS 3100 electret filter air sampler,2017-07-06
+SRR10002771,SRR10002771,Hong Kong,Asia,Hong Kong,"Hong Kong, Tsim Sha Tsui",SASS 3100 electret filter air sampler,2017-07-05
+SRR10002772,SRR10002772,Hong Kong,Asia,Hong Kong,"Hong Kong, East Tsim Sha Tsui",SASS 3100 electret filter air sampler,2017-07-05
+SRR10002773,SRR10002773,Hong Kong,Asia,Hong Kong,"Hong Kong, Hung Hom",SASS 3100 electret filter air sampler,2017-07-05
+SRR10002774,SRR10002774,Hong Kong,Asia,Hong Kong,"Hong Kong, Mong Kok East",SASS 3100 electret filter air sampler,2017-07-05

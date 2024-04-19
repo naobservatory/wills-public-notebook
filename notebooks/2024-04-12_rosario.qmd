@@ -32,7 +32,7 @@ theme_kit <- theme_rotate + theme(
 tnl <- theme(legend.position = "none")
 ```
 
-Continuing our look at air sampling datasets, we turn to Rosario et al. (2018), another study of air filters, this time from HVAC filters from an undergraduate dorm building at the University of Colorado campus in Boulder. As in [Prussin](https://data.securebio.org/wills-public-notebook/notebooks/2024-04-12_prussin.html), samples were eluted from filters (in this case MERV-8, so less stringent than Prussin's MERV-14 filters) and underwent both RNA and DNA sequencing – this time on an Illumina MiSeq with 2x250bp reads.
+Continuing our look at air sampling datasets, we turn to [Rosario et al. (2018)](https://pubs.acs.org/doi/10.1021/acs.est.7b04203), another study of air filters, this time from HVAC filters from an undergraduate dorm building at the University of Colorado campus in Boulder. As in [Prussin](https://data.securebio.org/wills-public-notebook/notebooks/2024-04-12_prussin.html), samples were eluted from filters (in this case MERV-8, so less stringent than Prussin's MERV-14 filters) and underwent both RNA and DNA sequencing – this time on an Illumina MiSeq with 2x250bp reads.
 
 # The raw data
 
