@@ -11,7 +11,6 @@ format:
     df-print: paged
 editor: visual
 title-block-banner: black
-draft: true
 ---
 
 ```{r}
@@ -793,7 +792,7 @@ blast_results <- read_tsv(blast_results_path, show_col_types = FALSE)
 blast_results_best <- blast_results %>% group_by(qseqid, staxid) %>% 
   filter(bitscore == max(bitscore)) %>%
   filter(length == max(length)) %>% filter(row_number() == 1)
-write_tsv(blast_results_best, file.path(data_dir_base, "blast/putative-viral-best.blast.gz"))
+# write_tsv(blast_results_best, file.path(data_dir_base, "blast/putative-viral-best.blast.gz"))
 
 # Rank hits for each query and filter for high-ranking hits
 blast_results_ranked <- blast_results_best %>% 
