@@ -1,5 +1,5 @@
 ---
-title: "Workflow analysis of Bengtsson-Palme et al. (2021)"
+title: "Workflow analysis of Bengtsson-Palme et al. (2016)"
 subtitle: "Wastewater grab samples from Sweden."
 author: "Will Bradshaw"
 date: 2024-05-01
@@ -145,7 +145,7 @@ g_basic <- ggplot(basic_stats_raw_metrics,
   expand_limits(y=c(0,100)) +
   scale_fill_st() + 
   facet_grid(metric~location, scales = "free", space="free_x", switch="y") +
-  theme_kit + theme(
+  theme_xblank + theme(
     axis.title.y = element_blank(),
     strip.text.y = element_text(face="plain")
   )
