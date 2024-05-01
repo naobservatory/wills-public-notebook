@@ -403,7 +403,7 @@ p_reads_summ <- p_reads_summ_prep %>%
 p_reads_summ
 ```
 
-As in previous DNA datasets, the vast majority of classified reads were bacterial in origin. The fraction of virus reads varied substantially between sample types, averaging \<0.01% in influent and final effluent but closer to 0.05% in other sample types. Interestingly (though not particularly relevantly for this analysis), the fraction of archaeal reads was much higher in influent than other sample types, in contrast to [Bengtsson-Palme](https://data.securebio.org/wills-public-notebook/notebooks/2024-05-01_bengtsson-palme.html) where it was highest in slidge.
+As in previous DNA datasets, the vast majority of classified reads were bacterial in origin. The fraction of virus reads varied substantially between sample types, averaging \<0.01% in influent and final effluent but closer to 0.05% in other sample types. Interestingly (though not particularly relevantly for this analysis), the fraction of archaeal reads was much higher in influent than other sample types, in contrast to [Bengtsson-Palme](https://data.securebio.org/wills-public-notebook/notebooks/2024-05-01_bengtsson-palme.html) where it was highest in sludge.
 
 As is common for DNA data, viral reads were overwhelmingly dominated by *Caudoviricetes* phages, though one wet-well sample contained a substantial fraction of *Alsuviricetes* (a class of mainly plant pathogens that includes *Virgaviridae*):
 
