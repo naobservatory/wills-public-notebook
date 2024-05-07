@@ -1,6 +1,6 @@
 ---
-title: "Workflow analysis of Maritz et al. (2019)"
-subtitle: "Wastewater from NYC."
+title: "Workflow analysis of Munk et al. (2022)"
+subtitle: "A global wastewater study."
 author: "Will Bradshaw"
 date: 2024-05-07
 format:
