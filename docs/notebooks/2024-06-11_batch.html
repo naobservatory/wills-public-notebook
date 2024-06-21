@@ -172,6 +172,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <p><a href="https://aws.amazon.com/batch/">AWS Batch</a> is an incredibly powerful tool for running Nextflow workflows in a highly parallelized and automated manner, but it’s also confusing to set up and run. In this entry, I try to break down the process in a way that makes it simpler for teammates and other interested parties to run our own workflows using Batch.</p>
 <p>The below represents the decisions I made while setting up my first Batch workflow, and my recommendations for others trying to do the same. Others in significantly different circumstances would do well to try and understand the process more deeply before simply following everything I’ve written here.</p>
+<section id="check-your-permissions" class="level1">
+<h1>0. Check your permissions</h1>
+<p>The most common ways you can run into trouble following these instructions all arise from insufficient AWS permissions. For a smooth experience, make sure you have the following:</p>
+<ol type="1">
+<li><strong>AWS Batch Permissions:</strong> You need to have appropriate permissions to view, modify and run Batch compute environments and job queues. The simplest way to do this is to have your administrator add you to the <code>AWSBatchFullAccess</code> IAM policy (at SecureBio, this is enabled for all members of the <code>TeamMembers</code> group).</li>
+<li><strong>S3 Permissions:</strong> You need to have appropriate permissions to read, write and view the S3 bucket where your workflow data is stored. A useful start here is to have your administrator add you to the <code>AmazonS3FullAccess</code> IAM policy. After that, you should make sure you have the appropriate permissions to access the specific bucket you’re using for your workflow, including the ability to list, read, write, and delete objects<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</li>
+<li><strong>EC2 Permissions:</strong> You need to have appropriate permissions to create and modify EC2 launch templates and compute environments. The simplest way to do this is to have your administrator add you to the <code>AmazonEC2FullAccess</code> IAM policy.</li>
+<li><strong>Instance Role Permissions:</strong> You will need to assign an Instance Role when setting up your Batch compute environment. This role should have at least the following permissions: <code>AmazonEC2ContainerServiceRole</code>, <code>AmazonEC2ContainerServiceforEC2Role</code>, and <code>AmazonS3FullAccess</code>. Make sure you can either set up such a role yourself, or have your administrator do so and point you to the role name. (On SecureBio, this role is called <code>ecsInstanceRole</code>.)</li>
+</ol>
+</section>
 <section id="create-an-ec2-launch-template" class="level1">
 <h1>1. Create an EC2 launch template</h1>
 <p>First, you need to create an EC2 launch template that specifies the configuration for EC2 instances to be set up through Batch. To do this on the AWS console, Navigate to EC2 on the Services menu, then:</p>
@@ -191,7 +201,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Now we come to storage. Configuring this correctly is important to avoid IOPS errors!
 <ol type="1">
 <li>The key thing to realize is that, since Batch is spinning up and terminating instances as needed, the usual costs of creating large EBS volumes don’t really apply. As such, you can be relatively greedy in provisioning storage for these instances, to minimize the risk of IOPS-related problems with your workflow.</li>
-<li>My recommendation is as follows: under “Storage (volumes)”, expand the default “Volume 1 (AMI Root)” volume, then enter the following configuration values<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>:
+<li>My recommendation is as follows: under “Storage (volumes)”, expand the default “Volume 1 (AMI Root)” volume, then enter the following configuration values<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>:
 <ol type="1">
 <li>Size: 1000 GiB</li>
 <li>Volume type: gp3</li>
@@ -210,14 +220,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol type="1">
 <li>Select “Compute environments” in the left-hand menu</li>
 <li>Click the orange “Create” button</li>
-<li>Under “Compute environment configuration”, select “Amazon Elastic Compute Cloud (Amazon EC2)”<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. Then:
+<li>Under “Compute environment configuration”, select “Amazon Elastic Compute Cloud (Amazon EC2)”<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. Then:
 <ol type="1">
 <li>Under “Orchestration Type”, select “Managed”.</li>
 <li>Enter an environment name (I generally go with something unimaginative like “will-batch-3”.</li>
 <li>Set up roles:
 <ol type="1">
 <li>Under “Service role” select “AWSServiceRoleForBatch”.</li>
-<li>Under “Instance role” select “ecsInstanceRole”</li>
+<li>Under “Instance role” select “ecsInstanceRole”, or another role with appropriate permissions (see step 0 above).</li>
 <li>If these roles don’t exist or aren’t available in the drop-down menu, contact your administrator about setting them up for you.</li>
 </ol></li>
 </ol></li>
@@ -263,7 +273,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1>4. Run Nextflow with Batch</h1>
 <p>Finally, you need to use all the infrastructure you’ve just set up to actually run a Nextflow workflow!</p>
 <p>First, make sure your workflow is fully containerized, e.g.&nbsp;using Docker Hub or Seqera Containers to specify containers for each process. Whereas local Nextflow can handle non-containerized workflows, Batch cannot.</p>
-<p>Next, edit your Nextflow configuration file as follows to specify the AWS configuration (replacing QUEUE_NAME with the name of your AWS Batch job queue):</p>
+<p>Next, edit your Nextflow configuration file as follows to specify the AWS configuration (replacing QUEUE_NAME with the name of your AWS Batch job queue)<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode groovy code-with-copy"><code class="sourceCode groovy"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>aws <span class="op">{</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    client <span class="op">{</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        maxConnections <span class="op">=</span> <span class="dv">1000</span></span>
@@ -308,8 +318,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>If you want even more IOPS, you can provision an io2 volume instead of gp3. However, that’s beyond the scope of this guide.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>In the future, I’ll investigate running Batch with Fargate for Nextflow workflows. For now, using EC2 gives us greater control over configuration than Fargate, at the cost of additional setup complexity and occasional startup delays.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>In more depth, you need the following actions to be enabled for the bucket in question for your IAM user or role: <code>s3:ListBucket</code>, <code>s3:GetBucketLocation</code>, <code>s3:GetObject</code>, <code>s3:GetObjectAcl</code>, <code>s3:PutObject</code>, <code>s3:PutObjectAcl</code>, <code>s3:PutObjectTagging</code>, and <code>s3:DeleteObject</code>. If you’re using a bucket specific to your user, all this is easier if you first have your administrator enable <code>s3:GetBucketPolicy</code> and <code>s3:PutBucketPolicy</code> for your user.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>If you want even more IOPS, you can provision an io2 volume instead of gp3. However, that’s beyond the scope of this guide.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>In the future, I’ll investigate running Batch with Fargate for Nextflow workflows. For now, using EC2 gives us greater control over configuration than Fargate, at the cost of additional setup complexity and occasional startup delays.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>On the latest version of the v2 pipeline, most of these options are already configured appropriately when running the pipeline with <code>-profile batch</code> (which is also the default profile). In this case, you only need to change <code>process.queue</code> to point to the name of your job queue.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -791,123 +803,136 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>The below represents the decisions I made while setting up my first Batch workflow, and my recommendations for others trying to do the same. Others in significantly different circumstances would do well to try and understand the process more deeply before simply following everything I've written here.</span>
 <span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="fu"># 1. Create an EC2 launch template</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="fu"># 0. Check your permissions</span></span>
 <span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>First, you need to create an EC2 launch template that specifies the configuration for EC2 instances to be set up through Batch. To do this on the AWS console, Navigate to EC2 on the Services menu, then:</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>The most common ways you can run into trouble following these instructions all arise from insufficient AWS permissions. For a smooth experience, make sure you have the following:</span>
 <span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>Select "Launch templates" in the left-hand menu.</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>Click the orange "Create launch template" button.</span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="ss">3.  </span>Enter a launch template name (e.g. "will-batch-template") and optionally a description.</span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="ss">4.  </span>Check the box under "Auto scaling guidance"</span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="ss">5.  </span>Under "Application and OS Images (Amazon Machine Image)", click "Browse more AMIs", then search for "Amazon ECS-Optimized Amazon Linux 2023 (AL2023) x86_64 AMI".</span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="ss">    1.  </span>Under "AWS Marketplace AMIs", select "Amazon ECS-Optimized Amazon Linux 2023 (AL2023) x86_64 AMI" by Amazon Web Services.</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="ss">    2.  </span>In the popup, select "Subscribe now"</span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="ss">6.  </span>Select an instance type (this isn't hugely important as Batch will modify the instance types provisioned based on the needs of the workflow; I generally select "m5.8xlarge").</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="ss">7.  </span>Under "Key pair (login)", select "Don't include in launch template"</span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="ss">8.  </span>Under "Network settings", select "Create security group" and follow the default settings.</span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="ss">9.  </span>Now we come to storage. Configuring this correctly is important to avoid IOPS errors!</span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="ss">    1.  </span>The key thing to realize is that, since Batch is spinning up and terminating instances as needed, the usual costs of creating large EBS volumes don't really apply. As such, you can be relatively greedy in provisioning storage for these instances, to minimize the risk of IOPS-related problems with your workflow.</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="ss">    2.  </span>My recommendation is as follows: under "Storage (volumes)", expand the default "Volume 1 (AMI Root)" volume, then enter the following configuration values<span class="ot">[^1]</span>:</span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="ss">        1.  </span>Size: 1000 GiB</span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="ss">        2.  </span>Volume type: gp3</span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="ss">        3.  </span>IOPS: 16000 (maximum for gp3)</span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="ss">        4.  </span>Throughput: 1000</span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>Finally, add tags so the cost of your provisioned resources can be tracked more effectively. Add one "Instances" tag (e.g. "will-batch-template-instance") and one "Volumes" tag (e.g. "will-batch-template-volumes").</span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span>Leave the other settings as default (mostly "Don't include in launch template") and select "Create launch template".</span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="ot">[^1]: </span>If you want even more IOPS, you can provision an io2 volume instead of gp3. However, that's beyond the scope of this guide.</span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>If you want to modify your template after creating it, you can do so by navigating to it in the panel and selecting "Actions" <span class="sc">\&gt;</span> "Modify template (create new version)". Be careful to pay attention to which version of the template any dependent resources (e.g. compute environments, see below) are using.</span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="fu"># 2. Set up a Batch compute environment</span></span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>Next, you need to create a compute environment through which jobs can be allocated to instances. To do this on the AWS console, navigate to Batch on the Services menu, then:</span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>Select "Compute environments" in the left-hand menu</span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>Click the orange "Create" button</span>
-<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="ss">3.  </span>Under "Compute environment configuration", select "Amazon Elastic Compute Cloud (Amazon EC2)"<span class="ot">[^2]</span>. Then:</span>
-<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="ss">    1.  </span>Under "Orchestration Type", select "Managed".</span>
-<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="ss">    2.  </span>Enter an environment name (I generally go with something unimaginative like "will-batch-3".</span>
-<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a><span class="ss">    3.  </span>Set up roles:</span>
-<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a><span class="ss">        1.  </span>Under "Service role" select "AWSServiceRoleForBatch".</span>
-<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="ss">        2.  </span>Under "Instance role" select "ecsInstanceRole"</span>
-<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="ss">        3.  </span>If these roles don't exist or aren't available in the drop-down menu, contact your administrator about setting them up for you.</span>
-<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="ss">4.  </span>Under "Tags", navigate to "EC2 tags" and click the "Add tag" button. Then select a tag name that can be used to uniquely identify your use of the workflow (e.g. "mgs-workflow-will"). This is important to let your administrator keep track of how much money you and the wider team are spending on Batch (whose resource consumption is otherwise somewhat inscrutable).</span>
-<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="ss">5.  </span>Click the orange "Next" button. Then, under "Instance configuration":</span>
-<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="ss">    1.  </span>Under "Use EC2 Spot instances", make sure the "Enable using Spot instances" selector is enabled.</span>
-<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="ss">    2.  </span>Under "Maximum % on-demand price", enter a number between 0 and 100. 100 is a good default. Lower numbers will lower costs but increase the chance of unscheduled instance termination, which will require your workflow to re-run jobs.</span>
-<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="ss">    3.  </span>Enter integer values under "Minimum vCPUs", "Desired vCPUs" and "Maximum vCPUs". I typically use 0, 0, and 1024.</span>
-<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a><span class="ss">    4.  </span>Under "Allowed instance types", select "optimal" plus whatever other instance families you want to provision. I typically use optimal, m5, and c6a.</span>
-<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="ss">    5.  </span>Under "Additional configuration":</span>
-<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="ss">        1.  </span>Specify your EC2 key pair to allow direct ssh'ing into Batch instances (you should very rarely need to do this so you can skip this if you like)</span>
-<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="ss">        2.  </span>Under "Launch template" select the launch template you configured previously.</span>
-<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a><span class="ss">        3.  </span>Under "Launch template version", enter "\$Default" or "\$Latest" (your preference).</span>
-<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="ss">6.  </span>Click the orange "Next button", then do so again (i.e. accept defaults for "Network configuration").</span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="ss">    1.  </span>You can configure your own network setup if you like, but that's beyond the scope of this guide.</span>
-<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a><span class="ss">7.  </span>Review your selections, then click the orange "Create compute environment" button.</span>
-<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a><span class="ot">[^2]: </span>In the future, I'll investigate running Batch with Fargate for Nextflow workflows. For now, using EC2 gives us greater control over configuration than Fargate, at the cost of additional setup complexity and occasional startup delays.</span>
-<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a><span class="fu"># 3. Set up a Batch job queue</span></span>
-<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>The last step you need to complete on AWS itself is to set up a job queue that Nextflow can use to submit jobs to Batch. To do this on the AWS console, navigate to Batch on the Services menu, then:</span>
-<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>Select "job queues" in the left-hand menu.</span>
-<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>Click the orange "Create" button.</span>
-<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a><span class="ss">3.  </span>Under "Orchestration Type", again select "Amazon Elastic Compute Cloud (Amazon EC2)".</span>
-<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a><span class="ss">4.  </span>Under "Job queue configuration", enter:</span>
-<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a><span class="ss">    1.  </span>A queue name (I generally go with something uncreative like "will-batch-queue-nf")</span>
-<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a><span class="ss">    2.  </span>A job priority (unimportant if you're only using one queue and you're the only one using that queue)</span>
-<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a><span class="ss">    3.  </span>A connected compute environment (select the environment you set up previously from the dropdown menu)</span>
-<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a><span class="ss">5.  </span>Click the orange "Create job queue" button.</span>
-<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a><span class="ss">6.  </span>Success!</span>
-<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a><span class="fu"># 4. Run Nextflow with Batch</span></span>
-<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>Finally, you need to use all the infrastructure you've just set up to actually run a Nextflow workflow!</span>
-<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>First, make sure your workflow is fully containerized, e.g. using Docker Hub or Seqera Containers to specify containers for each process. Whereas local Nextflow can handle non-containerized workflows, Batch cannot.</span>
-<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>Next, edit your Nextflow configuration file as follows to specify the AWS configuration (replacing QUEUE_NAME with the name of your AWS Batch job queue):</span>
-<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a><span class="in">``` groovy</span></span>
-<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a><span class="in">aws {</span></span>
-<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a><span class="in">    client {</span></span>
-<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="in">        maxConnections = 1000</span></span>
-<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a><span class="in">        maxErrorRetry = 10</span></span>
-<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a><span class="in">        connectionTimeout = 0</span></span>
-<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a><span class="in">        socketTimeout = 0</span></span>
-<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a><span class="in">    }</span></span>
-<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
-<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a><span class="in">docker {</span></span>
-<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a><span class="in">    enabled = true</span></span>
-<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
-<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a><span class="in">fusion {</span></span>
-<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a><span class="in">    enabled = true</span></span>
-<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a><span class="in">    exportStorageCredentials = true</span></span>
-<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
-<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a><span class="in">wave {</span></span>
-<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a><span class="in">    enabled = true</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**AWS Batch Permissions:** You need to have appropriate permissions to view, modify and run Batch compute environments and job queues. The simplest way to do this is to have your administrator add you to the <span class="in">`AWSBatchFullAccess`</span> IAM policy (at SecureBio, this is enabled for all members of the <span class="in">`TeamMembers`</span> group).</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**S3 Permissions:** You need to have appropriate permissions to read, write and view the S3 bucket where your workflow data is stored. A useful start here is to have your administrator add you to the <span class="in">`AmazonS3FullAccess`</span> IAM policy. After that, you should make sure you have the appropriate permissions to access the specific bucket you're using for your workflow, including the ability to list, read, write, and delete objects<span class="ot">[^s3]</span>.</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**EC2 Permissions:** You need to have appropriate permissions to create and modify EC2 launch templates and compute environments. The simplest way to do this is to have your administrator add you to the <span class="in">`AmazonEC2FullAccess`</span> IAM policy.</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>**Instance Role Permissions:** You will need to assign an Instance Role when setting up your Batch compute environment. This role should have at least the following permissions: <span class="in">`AmazonEC2ContainerServiceRole`</span>, <span class="in">`AmazonEC2ContainerServiceforEC2Role`</span>, and <span class="in">`AmazonS3FullAccess`</span>. Make sure you can either set up such a role yourself, or have your administrator do so and point you to the role name. (On SecureBio, this role is called <span class="in">`ecsInstanceRole`</span>.)</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="ot">[^s3]: </span>In more depth, you need the following actions to be enabled for the bucket in question for your IAM user or role: <span class="in">`s3:ListBucket`</span>, <span class="in">`s3:GetBucketLocation`</span>, <span class="in">`s3:GetObject`</span>, <span class="in">`s3:GetObjectAcl`</span>, <span class="in">`s3:PutObject`</span>, <span class="in">`s3:PutObjectAcl`</span>, <span class="in">`s3:PutObjectTagging`</span>, and <span class="in">`s3:DeleteObject`</span>. If you're using a bucket specific to your user, all this is easier if you first have your administrator enable <span class="in">`s3:GetBucketPolicy`</span> and <span class="in">`s3:PutBucketPolicy`</span> for your user.</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="fu"># 1. Create an EC2 launch template</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>First, you need to create an EC2 launch template that specifies the configuration for EC2 instances to be set up through Batch. To do this on the AWS console, Navigate to EC2 on the Services menu, then:</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>Select "Launch templates" in the left-hand menu.</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>Click the orange "Create launch template" button.</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="ss">3.  </span>Enter a launch template name (e.g. "will-batch-template") and optionally a description.</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="ss">4.  </span>Check the box under "Auto scaling guidance"</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="ss">5.  </span>Under "Application and OS Images (Amazon Machine Image)", click "Browse more AMIs", then search for "Amazon ECS-Optimized Amazon Linux 2023 (AL2023) x86_64 AMI".</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="ss">    1.  </span>Under "AWS Marketplace AMIs", select "Amazon ECS-Optimized Amazon Linux 2023 (AL2023) x86_64 AMI" by Amazon Web Services.</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="ss">    2.  </span>In the popup, select "Subscribe now"</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="ss">6.  </span>Select an instance type (this isn't hugely important as Batch will modify the instance types provisioned based on the needs of the workflow; I generally select "m5.8xlarge").</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="ss">7.  </span>Under "Key pair (login)", select "Don't include in launch template"</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="ss">8.  </span>Under "Network settings", select "Create security group" and follow the default settings.</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="ss">9.  </span>Now we come to storage. Configuring this correctly is important to avoid IOPS errors!</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="ss">    1.  </span>The key thing to realize is that, since Batch is spinning up and terminating instances as needed, the usual costs of creating large EBS volumes don't really apply. As such, you can be relatively greedy in provisioning storage for these instances, to minimize the risk of IOPS-related problems with your workflow.</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="ss">    2.  </span>My recommendation is as follows: under "Storage (volumes)", expand the default "Volume 1 (AMI Root)" volume, then enter the following configuration values<span class="ot">[^1]</span>:</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="ss">        1.  </span>Size: 1000 GiB</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="ss">        2.  </span>Volume type: gp3</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="ss">        3.  </span>IOPS: 16000 (maximum for gp3)</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="ss">        4.  </span>Throughput: 1000</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>Finally, add tags so the cost of your provisioned resources can be tracked more effectively. Add one "Instances" tag (e.g. "will-batch-template-instance") and one "Volumes" tag (e.g. "will-batch-template-volumes").</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span>Leave the other settings as default (mostly "Don't include in launch template") and select "Create launch template".</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="ot">[^1]: </span>If you want even more IOPS, you can provision an io2 volume instead of gp3. However, that's beyond the scope of this guide.</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>If you want to modify your template after creating it, you can do so by navigating to it in the panel and selecting "Actions" <span class="sc">\&gt;</span> "Modify template (create new version)". Be careful to pay attention to which version of the template any dependent resources (e.g. compute environments, see below) are using.</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="fu"># 2. Set up a Batch compute environment</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>Next, you need to create a compute environment through which jobs can be allocated to instances. To do this on the AWS console, navigate to Batch on the Services menu, then:</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>Select "Compute environments" in the left-hand menu</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>Click the orange "Create" button</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="ss">3.  </span>Under "Compute environment configuration", select "Amazon Elastic Compute Cloud (Amazon EC2)"<span class="ot">[^2]</span>. Then:</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a><span class="ss">    1.  </span>Under "Orchestration Type", select "Managed".</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="ss">    2.  </span>Enter an environment name (I generally go with something unimaginative like "will-batch-3".</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="ss">    3.  </span>Set up roles:</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="ss">        1.  </span>Under "Service role" select "AWSServiceRoleForBatch".</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a><span class="ss">        2.  </span>Under "Instance role" select "ecsInstanceRole", or another role with appropriate permissions (see step 0 above).</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="ss">        3.  </span>If these roles don't exist or aren't available in the drop-down menu, contact your administrator about setting them up for you.</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="ss">4.  </span>Under "Tags", navigate to "EC2 tags" and click the "Add tag" button. Then select a tag name that can be used to uniquely identify your use of the workflow (e.g. "mgs-workflow-will"). This is important to let your administrator keep track of how much money you and the wider team are spending on Batch (whose resource consumption is otherwise somewhat inscrutable).</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a><span class="ss">5.  </span>Click the orange "Next" button. Then, under "Instance configuration":</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a><span class="ss">    1.  </span>Under "Use EC2 Spot instances", make sure the "Enable using Spot instances" selector is enabled.</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a><span class="ss">    2.  </span>Under "Maximum % on-demand price", enter a number between 0 and 100. 100 is a good default. Lower numbers will lower costs but increase the chance of unscheduled instance termination, which will require your workflow to re-run jobs.</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a><span class="ss">    3.  </span>Enter integer values under "Minimum vCPUs", "Desired vCPUs" and "Maximum vCPUs". I typically use 0, 0, and 1024.</span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a><span class="ss">    4.  </span>Under "Allowed instance types", select "optimal" plus whatever other instance families you want to provision. I typically use optimal, m5, and c6a.</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a><span class="ss">    5.  </span>Under "Additional configuration":</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a><span class="ss">        1.  </span>Specify your EC2 key pair to allow direct ssh'ing into Batch instances (you should very rarely need to do this so you can skip this if you like)</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="ss">        2.  </span>Under "Launch template" select the launch template you configured previously.</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a><span class="ss">        3.  </span>Under "Launch template version", enter "\$Default" or "\$Latest" (your preference).</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a><span class="ss">6.  </span>Click the orange "Next button", then do so again (i.e. accept defaults for "Network configuration").</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a><span class="ss">    1.  </span>You can configure your own network setup if you like, but that's beyond the scope of this guide.</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a><span class="ss">7.  </span>Review your selections, then click the orange "Create compute environment" button.</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a><span class="ot">[^2]: </span>In the future, I'll investigate running Batch with Fargate for Nextflow workflows. For now, using EC2 gives us greater control over configuration than Fargate, at the cost of additional setup complexity and occasional startup delays.</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a><span class="fu"># 3. Set up a Batch job queue</span></span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>The last step you need to complete on AWS itself is to set up a job queue that Nextflow can use to submit jobs to Batch. To do this on the AWS console, navigate to Batch on the Services menu, then:</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>Select "job queues" in the left-hand menu.</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>Click the orange "Create" button.</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a><span class="ss">3.  </span>Under "Orchestration Type", again select "Amazon Elastic Compute Cloud (Amazon EC2)".</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a><span class="ss">4.  </span>Under "Job queue configuration", enter:</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a><span class="ss">    1.  </span>A queue name (I generally go with something uncreative like "will-batch-queue-nf")</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a><span class="ss">    2.  </span>A job priority (unimportant if you're only using one queue and you're the only one using that queue)</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a><span class="ss">    3.  </span>A connected compute environment (select the environment you set up previously from the dropdown menu)</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a><span class="ss">5.  </span>Click the orange "Create job queue" button.</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a><span class="ss">6.  </span>Success!</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="fu"># 4. Run Nextflow with Batch</span></span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>Finally, you need to use all the infrastructure you've just set up to actually run a Nextflow workflow!</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>First, make sure your workflow is fully containerized, e.g. using Docker Hub or Seqera Containers to specify containers for each process. Whereas local Nextflow can handle non-containerized workflows, Batch cannot.</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>Next, edit your Nextflow configuration file as follows to specify the AWS configuration (replacing QUEUE_NAME with the name of your AWS Batch job queue)<span class="ot">[^profile]</span>:</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a><span class="ot">[^profile]: </span>On the latest version of the v2 pipeline, most of these options are already configured appropriately when running the pipeline with <span class="in">`-profile batch`</span> (which is also the default profile). In this case, you only need to change <span class="in">`process.queue`</span> to point to the name of your job queue.</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a><span class="in">``` groovy</span></span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a><span class="in">aws {</span></span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a><span class="in">    client {</span></span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a><span class="in">        maxConnections = 1000</span></span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a><span class="in">        maxErrorRetry = 10</span></span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a><span class="in">        connectionTimeout = 0</span></span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a><span class="in">        socketTimeout = 0</span></span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a><span class="in">    }</span></span>
 <span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
 <span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a><span class="in">process{</span></span>
-<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a><span class="in">    errorStrategy = "retry"</span></span>
-<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a><span class="in">    maxRetries = 3</span></span>
-<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a><span class="in">    executor = "awsbatch"</span></span>
-<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a><span class="in">    queue = "QUEUE_NAME"</span></span>
-<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
-<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>The <span class="in">`aws`</span> scope configurations are designed to prevent jobs failing due to timeout issues. When it comes to the <span class="in">`process`</span> scope, I highly recommend setting <span class="in">`errorStrategy`</span> to "retry" and <span class="in">`maxRetries`</span> to some fairly large number (I go with 3). It's not that uncommon for Batch processes to fail due to issues that have nothing to do with your workflow code (such as the infamous <span class="co">[</span><span class="ot">DockerTimeoutError</span><span class="co">](https://repost.aws/knowledge-center/batch-docker-timeout-error)</span>), and it will make your life much easier if the workflow can quietly rerun these without breaking.</span>
-<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>Make sure Nextflow has access to the appropriate AWS credentials to access the specified job queue (I generally find that <span class="in">`eval "$(aws configure export-credentials --format env)"`</span> works well), then run Nextflow as normal. If all goes well, it should work more-or-less seamlessly.</span>
-<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a><span class="fu"># Addendum: Troubleshooting</span></span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>*In the interests of getting this out quickly, I'm not including any common errors or debugging tips at this time, but will add them here as I or others encounter them in the future.*</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a><span class="in">docker {</span></span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a><span class="in">    enabled = true</span></span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a><span class="in">fusion {</span></span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a><span class="in">    enabled = true</span></span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a><span class="in">    exportStorageCredentials = true</span></span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a><span class="in">wave {</span></span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a><span class="in">    enabled = true</span></span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a><span class="in">process{</span></span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a><span class="in">    errorStrategy = "retry"</span></span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a><span class="in">    maxRetries = 3</span></span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a><span class="in">    executor = "awsbatch"</span></span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a><span class="in">    queue = "QUEUE_NAME"</span></span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>The <span class="in">`aws`</span> scope configurations are designed to prevent jobs failing due to timeout issues. When it comes to the <span class="in">`process`</span> scope, I highly recommend setting <span class="in">`errorStrategy`</span> to "retry" and <span class="in">`maxRetries`</span> to some fairly large number (I go with 3). It's not that uncommon for Batch processes to fail due to issues that have nothing to do with your workflow code (such as the infamous <span class="co">[</span><span class="ot">DockerTimeoutError</span><span class="co">](https://repost.aws/knowledge-center/batch-docker-timeout-error)</span>), and it will make your life much easier if the workflow can quietly rerun these without breaking.</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>Make sure Nextflow has access to the appropriate AWS credentials to access the specified job queue (I generally find that <span class="in">`eval "$(aws configure export-credentials --format env)"`</span> works well), then run Nextflow as normal. If all goes well, it should work more-or-less seamlessly.</span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a><span class="fu"># Addendum: Troubleshooting</span></span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>*In the interests of getting this out quickly, I'm not including any common errors or debugging tips at this time, but will add them here as I or others encounter them in the future.*</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

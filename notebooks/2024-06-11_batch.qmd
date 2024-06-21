@@ -17,6 +17,17 @@ title-block-banner: black
 
 The below represents the decisions I made while setting up my first Batch workflow, and my recommendations for others trying to do the same. Others in significantly different circumstances would do well to try and understand the process more deeply before simply following everything I've written here.
 
+# 0. Check your permissions
+
+The most common ways you can run into trouble following these instructions all arise from insufficient AWS permissions. For a smooth experience, make sure you have the following:
+
+1. **AWS Batch Permissions:** You need to have appropriate permissions to view, modify and run Batch compute environments and job queues. The simplest way to do this is to have your administrator add you to the `AWSBatchFullAccess` IAM policy (at SecureBio, this is enabled for all members of the `TeamMembers` group).
+2. **S3 Permissions:** You need to have appropriate permissions to read, write and view the S3 bucket where your workflow data is stored. A useful start here is to have your administrator add you to the `AmazonS3FullAccess` IAM policy. After that, you should make sure you have the appropriate permissions to access the specific bucket you're using for your workflow, including the ability to list, read, write, and delete objects[^s3].
+3. **EC2 Permissions:** You need to have appropriate permissions to create and modify EC2 launch templates and compute environments. The simplest way to do this is to have your administrator add you to the `AmazonEC2FullAccess` IAM policy.
+4. **Instance Role Permissions:** You will need to assign an Instance Role when setting up your Batch compute environment. This role should have at least the following permissions: `AmazonEC2ContainerServiceRole`, `AmazonEC2ContainerServiceforEC2Role`, and `AmazonS3FullAccess`. Make sure you can either set up such a role yourself, or have your administrator do so and point you to the role name. (On SecureBio, this role is called `ecsInstanceRole`.)
+
+[^s3]: In more depth, you need the following actions to be enabled for the bucket in question for your IAM user or role: `s3:ListBucket`, `s3:GetBucketLocation`, `s3:GetObject`, `s3:GetObjectAcl`, `s3:PutObject`, `s3:PutObjectAcl`, `s3:PutObjectTagging`, and `s3:DeleteObject`. If you're using a bucket specific to your user, all this is easier if you first have your administrator enable `s3:GetBucketPolicy` and `s3:PutBucketPolicy` for your user.
+
 # 1. Create an EC2 launch template
 
 First, you need to create an EC2 launch template that specifies the configuration for EC2 instances to be set up through Batch. To do this on the AWS console, Navigate to EC2 on the Services menu, then:
@@ -56,7 +67,7 @@ Next, you need to create a compute environment through which jobs can be allocat
     2.  Enter an environment name (I generally go with something unimaginative like "will-batch-3".
     3.  Set up roles:
         1.  Under "Service role" select "AWSServiceRoleForBatch".
-        2.  Under "Instance role" select "ecsInstanceRole"
+        2.  Under "Instance role" select "ecsInstanceRole", or another role with appropriate permissions (see step 0 above).
         3.  If these roles don't exist or aren't available in the drop-down menu, contact your administrator about setting them up for you.
 4.  Under "Tags", navigate to "EC2 tags" and click the "Add tag" button. Then select a tag name that can be used to uniquely identify your use of the workflow (e.g. "mgs-workflow-will"). This is important to let your administrator keep track of how much money you and the wider team are spending on Batch (whose resource consumption is otherwise somewhat inscrutable).
 5.  Click the orange "Next" button. Then, under "Instance configuration":
@@ -94,7 +105,9 @@ Finally, you need to use all the infrastructure you've just set up to actually r
 
 First, make sure your workflow is fully containerized, e.g. using Docker Hub or Seqera Containers to specify containers for each process. Whereas local Nextflow can handle non-containerized workflows, Batch cannot.
 
-Next, edit your Nextflow configuration file as follows to specify the AWS configuration (replacing QUEUE_NAME with the name of your AWS Batch job queue):
+Next, edit your Nextflow configuration file as follows to specify the AWS configuration (replacing QUEUE_NAME with the name of your AWS Batch job queue)[^profile]:
+
+[^profile]: On the latest version of the v2 pipeline, most of these options are already configured appropriately when running the pipeline with `-profile batch` (which is also the default profile). In this case, you only need to change `process.queue` to point to the name of your job queue.
 
 ``` groovy
 aws {
