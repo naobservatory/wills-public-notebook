@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/notebooks/2024-07-18_index-profiling.html",
       "/notebooks/2024-07-01_partial-hv.html",
       "/notebooks/2024-06-11_batch.html",
       "/notebooks/2024-05-07_munk.html",
