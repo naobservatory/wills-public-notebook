@@ -71,7 +71,6 @@ strip_panel_spacing <- lines(0.2) # Ditto
 plot_title_spacing <- 0.7 # Space between plot titles and main plot (in lines)
 plot_tag_margin <- lmargin(b=0.6, r = 0.25)
 plot_margin <- lmargin(0.4, 0.4, 0.4, 0.1)
-plot_aspect_ratio_base <- 1/2
 
 # Additional parameters for internal-legend themes
 legend_internal_plain_fill <- alpha("white", 0.5)
@@ -201,7 +200,8 @@ theme_strips <- theme( # Facet strip formatting
 )
 
 theme_outer <- theme( # High-level plot formatting
-  plot.title = element_text(face = "bold", margin = lmargin(b=plot_title_spacing)), # Inherits from title
+  plot.title = element_text(hjust=0, face="plain", margin = lmargin(b=plot_title_spacing),
+                            size = rel(1.2)), # Inherits from title
   plot.subtitle = element_text(margin = lmargin(b=plot_title_spacing)), # Inherits from title
   plot.caption = element_text(margin = lmargin(t=plot_title_spacing)), # Inherits from title
   plot.tag = element_text(face = "bold", size = fontsize_label,
@@ -211,7 +211,7 @@ theme_outer <- theme( # High-level plot formatting
   plot.title.position = "panel", # Align title to panel or entire plot?
   plot.caption.position = "panel", # Align caption to panel or entire plot?
   plot.tag.position = "topleft", # Alignment of tag (e.g. subfigure letter)
-  aspect.ratio = plot_aspect_ratio_base # Aspect ratio of plot (height/width)
+  aspect.ratio = NULL # Aspect ratio of plot (height/width)
 )
 
 #------------------------------------------------------------------------------
@@ -221,6 +221,12 @@ theme_outer <- theme( # High-level plot formatting
 # Main theme (for most single plots)
 theme_base <- theme(complete = TRUE) + theme_core + theme_legend +
   theme_axes + theme_panel + theme_strips + theme_outer
+
+# Alternative theme for tilted x-axis labels
+theme_tilt <- theme_base + theme(
+  axis.text.x = element_text(hjust = 1, angle = 45),
+  axis.title.x = element_blank(),
+)
 
 # Alternative theme for internal legends
 theme_internal_plain <- theme_base + theme(

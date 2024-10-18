@@ -1,0 +1,14 @@
+{
+    "mode": "run",
+    "base_dir": "s3://nao-mgs-wb/CC-PRJNA661613-3",
+    "ref_dir": "s3://nao-mgs-wb/index-20240714/output",
+    "sample_sheet": "/home/ec2-user/mgs-workflow-batch/CC-PRJNA661613/samplesheet.csv",
+    "adapters": "/home/ec2-user/mgs-workflow-batch/repo/ref/adapters.fasta",
+    "n_reads_trunc": 0,
+    "n_reads_profile": 1000000,
+    "bt2_score_threshold": 20,
+    "blast_hv_fraction": 0,
+    "kraken_memory": "128 GB",
+    "quality_encoding": "phred33",
+    "fuzzy_match_alignment_duplicates": 1
+}
